@@ -51,29 +51,78 @@ Wstęp
 % wstęp
 \introduction
 
-Celem pracy było stworzenie narzędzia dla języka Scala pozwalającego na efektywne wykorzystanie jednej z opisywanych baz grafowych. Język ten został wybrany ze względu na dostępność licznych mechanizmów umożliwiających definiowanie tzw. języków domenowych (DSL).
+Celem pracy było stworzenie narzędzia dla języka Scala pozwalającego na efektywne wykorzystanie jednej z opisywanych baz grafowych. Język ten został wybrany ze względu na dostępność licznych mechanizmów ułatwiających definiowanie tzw. języków domenowych (DSL). 
 
 \chapter{Bazy grafowe}
 
 \section{Wstęp}
 
+Bazy grafowe charakteryzują się sposobem reprezentacji danych i zależności między nimi. W odróżnieniu od baz relacyjnych gdzie powiązania pomiędzy tabelami realizuje się za pomocą kluczy obcych bazy grafowe pozwalają na zapisywanie całych grafów w których krawędzie są odpowiednio nazwane i służą do identyfikacji relacji między obiektami. Poza odmienną reprezentacją danych również przeszukiwanie bazy odbywa się w inny sposób. Mianowicie zamiast operować na pojęciach typu tabele i klucze, dane wyszukuje się za pomocą wzorców w grafie.
+
 \section{Rodzaje baz grafowych}
+
+\subsection{Bazy z relacyjnym magazynem danych}
+Rozróżniamy dwa główne rodzaje baz grafowych. Pierwszym z nich są bazy które jedynie wystawiają interfejs pozwalający operować na grafach które jednak wewewnętrznie przechowują dane z wykorzystaniem baz relacyjnych. Przykładem takiej bazy danych jest np. FlockDB która wykorzystuje bazę MySQL do składowania danych.
+
+\subsection{Bazy natywne}
+Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko wystawiają interfejs do przeszukiwania grafów ale również wykorzystują strukturę grafów do przechowywania danych. Ma to tę zaletę iż przeszukiwanie takiej bazy może okazać się o wiele wydajniejsze niż odpowiednik przechowywany w bazie relacyjnej. Powodem tego jest lokalność operacji wykonywanych na grafie. W odróżnieniu do baz relacyjnych gdzie by wyszukać dane powiązane pewną relacją wymagane jest wykonanie iloczynu kartezjańskiego na całych zbiorach danych. W przypadku ogromnej liczby rekordów taka operacja może okazać się wielce niewydajna. W przypadku baz grafowych nie ma potrzeby odwiedzania wszystkich danych bowiem poruszamy się tylko w obrębie obiektów w bezpośredni sposób związanych ze sobą krawędziami. Przykładem takiej bazy jest np. Neo4J której została poświęcona znaczna część tej pracy.
 
 \section{Wiodące bazy}
 
-\section{Neo4j}
+\chapter{Neo4j}
 
 \section{Język Cypher}
+Cypher jest językiem zapytań stworzonym specjalnie na potrzeby neo4j pozwalającym w sposób deklaratywny przeszukiwać bazę grafową.
 
-\chapter{Sposoby dostępu do neo4j}
+\subsection{Przeszukiwanie grafu}
 
-\section{Embedded mode}
+Najważniejszym rodzajem zapytań jest oczywiście zapytanie służące do wyszukiwania wzorców i wyciągania danych z grafu. Zapytanie takie składa się z trzech podstawowych części.
 
-\section{REST mode}
+Sekcja "START" pozwala na wyciągnięcie węzłów startowych od których zacznie się przeszukiwanie grafu. Węzły można wyciągnąć na podstawie jego wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu.
 
-\section{Zapytania Cypher}
+\lstinputlisting{listings/cypher/start-section.cypher}
 
-\chapter{Dostęp do bazy poprzez DSL}
+Sekcja "MATCH" jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju odpowiednikiem instrukcji INNER JOIN w języku SQL.
+
+\lstinputlisting{listings/cypher/match-section.cypher}
+
+Ostatnim elementem zapytania jest sekcja "RETURN" pozwalająca zdefiniowanie obcięcia które ma zostać zwrócone jako wynik zapytania.
+
+\lstinputlisting{listings/cypher/return-section.cypher}
+
+Pełne zapytanie wygląda następująco i zwraca ono identyfikatory oraz imona obiektów które są połączone krawędzią o identyfikatorze "KNOWS" z obiektem john oraz będące połączone krawędzią "LIKES" z obiektem o identyfikatorze równym 1. Poruszając się w domenie sieci społecznościowej zapytanie zwraca znajomych użytkownika John którzy polubili komentarz o identyfikatorze 1.
+
+\lstinputlisting{listings/cypher/sample-query.cypher}
+
+\subsection{Modyfikacja danych}
+
+Język Cypher pozwala również na aktualizację danych w grafie. Wyrażenie takie podobnie jak zapytanie służące do wyszukiwania w grafie składa się z kilku sekcji.
+
+Pierwszą z nich ponownie jest sekcja "START" która pozwala na wybranie wezłów początkowych między którymi będziemy wstawiać relacje. Jest ona opcjonalna jeśli zamierzamy operować wyłącznie na nowych obiektach.
+
+\lstinputlisting{listings/cypher/start-section.cypher}
+
+Kolejną sekcją jest "CREATE" której składnia jest podobna do sekcji "MATCH". W przeciwieństwie jednak do MATCH pozwala ona na tworzenie krawędzi w grafie oraz węzłów.
+
+\lstinputlisting{listings/cypher/create-section.cypher}
+
+Ostatnim elementem jest wykorzystana już wcześniej sekcja RETURN która pozwala na wyciągnięcie danych o nowoutworzonych obiektach takich jak ich identyfikatory.
+
+\lstinputlisting{listings/cypher/return-section-2.cypher}
+
+Pełne zapytanie wstawiające do grafu nowy obiekt o polu "name" równym "New Friend" i łączące go z obiektami "john" oraz "comment" wygląda następująco
+
+\lstinputlisting{listings/cypher/sample-create-query.cypher}
+
+\section{Programistyczne sposoby dostępu do neo4j}
+
+\subsection{Embedded mode}
+
+\subsection{REST mode}
+
+\subsection{Zapytania Cypher}
+
+\chapter{Dostęp do baz danych z wykorzystaniem DSL}
 
 \section{Wstęp}
 
@@ -103,9 +152,19 @@ Drugi sposób do złudzenia przypomina tworzenie listy
 
 \section{Nakładanie warunków na wyniki zapytań}
 
+\subsection{Makra}
+
+\subsection{Przetwarzanie wyrażeń typu Boolean}
+
 \section{Serializacja do języka Cypher}
 
 \section{Zwracanie wyników}
+
+\subsection{Mapper obiektowy}
+
+\section{Potencjalne funkcjonalności}
+
+\subsection{Aktualizacja danych}
 
 % zakończenie 
 \summary

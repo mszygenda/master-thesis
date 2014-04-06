@@ -136,25 +136,67 @@ Pełne zapytanie wstawiające do grafu nowy obiekt o polu "name" równym "New Fr
 
 \chapter{DSL do baz grafowych}
 
+\section{Definiowanie modelu}
+
+Pierwszym krokiem jaki należy wykonać przed definiowaniem zapytań jest utworzenie modelu (tj. zbioru klas) odpowiadającemu dziedzinie którą przechowujemy w bazie grafowej. Stworzone narzędzie udostępnia mechanizmy pomocnicze które pozwalają na szybkie odwzorowanie encji oraz relacji między nimi.
+
+\subsection{Klasa DomainObject}
+
+Wszystkie klasy domenowe muszą dziedziczyć po generycznej klasie DomainObject która dostarcza narzędziu niezbędnych informacji do działania. Jest to klasa generyczna która wymaga określenia typu klasy którą definiujemy. Informacja ta jest potrzebna w celu nakładania ograniczeń na obiekty które będzie można stosować do poszczególnych relacji.
+
+Definiowana klasa może zawierać pola następujących typów: Int, Byte, Short, Char, Long, Double, Float, String.
+
+\subsection{Relacje}
+
+Oczywiście najistotniejszą informacją w przypadku baz grafowych są relacje czy też krawędzie wychodzące z węzłów danego typu. Należy je zdefiniować jako pola w klasie domenowej. Nie ma oczywiście potrzeby tworzenia obiektów w sposób ręczny gdyż klasa DomainObject udostępnia metody pomocnicze pozwalające na definiowanie relacji. Są to metody  -->, <--, -- które jednocześnie określają kierunek. Metody te są generyczne i pozwalają na określenie typu obiektów pomiędzy którymi zachodzić będzie relacja. Przyjmują one jeden parametr typu String który pozwala na zdefiniowanie nazwy relacji czy też krawędzi.
+
+\subsection{Przykładowy model}
+
+Oto przykładowa klasa domenowa reprezentująca osobę. Zawiera ona pola takie jak name, surname odpowiadające imieniu i nazwisku osoby oraz pola definiujące krawędzie wchodzące i wychodzące z węzłów tego typu. Są to relacje knows która definiuje krawędź wychodzącą do obiektów typu Person oraz wrote która jest relacją skierowaną do naszego obiektu i jest powiązana z obiektem typu Comment.
+
+\lstinputlisting{listings/scala/dsl/sample-model.scala}
+
 \section{Budowanie wzorców}
 
-\subsection{Wstęp}
+Zapytania w bazach grafowych skupiają się na wyszukiwaniu określonych wzorców. Z tego powodu główny nacisk w obrębie ekspresywności tworzonego DSLa został położony właśnie na tej części.
 
-Zapytania w bazach grafowych skupiają się na wyszukiwaniu określonych wzorców w grafie. Z tego powodu główny nacisk w obrębie ekspresywności tworzonego DSLa został położony właśnie na tej części.
+Do budowania wzorców wykorzystywana jest klasa PatternBuilder której instancje tworzone są przez metody pomocnicze używane przy definiowaniu klas, są to mianowicie omówione wcześniej metody <--, --, -->. Klasa PatternBuilder definiuje metodę apply której argumentem może być pojedyńczy obiekt typu określonego w wywołaniu metody kierunkowej lub cały wzorzec który zaczyna się od węzła tego typu. Implikuje to iż budowane wzorce będą zawsze podlegać regułom typów określonym klasach domenowych. Niemożliwe jest na przykład utworzenie wzorca person -[:KNOWS]-> comment gdyż zachodzi niezgodność typów (comment nie jest typu Person).
 
-Stworzone narzędzie umożliwia defininiowanie wzorców na dwa niezależne sposoby.
+Oto przykładowe złożenie kilku wzorców. Obiekty john, friend, matthew są typu Person podczas gdy wiseComment jest obiektem typu Comment.
 
-Pierwszy z nich polega na składaniu wywołań funkcji
 \lstinputlisting{listings/scala/dsl/patterns/functional-example-1.scala}
 
-Drugi sposób do złudzenia przypomina tworzenie listy 
-\lstinputlisting{listings/scala/dsl/patterns/lists-like-example-1.scala}
+Wynikiem pojedyńczego wyrażenia budującego wzorzec jest obiekt typu Pattern którego najbardziej istotną podklasą jest PatternTriple. Jest to generyczna klasa która składa się z trzech elementów. Pierwszym z nich jest początek wzorca czyli pojedyńczy węzeł od którego zaczyna się wzorzec. Kolejnym elementem jest relacja z określonym kierunkiem która określa jakiego typu obiektu spodziewamy się w dalszej części wzorca. Ostatnim elementem jest obiekt typu PatternWithNode który jest superklasą bardziej specyficznych PatternNode który służy do definiowania pojedyńczych węzłów oraz wspomniana już klasa PatternTriple. PatternTriple pozwala zatem na definiowanie rekurencyjnej struktury wzorca.
 
 \section{Nakładanie warunków na wyniki zapytań}
 
+Jednym z bardziej istotnych mechanizmów przy przeszukiwaniu baz danych jest możliwość nakładania warunków na zwracane wyniki. Założeniem projektu było aby nie było potrzeby wprowadzania nowej składni do budowania wyrażeń typu Boolean innej niż ta dostarczana przez sam język scala. Oczywiście wyrażenia powinny być wykonywane po stronie serwera bazy stąd zwykłe wyrażenia typu boolean które ewaluuje się do prawdy lub fałszu byłyby niewystarczające by można je przenieść do zapytania Cypher. Aby wyciągnąć strukturę wyrażenia logicznego potrzebne jest wykorzystanie mechanizmu makr które pozwala na modyfikacje abstrakcyjnego drzewa składniowego.
+
 \subsection{Makra}
 
+Makra są eksperymentalną funkcjonalnością języka scala wprowadzone w wersji WERSJA. Są one podobnie jak w przypadku makr znanych z języka C wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie definiują żadnego specyficznego do tego typu zadań mini-języka. Zamiast tego makra mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężny mechanizm.
+
+By zdefiniować makro w kodzie programu należy utworzyć obiekt z metodą która zamiast ciała zawiera słowo kluczowe macro oraz nazwę metody implementującej dane makro.
+Metoda implementująca makro powinna mieć dwie listy parametrów. Pierwsza z nich powinna składać się z argumentu typu Context. Druga lista parametrów powinna zawierać tak samo nazwane argumenty jak w przypadku deklaracji makra jednak ich typ powinien być opakowany przez klasę Expr zdefiniowaną w obiekcie Context. Typem zwracanym takiej metody jest obiekt typu Expr zdefiniowany w kontekście obiektu Context.
+
+Oto przykładowa definicja makra
+
+\lstinputlisting{listings/scala/macro-sample.scala}
+
+Wszystkie wywołania metody assert zostaną zamienione podczas procesu kompilacji przez wyrażenie wygenerowane przez metodę assertImpl. 
+
+Obiekt typu Expr zawiera w sobie strukturę wyrażenia ktore reprezentuje. W przypadku parametrów zawiera on drzewo składniowe przed dokonaniem ewaluacji. Dlatego przy wywołaniu metody assert z parametrami (someInt == 5, "someInt is equal to 5"), w metodzie implementującej mamy dostęp do struktury wyrażenia someInt == 5 które możemy dowolnie przetransformować.
+
 \subsection{Przetwarzanie wyrażeń typu Boolean}
+
+Zastosowanie makr w przypadku projektu polega na zamianie wyrażeń typu Boolean na własną strukturę którą będzie można w prosty sposób serializować do języka Cypher. Strukturę tę rozpoczyna cecha Condition której potomkami są takie klasy jak And, Or, Not które odpowiednio reprezentują koniunkcję, alternatywę i zaprzeczenie warunków oraz PropertyComparison która odpowiada porównaniu pól obiektów z dziedziny.
+
+OBRAZEK Z HIERARCHIĄ KLAS
+
+Implementacja:
+
+Transformers
+Builders
 
 \section{Serializacja do języka Cypher}
 

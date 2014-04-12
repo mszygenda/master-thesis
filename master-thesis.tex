@@ -124,17 +124,33 @@ Pełne zapytanie wstawiające do grafu nowy obiekt o polu "name" równym "New Fr
 
 \chapter{Dostęp do baz danych z wykorzystaniem DSL}
 
-\section{Wstęp}
+Wszystkie bazy danych udostępniają pewien natywny interfejs do manipulacji na przechowywanych rekordach. W przypadku baz relacyjnych mamy do dyspozycji język SQL. O ile np. sam język SQL jest prostym w użyciu narzędziem to rzadko kiedy z poziomu tworzonego programu chcemy operować bezpośrednio na nim. Potrzebna jest pewna warstwa abstrakcji która ukryje przed programistą pewne różnice w implementacji SQLa w różnych bazach relacyjnych jak i uchroni ich przed typowymi błędami programistycznymi takimi jak SQL Injection. Rozwiązaniem tego problemu są tzw. mappery bazodanowe takie jak Hibernate. Udostępniają one mechanizmy które pozwalają na zdefiniowanie powiązania pomiędzy klasami programu a tabelami/kolekcjami w bazie danych. Narzędzia te zajmują się tłumaczeniem wywołań odpowiednich metod na zapytania języka obsługiwanego przez daną bazę. Oprócz tego zamiast zwracania generycznych obiektów z wynikami zapytań, zamieniane są one na instancje klas które reprezentują poszczególne rekordy.
+
+Alternatywą dla klasycznych rozwiązań typu Hibernate są tzw. DSLe bazodanowe czyli języki domenowe pozwalające w pewnym uproszczeniu na zapisywanie zapytań danego języka bazodanowego wprost w kodzie programu. Tak budowane zapytania są zwykłymi wywołaniami metod danego języka stąd są automatycznie walidowane na etapie kompilacji.
+
+Rozdział ten ma na celu przedstawienie istniejących rozwiązań dla baz relacyjnych jak i NoSQL będącymi inspiracją dla tworzonego narzędzia.
 
 \section{Bazy SQL}
 
 \subsection{Squeryl}
+
+Sztandarowym przykładem DSLa bazodanowego dla języka Scala jest projekt Squeryl. Umożliwia on zdefiniowanie struktury bazy danych w kodzie programu a następnie budowania zapytań z wykorzystaniem zdefiniowanej wcześniej struktury.
+
+Pierwszym etapem w przypadku narzędzia Squeryl jest stworzenie odwzorowania struktury bazy danych. Definiuje się ją z wykorzystaniem zwykłych klas języka scala oraz specjalnej klasy Schema. Przykładowa struktura (przykład z dokumentacji Squeryla)
+
+\lstinputlisting{listings/scala/squeryl-schema.scala}
+
+Po zdefiniowaniu struktury możliwe jest budowanie zapytań bazodanowych. Oto przykładowe zapytanie 
+
+\lstinputlisting{listings/scala/squeryl-query.scala}
 
 \section{Bazy NoSQL}
 
 \subsection{Mongoid}
 
 \chapter{DSL do baz grafowych}
+
+Bazy grafowe w sposób znaczący różnią się w sposobie dostępu do danych. Główną osią zapytań w przypadku baz grafowych są wzorce stąd narzędzie powinno umożliwiać na budowanie wzorców dowolnej długości. Podobnie jak w bibliotece Squeryl w stworzonym narzędziu przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze naszej bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
 
 \section{Definiowanie modelu}
 

@@ -135,6 +135,17 @@ Pełne zapytanie wstawiające do grafu nowy obiekt o polu "name" równym "New Fr
 
 \subsection{Zapytania Cypher}
 
+\chapter{Język Scala}
+
+Języki takie jak Java, C\# czy C++ są obiektowymi językami programowania opartymi na paradygmacie programowania imperatywnego. Zakłada on istnienie stanu w programie który podlega ciągłej zmianie. Przeciwieństwem tego podejścia jest programowanie funkcyjne w którym funkcje programu nie posiadają efektów ubocznych i bardziej przypominają funkcje znane z matematyki. Scala jest językiem łączącym paradygmat imperatywnego programowania obiektowego i programowania funkcyjnego.
+
+\subsection{Programowanie funkcyjne}
+
+\subsection{Podstawy składni}
+Łatwość definiowania DSL itd.
+
+\subsection{Pattern Matching}
+
 \chapter{Dostęp do baz danych z wykorzystaniem DSL}
 
 Wszystkie bazy danych udostępniają pewien natywny interfejs do manipulacji na przechowywanych rekordach. W przypadku baz relacyjnych mamy do dyspozycji język SQL. O ile np. sam język SQL jest prostym w użyciu narzędziem to rzadko kiedy z poziomu tworzonego programu chcemy operować bezpośrednio na nim. Potrzebna jest pewna warstwa abstrakcji która ukryje przed programistą pewne różnice w implementacji SQLa w różnych bazach relacyjnych jak i uchroni ich przed typowymi błędami programistycznymi takimi jak SQL Injection. Rozwiązaniem tego problemu są tzw. mappery bazodanowe takie jak Hibernate. Udostępniają one mechanizmy które pozwalają na zdefiniowanie powiązania pomiędzy klasami programu a tabelami/kolekcjami w bazie danych. Narzędzia te zajmują się tłumaczeniem wywołań odpowiednich metod na zapytania języka obsługiwanego przez daną bazę. Oprócz tego zamiast zwracania generycznych obiektów z wynikami zapytań, zamieniane są one na instancje klas które reprezentują poszczególne rekordy.
@@ -229,13 +240,13 @@ Builders
 
 \section{Serializacja do języka Cypher}
 
-W każdym zapytaniu języka Cypher da się wyszczególnić kilka głównych składowych odpowiadającym odmiennym zadaniom. Przykładem może być chociażby zapytanie do wyszukiwania danych w grafie które składa się z sekcji Start, Match oraz Return. Te same sekcje pojawiają się również w innych rodzajach zapytań (jak chociażby zapytanie służące do aktualizacji danych w grafie może zawierać w sobie sekcję Start). Z tego powodu serializacja poszczególnych sekcji została wyciągnięta do osobnych obiektów realizujących serializację w sposób niezależny. Dzięki temu możliwe jest ponowne wykorzystanie kodu w przypadku implementacji różnych rodzajów zapytań.
+W każdym zapytaniu języka Cypher da się wyszczególnić kilka głównych składowych odpowiadającym odmiennym zadaniom. Przykładem może być chociażby zapytanie do wyszukiwania danych w grafie które składa się z sekcji Start, Match oraz Return. Te same sekcje pojawiają się również w innych rodzajach zapytań (jak chociażby w zapytaniu służącym do aktualizacji danych w grafie może pojawić się sekcja Start). Z tego powodu serializacja poszczególnych sekcji została wyciągnięta do osobnych obiektów realizujących serializację w sposób niezależny. Dzięki temu możliwe jest ponowne wykorzystanie kodu w przypadku implementacji różnych rodzajów zapytań.
 
 \subsection{Struktura}
 
 Głównym obiektem zajmującym się serializacją jest obiekt CypherSerializer. Jego zadaniem jest obsługa wszystkich rodzajów zapytań i delegewanie serializacji do poszczególnych klas serializujących które składają poszczególne sekcje w kompletne zapytanie.
 
-Jedną z takich klas jest SelectSerializer która odpowiada za serializację zapytań typu Select które służą do wydobywania danych z bazy. Realizuje ona swoje zadanie z wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: StartSerializer, MatchSerializer, ReturnSerializer, WhereSerializer.
+Jedną z takich klas jest SelectSerializer która odpowiada za serializację zapytań typu Select służących do wydobywania danych z bazy. Realizuje ona swoje zadanie z wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: StartSerializer, MatchSerializer, ReturnSerializer, WhereSerializer.
 
 Aby wygenerowane sekcje były spójne pod względem używanych nazw zmiennych wykorzystywany jest obiekt implementujący interfejs NameResolver. Jego jedyną odpowiedzialnością jest przydzielanie nazw obiektom typu Node (wszystkie klasy dziedziczące po DomainObject dziedziczą również po Node). Domyślną implementacja którą jest BasicNameResolver przydziela nazwy według następującej konwencji. W przypadku węzłów o określonym identyfikatorze. Przydzielona nazwa to identyfikator z prefixem "id\_", pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem "n\_". Oczywiście głównym wymogiem klasy implementującej ten interfejs jest by dla danego węzła zawsze zwracana była ta sama nazwa.
 
@@ -253,11 +264,13 @@ WYKRES Z PORÓWNANIEM WYDAJNOŚCI REFLEKSJI VS BEZPOŚREDNI DOSTĘP
 
 \subsection{Mapper obiektowy}
 
-Silnik implementujący interfejs DatabaseEngine ma za zadanie zwracać obiekty implementujące intefejs ResultItem. Udostępnia on metody pozwalające na odczytywanie pól oraz obiektów zwróconych jako wynik zapytania w postaci tablicy hashującej. 
+Po wykonaniu zapytania baza danych zwraca wyniki w określonym przez siebie formacie. Może to być np. format JSON w przypadku RESTowej implementacji. Oczywiście narzędzia do obsługi bazy neo4j dostarczają natywnych narzędzi do obsługi wyników. Zajmują się one obsługą poszczególnych pól i rozpoznawaniem typu wartości. Stworzone narzędzie również udostępnia tego typu interfejsy mające na celu ujednolicić dostęp do różnych baz grafowych bądź różnych implementacji. Interfejsem opakowującym pojedyńczy wynik zapytania jest ResultItem. Zadaniem implementacji tego interfejsu jest dostarczanie struktury mapy hashującej która dla określonej nazwy pola zwraca jego wartość otrzymaną z silnika bazy danych. Jedyną dostępną implementacją jest Neo4jResultItem które zajmuje się tłumaczeniem wyników otrzymanych z serwisu REST.
 
-Zadaniem Mappera obiektowego jest zamiana obiektu typu ResultItem na instancję klasy wybranego typu. Domyślna implementacja mappera tj. NodeObjectMapper wykorzystuje wspomniany już mechanizm refleksji. Tworzy on najpierw instancję danej klasy a następnie modyfikuje pola o takiej samej nazwie jak te określone w tablicy hashującej.
+Sam silnik bazodanowy powinien implementować interfejs ExecutionEngine. Interfejs ten wymaga by jego implementacja dostarczała wyłącznie jedną metodę jaką jest exec. Metoda ta powinna dla każdego obsługiwanego przez narzędzie zapytania zlecać wykonanie zapytania oraz zwrócić wyniki w postaci kolekcji obiektów typu ResultItem.
 
-W swojej bieżącej implementacji nie wykorzystuje on żadnego mechanizmu cache'owania jednak nic nie stoi na przeszkodzie by w przyszłości wprowadzić taką warstwę i przez to podnieść wydajność całego narzędzia.
+Oczywiście ResultItem jest dość ogólnym typem i nie odpowiada on strukturze stworzonej przez klienta naszej aplikacji. Potrzebny jest zatem mechanizm zajmujący się zamianą obiektów typu ResultItem na instancje klas wybranego typu definiowanego przez klienta aplikacji. Zadanie to realizuje tzw. ObjectMapper. Domyślna implementacja mappera tj. NodeObjectMapper wykorzystuje wspomniany już mechanizm refleksji. Tworzy on najpierw instancję danej klasy a następnie modyfikuje pola o takiej samej nazwie jak te określone w tablicy hashującej.
+
+W swojej bieżącej implementacji nie wykorzystuje on żadnego mechanizmu cache'owania jednak nic nie stoi na przeszkodzie by w przyszłości wprowadzić taką warstwę i podnieść w znaczący sposób wydajność całego narzędzia.
 
 \section{Potencjalne funkcjonalności}
 

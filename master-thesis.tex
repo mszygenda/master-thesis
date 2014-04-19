@@ -91,11 +91,11 @@ Cypher jest językiem zapytań stworzonym specjalnie na potrzeby neo4j pozwalaj�
 
 Najważniejszym rodzajem zapytań jest oczywiście zapytanie służące do wyszukiwania wzorców i wyciągania danych z grafu. Zapytanie takie składa się z trzech podstawowych części.
 
-Sekcja "START" pozwala na wyciągnięcie węzłów startowych od których zacznie się przeszukiwanie grafu. Węzły można wyciągnąć na podstawie jego wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu.
+Sekcja "START" pozwala na wyciągnięcie węzłów startowych od których zacznie się przeszukiwanie grafu. Węzły można wyciągnąć na podstawie jego wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta jest opcjonalna jednak jest wysoce wskazane by określać węzły startowe. Bez tego zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych.
 
 \lstinputlisting{listings/cypher/start-section.cypher}
 
-Sekcja "MATCH" jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju odpowiednikiem instrukcji INNER JOIN w języku SQL.
+Sekcja "MATCH" jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju odpowiednikiem instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami początkowymi.
 
 \lstinputlisting{listings/cypher/match-section.cypher}
 
@@ -235,8 +235,13 @@ OBRAZEK Z HIERARCHIĄ KLAS
 
 Implementacja:
 
-Transformers
-Builders
+W makrach można wyszczególnić dwa rodzaje operacji. Są to przechodzenie drzewa składniowego i wyszukiwanie interesującyh wzorców oraz budowanie drzew składniowych wyrażeń którymi mają być zastąpione znalezione wzorce. Z tego powodu implementacja makra służącego do transformowania wyrażeń logicznych została podzielona na dwie części realizujące te dwa zadania.
+
+Pierwszą z nich są tzw. klasy transformujące (ang. Transformers) które zajmują się wyszukiwaniem wzorców w drzewie i zamianą ich na docelowe wyrażenia oraz budowniczy (ang. Builders) zajmujący się tworzeniem drzewa składniowego wspomnianych wyrażeń. Odseparowanie tych dwóch czynności oraz wprowadzenie kilku poziomów w hierarchi klas pozwoliło na stworzenie prostego w analizie kodu wspomnianego makra co jest kluczowe gdyż mechanizm makr jest sam w sobie dość skomplikowany.  Ze względu na niewielką ilość kodu pozwoliłem sobie na zamieszczenie implementacji makra poniżej.
+
+\lstinputlisting{listings/scala/boolean-macro-implementation.scala}
+
+Jak widać, na poziomie implementacji logiki makra wszystko ogranicza się do wywołań kilku metod poprzedzonych sekcją dopasowywania do wzorca (ang. Pattern Matching) znanego z języka Scala.
 
 \section{Serializacja do języka Cypher}
 

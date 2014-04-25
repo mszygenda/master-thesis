@@ -277,6 +277,16 @@ Oczywiście ResultItem jest dość ogólnym typem i nie odpowiada on strukturze 
 
 W swojej bieżącej implementacji nie wykorzystuje on żadnego mechanizmu cache'owania jednak nic nie stoi na przeszkodzie by w przyszłości wprowadzić taką warstwę i podnieść w znaczący sposób wydajność całego narzędzia.
 
+\chapter{Zmiany w Neo4j 2.0 względem 1.x}
+
+Stworzone narzędzie było projektowane z myślą o wersji 1.9.x która w momencie pisania większej części pracy była obowiązującym stabilnym wydaniem. Wersja druga przyniosła znaczące zmiany które wymagają omówienia (które stoją w sprzeczności z częścią opisanych tu mechanizmów).
+
+Jedną z bardziej istotnych zmian jest tak zwany mechanizm etykietowania który pozwala na grupowanie węzłów. Poza możliwością określenia typu każdego węzła możliwe stało się nakładanie tzw. więzów (ang. Constraints) na określone typy. Pozwala to na definiowanie czegoś w rodzaju schematu bazy danych znanego z baz relacyjnych. Pojawienie się mechanizmu etykiet miało również wpływ na rozszerzenie języka Cypher. Możliwe jest np. wyszukiwanie wzorców z węzłami określonego typu.
+
+Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W przypadku wydań z serii 1.x narzut związany z obsługą indeksowania był zrzucony na programistę. W dodatku by wykorzystać dany indeks w zapytaniu trzeba było zażądać tego w sposób jawny w sekcji START. Obecnie indeksy dużo bardziej funkcjonalność znaną z baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w zapytaniu natomiast zarządzanie indeksami stało się możliwe z poziomu języka Cypher.
+
+Zmiany dotknęły również języka Cypher który jak określają twórcy stał się bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji START. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
+
 \section{Potencjalne funkcjonalności}
 
 \subsection{Aktualizacja danych}

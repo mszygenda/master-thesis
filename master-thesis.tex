@@ -277,6 +277,24 @@ Oczywiście ResultItem jest dość ogólnym typem i nie odpowiada on strukturze 
 
 W swojej bieżącej implementacji nie wykorzystuje on żadnego mechanizmu cache'owania jednak nic nie stoi na przeszkodzie by w przyszłości wprowadzić taką warstwę i podnieść w znaczący sposób wydajność całego narzędzia.
 
+\chapter{Przykłady wykorzystania}
+
+W tym rozdziale postaram się zaprezentować kompletne przykłady zastosowania stworzonego narzędzia. Pierwszym z nich będzie sieć społecznościowa zawierająca kilka podstawowych relacji spotykanych w serwisach społecznościowych.
+
+\subsection{Sieć społecznościowa}
+
+Sieci społecznościowe koncentrują się w okół osób i relacji między nimi. Potrzeba zatem reprezentacji osób które będą przechowywane w bazie danych. Służyć do tego będzie prosta klasa Person zawierająca jedno pole name odpowiadające imieniu danej osoby. Poza polem opisującym osobę zawierać ona będzie pola określające relacje jakimi związana jest osoba z innymi obiektami naszej sieci społecznościowej. Relacjami są w tym przypadku "KNOWS" wiążąca znajomych oraz "WROTE" która zostanie opisana szczegółowo razem z obiektami typu Comment.
+
+Person Snippet
+
+Kolejnym obiektem składowanym w bazie będą komentarze reprezentowane przez klasę Comment. Typową relacją między osobą a komentarzem jest relacja autorstwa określająca kto napisał dany komentarz. Realizowana będzie ona za pomocą krawędzi "WROTE". Kolejną akcją dokonywaną na komentarzach jest głosowanie tj. wydanie aprobaty przez daną osobę. Relacja ta nazywa się "LIKES".
+
+Comment snippet
+
+\subsection{Zapytania w sieci społecznościowej}
+
+
+
 \chapter{Zmiany w Neo4j 2.0 względem 1.x}
 
 Stworzone narzędzie było projektowane z myślą o wersji 1.9.x która w momencie pisania większej części pracy była obowiązującym stabilnym wydaniem. Wersja druga przyniosła znaczące zmiany które wymagają omówienia (które stoją w sprzeczności z częścią opisanych tu mechanizmów).

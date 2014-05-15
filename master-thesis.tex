@@ -129,7 +129,11 @@ Pełne zapytanie wstawiające do grafu nowy obiekt o polu "name" równym "New Fr
 
 \section{Programistyczne sposoby dostępu do neo4j}
 
+Neo4j udostępnia kilka odmiennych sposobów dostępu do bazy. Rozdział ten ma na celu przedstawienie każdego z nich.
+
 \subsection{Embedded mode}
+
+Jedną z możliwości jest tzw. embedded mode który polega na wykorzystaniu udostępnionego API dla języka Java. Polega to na wykorzystaniu wewnętrznych struktur bazy. Rozwiązanie idealnie nadaje się w przypadku gdy potrzebna jest większa kontrola nad bazą danych i potrzebne są bardziej zaawansowane mechanizmy wyszukiwania danych. Oczywistą wadą jest fakt, że do wykorzystania tego mechanizmu potrzebna jest lokalna instancja bazy danych.
 
 \subsection{REST mode}
 
@@ -137,14 +141,38 @@ Pełne zapytanie wstawiające do grafu nowy obiekt o polu "name" równym "New Fr
 
 \chapter{Język Scala}
 
-Języki takie jak Java, C\# czy C++ są obiektowymi językami programowania opartymi na paradygmacie programowania imperatywnego. Zakłada on istnienie stanu w programie który podlega ciągłej zmianie. Przeciwieństwem tego podejścia jest programowanie funkcyjne w którym funkcje programu nie posiadają efektów ubocznych i bardziej przypominają funkcje znane z matematyki. Scala jest językiem łączącym paradygmat imperatywnego programowania obiektowego i programowania funkcyjnego.
+Scala jest statycznie typowanym językiem programowania który łączy w sobie idee programowania obiektowego oraz funkcyjnego. Połączenie tych dwóch paradygmatów było jednym ze środków do osiągnięcia głównego z założeń twórców jakim było stworzenie języka który jest skalowalny oraz zwięzły. Skalowalność w tym przypadku polega na przystosowaniu języka do prostych zadań jak np. niewielkie skrypty oraz do ogromnych projektów jakie realizuje się w językach typu Java czy C\#.
+
+Do dyspozycji programisty zostało oddanych szereg mechanizmów pozwalających na ,,rozszerzanie" składni języka. Jednym z nich jest np. możliwość definiowania operatorów takich jak *, +, - itd. oraz wywoływania ich w postaci infixowej. Pozwala to na budowanie złożonych klas których użycie przypomina zwykłe wyrażenia arytmetyczne które, w większości języków programowania są obsługiwane w sposób szczególny. Scala jest natomiast tak elastycznym narzędziem iż pozwala nawet na definiowanie znanych struktur kontrolnych takich jak np. pętla while (jest to zasługa tego iż Scala jest językiem funkcyjnym i funkcje mogą być przekazywane jak zwykłe obiekty).
+
+Pomimo faktu iż jest to język statycznie typowany, nie wymaga on od programisty jawnego określania typu w każdej sytuacji. System inferencji typów jest na tyle rozbudowany iż w wielu przypadkach możliwe jest całkowite pominięcie określania typów zmiennych. Jest to kolejna cecha poza wieloma innymi (takimi jak np. brak konieczności kończenia linii średnikiem) wpływająca na zwięzłość kodu pisanego w tym języku.
+
+Właśnie z powodów zwięzłości oraz łatwości z jaką możliwe jest rozszerzanie składni, Scala została wybrana do stworzenia języka dziedzinowego służącego do obsługi baz grafowych.
 
 \subsection{Programowanie funkcyjne}
 
+Języki takie jak Java, C\# czy C++ są obiektowymi językami programowania opartymi na paradygmacie programowania imperatywnego. Zakłada on istnienie stanu w programie który podlega ciągłej zmianie. Przeciwieństwem tego podejścia jest programowanie funkcyjne w którym nie istnieje stan a funkcje przekształcają dane wejściowe w wyjściowe bez tzw. efektów ubocznych. Kolejną cechą języków funkcyjnych jest to iż funkcje są traktowane jak zwykłe wartości. Możliwe jest na przykład przechowywanie funkcji w zmiennych, przekazywanie ich jako parametry innych funkcji w identyczny sposób jak dzieje się to z instancjami typów String czy Integer. Scala łączy te dwa odmienne podejścia dając programiście swobodę w wyborze przy implementacji programów.
+
 \subsection{Podstawy składni}
-Łatwość definiowania DSL itd.
+Składnia Scali była inspirowana takimi językami jak C\# czy Java stąd doświadczonym programistom nie powinno sprawiać trudności czytanie kodu języka Scala. Oczywiście jak zostało to już wspomniane w odróżnieniu od wspomnianych języków Scala wprowadza szereg usprawnień wpływających na zwięzłość pisanego kodu. Nie ma np. potrzeby kończenia każdej linii średnikiem czy jawnego określania typu każdej zmiennej (o ile system interferencji jest w stanie określić jej typ).
+
+Poniżej przedstawiona jest prosta klasa w języku Scala w której zdefiniowane są dwa pola: name oraz age. Razem z nazwą klasy zdefiniowany jest również konstruktor główny w którym możliwe jest określanie pól składowych z użyciem słów kluczowych val lub var (służą one odpowiednio do deklarowania stałych lub zmiennych). Poza tym klasa zawiera jedną metodę ,,sayHello" która wyświetla komunikat.
+
+\lstinputlisting{listings/scala/simple-class-person.scala}
+
+Zdefiniowanej powyżej klasie odpowiada poniższy kod w języku Java.
+
+\lstinputlisting{listings/java/simple-class-person.java}
+
+Nawet tak prosty przykład pokazuje jak elastycznym językiem jest Scala.
 
 \subsection{Pattern Matching}
+
+Jednym z bardziej istotnych mechanizmów języka niespotykanym w takich językach jak Java jest tzw. Pattern Matching (dopasowywanie do wzorca). Pozwala on na definiowanie specjalnych klas (ang. Case Classes) które można dopasowywać i wyciągać ich składowe z wykorzystaniem specjalnej składni. Przypomina to trochę instrukcję ,,switch" o dużo bardziej zaawansowanym działaniu. Oto przykład pozwalający na wyświetlenie wartości przechowywanych w liściach struktury drzewa reprezentowanej właśnie przy pomocy tzw. case classes.
+
+\lstinputlisting{listings/scala/pattern-matching-trees.scala}
+
+Pattern matching znajduje zastosowanie w neodsl chociażby na etapie serializacji struktury zapytań baz grafowych do języka natywnego obsługiwanego przez konkretną bazę.
 
 \chapter{Dostęp do baz danych z wykorzystaniem DSL}
 

@@ -82,24 +82,26 @@ Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko przedsta
 
 \chapter{Neo4j}
 
-Neo4j jest natywną bazą grafową napisaną w języku Java. 
+Neo4j jest natywną bazą grafową napisaną w języku Java. Pozwala ona na przechowywanie węzłów jak i relacji wraz z polami typów prostych takimi jak napisy czy liczby. W implementacji zostało zastosowanych wiele mechanizmów mających na celu osiąnięcie jak najlepszej wydajności przy przeszukiwaniu grafów. Warto tutaj wymienić chociażby sposób w jaki zapisywana jest informacja o krawędziach wychodzących z wierzchołka. Otóż, aby odczytać listę krawędzi dla danego wierzchołka nie ma potrzeby korzystania z żadnego pośredniczącego indeksu, informację tę można odczytać bezpośrednio w jednym kroku (ang. Index-Free Adjacency). Wierzchołki i krawędzie są natomiast zapisywane w plikach w których każdy rekord jest stałego rozmiaru. Pozwala to na bardzo szybkie odczytywanie danych bez konieczności przeglądania pliku w celu odnalezienia właściwego rekordu (wystarczy pomnożyć rozmiar rekordu relacji bądź węzła przez jego identyfikator by uzyskać lokalizację w pliku).
+
+Neo4j jest wydajną i jedną z bardziej rozpoznawalnych baz grafowych. Z tego powodu została ona wybrana do implementacji narzędzia będącego przedmiotem tej pracy.
 
 \section{Język Cypher}
-Cypher jest językiem zapytań stworzonym specjalnie na potrzeby neo4j pozwalającym w sposób deklaratywny przeszukiwać bazę grafową.
+Cypher jest językiem zapytań stworzonym specjalnie na potrzeby neo4j pozwalającym w sposób deklaratywny przeszukiwać oraz aktualizować bazę grafową. Podobnie jak SQL jest to stosunkowo łatwy w analizie język który oferuje duże możliwości. Podrozdział ten ma na celu zaznajomienie czytelnika z podstawową składnią i sposobem w jaki operuje się na danych w bazach grafowych.
 
 \subsection{Przeszukiwanie grafu}
 
-Najistotniejszą funkcjonalnością baz danych jest możliwość przeszukiwania zbioru danych. Zapytanie służące do odczytywania danych składa się z trzech podstawowych części.
+Najistotniejszą funkcjonalnością baz danych jest możliwość przeszukiwania zbioru rekordów. Zapytanie służące do odczytywania informacji składa się z trzech podstawowych części.
 
-Sekcja ,,START" pozwala na wyciągnięcie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 2.0 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe. Bez tego zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej comment przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast john będzie wskazywał na węzły znajdujące się w indeksie nazwanym ,,nameIndex'' oraz zawierające pole o wartości równej ,,John"
+Sekcja ,,START" pozwala na ustalenie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 2.0 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe. Bez tego zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej comment przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast john będzie wskazywał na węzły znajdujące się w indeksie nazwanym ,,nameIndex'' oraz zawierające pole ,,name'' o wartości równej ,,John"
 
 \lstinputlisting{listings/cypher/start-section.cypher}
 
-Sekcja ,,MATCH" jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju odpowiednikiem instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać dwóch znajomych takich, że jeden z nich ,,lubi" komentarz wskazywany przez zmienną ,,comment"
+Sekcja ,,MATCH" jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać dwóch znajomych takich, że jeden z nich ,,lubi" komentarz wskazywany przez zmienną ,,comment"
 
 \lstinputlisting{listings/cypher/match-section.cypher}
 
-Ostatnim elementem zapytania jest sekcja "RETURN" służąca określania pól które mają zostać zwrócone jako wynik. W poniższym przykładzie zwrócone zostaną pola id oraz name węzłów dopasowanych do zmiennej friend.
+Ostatnim elementem zapytania jest sekcja "RETURN" służąca określania pól które mają zostać zwrócone jako wynik. W poniższym przykładzie zwrócone zostanie pole name oraz wewnętrzny identyfikator węzłów dopasowanych do zmiennej friend.
 
 \lstinputlisting{listings/cypher/return-section.cypher}
 
@@ -147,7 +149,7 @@ Do dyspozycji programisty zostało oddanych szereg mechanizmów pozwalających n
 
 Pomimo faktu iż jest to język statycznie typowany, nie wymaga on od programisty jawnego określania typu w każdej sytuacji. System inferencji typów jest na tyle rozbudowany iż w wielu przypadkach możliwe jest całkowite pominięcie określania typów zmiennych. Jest to kolejna cecha poza wieloma innymi (takimi jak np. brak konieczności kończenia linii średnikiem) wpływająca na zwięzłość kodu pisanego w tym języku.
 
-Właśnie z powodów zwięzłości oraz łatwości z jaką możliwe jest rozszerzanie składni, Scala została wybrana do stworzenia języka dziedzinowego służącego do obsługi baz grafowych.
+Właśnie z powodów zwięzłości oraz łatwości z jaką możliwe jest rozszerzanie składni, Scala została wybrana do stworzenia języka dziedzinowego do obsługi baz grafowych.
 
 \subsection{Programowanie funkcyjne}
 
@@ -164,7 +166,7 @@ Zdefiniowanej powyżej klasie odpowiada poniższy kod w języku Java.
 
 \lstinputlisting{listings/java/simple-class-person.java}
 
-Nawet tak prosty przykład pokazuje jak elastycznym językiem jest Scala.
+Nawet tak prosty przykład pokazuje jak zwięzłym językiem jest Scala.
 
 \subsection{Pattern Matching}
 
@@ -196,21 +198,32 @@ Powyższa struktura odwzorowuje bardzo prostą bazę danych z jedną tabelą Son
 
 \lstinputlisting{listings/scala/squeryl-query.scala}
 
-Odpowiada ono mniej więcej takiemu zapytaniu w języku SQL
+Służy ono do wyszukiwania piosenek które w tytule zawierają słowo ,,funk". Powyższe wyrażenie mniej więcej takiemu zapytaniu w języku SQL.
 
 \lstinputlisting{listings/sql/squeryl-query.sql}
 
-Jak można zaobserwować na tym przykładzie zastosowanie języka dziedzionowego pozwala w pełniejszy sposób wykorzystać możliwości natywnego języka bazy danych przy jednoczesnym zachowaniu zalet rozwiązań typu Hibernate (tj. mapowanie wyników na obiekty oraz kontrola wyrażeń na etapie kompilacji)
+Zastosowanie języka dziedzionowego pozwala w pełniejszy sposób wykorzystać możliwości natywnego języka bazy danych przy jednoczesnym zachowaniu zalet rozwiązań typu Hibernate (tj. mapowanie wyników na obiekty oraz kontrola wyrażeń na etapie kompilacji)
 
 \section{Bazy NoSQL}
 
-\subsection{Mongoid}
+MongoDB jest jedną z popularniejszych baz dokumentowych. Pozwala ona na przechowywanie tzw. dokumentów tj. złożonych wartości które mogą być dowolnie zagnieżdżane. Oferuje ona dużą wydajność kosztem zerwania normalizacją i brakiem transakcyjności.
+
+\subsection{Rogue}
+Jedną z bibliotek do obsługi MongoDB z poziomu języka Scala jest Rogue. Podobnie jak Squeryl udostępnia ona DSL służący do budowania zapytań. Oto przykładowa klasa modelu składowanego w MongoDB
+
+\lstinputlisting{listings/scala/rogue-model.scala}
+
+Do definiowania pól konieczne jest tworzenie obiektów rozszerzających cechę Field. Rogue wymaga od programisty napisania nieco więcej kodu niż Squeryl. Zaprezentowane rozwiązanie ma jednak tę zaletę iż dzięki specjalnym typom jak np. LongField dużo łatwiejsze stało się tworzenie DSLa który nie musi zajmować się obsługą typów wbudowanych w język Scala.
+
+Przykładowe zapytanie przedstawione jest poniżej
+
+\lstinputlisting{listings/scala/rogue-query.scala}
 
 \chapter{DSL do baz grafowych}
 
 W celu zaprezentowania jednego ze sposobów w jaki można wykorzystać bazy grafowe w nowoczesnych językach jak Scala powstało narzędzie ,,neodsl". Jest to DSL służący do obsługi baz grafowych. W bieżącej implementacji obsługiwana jest tylko jedna z nich, mianowicie Neo4j (stąd projekt wziął swą nazwę). 
 
-Bazy grafowe w sposób znaczący różnią się w sposobie dostępu do danych względem baz relacyjnych. Głównym elementem zapytań w przypadku baz grafowych są tzw. wzorce stąd narzędzie do ich obsługi powinno pozwalać na budowanie dowolnie długich dopasowań relacji. Podobnie jak w bibliotece Squeryl, w ,,neodsl'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze naszej bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
+Bazy grafowe w sposób znaczący różnią się w sposobie dostępu do danych względem baz relacyjnych. Głównym elementem zapytań w przypadku baz grafowych są tzw. wzorce stąd narzędzie do ich obsługi powinno pozwalać na budowanie dowolnie długich dopasowań. Podobnie jak w bibliotece Squeryl, w ,,neodsl'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze naszej bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
 
 \section{Definiowanie modelu}
 
@@ -224,7 +237,7 @@ Definiowane klasy mogą zawierać dowolne pola proste dostępne w języku Scala 
 
 \subsection{Relacje}
 
-Oczywiście najistotniejszą informacją w przypadku baz grafowych są relacje czy też krawędzie wychodzące z węzłów danego typu. Należy je zdefiniować jako pola w klasie domenowej. Nie ma oczywiście potrzeby tworzenia obiektów w sposób ręczny gdyż klasa DomainObject udostępnia metody pomocnicze pozwalające na definiowanie relacji. Są to metody  -->, <--, -- które jednocześnie określają kierunek. Metody te są generyczne i pozwalają na określenie typu obiektów pomiędzy którymi zachodzić będzie relacja. Przyjmują one jeden parametr typu String który pozwala na zdefiniowanie nazwy relacji czy też krawędzi.
+Najistotniejszą informacją w przypadku baz grafowych są relacje czy też krawędzie wychodzące z węzłów danego typu. Należy je zdefiniować jako pola w klasie domenowej. Nie ma oczywiście potrzeby tworzenia obiektów w sposób ręczny gdyż klasa DomainObject udostępnia metody pomocnicze pozwalające na definiowanie relacji. Są to metody  -->, <--, -- które jednocześnie określają kierunek. Metody te są generyczne i pozwalają na określenie typu obiektów pomiędzy którymi zachodzić będzie relacja. Przyjmują one jeden parametr typu String który pozwala na zdefiniowanie nazwy relacji czy też krawędzi.
 
 \subsection{Przykład modelu}
 
@@ -331,8 +344,6 @@ Kolejnym obiektem składowanym w bazie będą komentarze reprezentowane przez kl
 Comment snippet
 
 \subsection{Zapytania w sieci społecznościowej}
-
-
 
 \chapter{Zmiany w Neo4j 2.0 względem 1.x}
 

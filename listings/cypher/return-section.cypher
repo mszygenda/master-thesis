@@ -1,1 +1,1 @@
-RETURN friend.id, friend.name
+RETURN id(friend) AS `friend.id`, friend.name

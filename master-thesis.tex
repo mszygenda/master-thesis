@@ -51,15 +51,15 @@ Wstęp
 % wstęp
 \introduction
 
-W ostatnich latach można było zaobserwować pojawienie się wielu baz danych zrywających paradygmatem baz relacyjnych, które przodowały przez wiele lat. Mowa tutaj o bazach nazywanych wspólnym hasłem "NoSQL" takich jak dokumentowa MongoDB czy też grafowa Neo4j. W określonych warunkach oferują one dużo większą wydajność niż bazy relacyjne. Oczywiście odbywa się to pewnym kosztem. W przypadku baz dokumentowych jest to zerwanie z normalizacją oraz transakcyjnością lub z całkowitą zmianą paradygmatu jak ma to miejsce w przypadku baz grafowych. Poszukiwanie wydajniejszych rozwiązań do składowania danych ma oczywiście swoją przyczynę. Jest to mianowicie fakt iż współczesne aplikacje internetowe muszą obsługiwać miliony użytkowników w czasie rzeczywistym. Baza danych która jest niejednokrotnie głównym elementem układanki musi oczwyiście sprostać tym wymaganiom. Okazuje się jednak, że w przypadku danych w których rekordy są ze sobą ściśle powiązane relacjami bazy relacyjne mogą okazać się niewystarczające. Wynika to ze sposobu w jaki relacje są realizowane w takich bazach. Wykorzystywany mianowicie jest mechanizm kluczy obcych, natomiast na poziomie zapytań bazodanowych wykonywany jest iloczyn kartezjański co przy dużej ilości danych i~kilku relacjach zajmuje olbrzymią ilość czasu. Z punktu widzenia użytkownika jest całkowicie nie do zaakceptowania by obsłużenie jego żądania zajmowało czas rzędu kilkunastu sekund lub nawet minut (ODNOŚNIK DO PORÓWNANIA WYDAJNOŚCIOWEGO). Potrzeba zatem wydajnego mechanizmu, który byłby w stanie spełnić rygorystyczne wymogi wydajnościowe oraz dobrze radzi sobie z danymi powiązanymi wieloma relacjami. Odpowiedzią są bazy grafowe które stosują reprezentację grafów do zapisywania rekordów. Jak zostanie to wyjaśnione  w dalszych rozdziałach ma to znaczący wpływ na wydajność i sposób operowania na danych. Celem pracy było stworzenie narzędzia dla języka Scala pozwalającego na efektywne wykorzystanie jednej z opisywanych baz grafowych. Język ten został wybrany ze względu na dostępność licznych mechanizmów ułatwiających definiowanie tzw. języków dziedzinowych (DSL).
+W ostatnich latach można było zaobserwować pojawienie się wielu baz danych zrywających z niepodzielnie dotychczas panującym paradygmatem baz relacyjnych. Mowa tutaj o bazach nazywanych wspólnym hasłem ,,NoSQL" takich jak dokumentowa MongoDB czy też grafowa Neo4j. W określonych warunkach oferują one dużo większą wydajność niż bazy relacyjne. Oczywiście odbywa się to pewnym kosztem. W przypadku baz dokumentowych jest to zerwanie z normalizacją oraz transakcyjnością lub z całkowitą zmianą paradygmatu jak ma to miejsce w przypadku baz grafowych. Poszukiwanie wydajniejszych rozwiązań do składowania danych ma oczywiście swoją przyczynę. Jest to mianowicie fakt iż współczesne aplikacje internetowe muszą obsługiwać miliony użytkowników w czasie rzeczywistym. Baza danych która jest niejednokrotnie głównym elementem układanki musi oczwyiście sprostać tym wymaganiom. Okazuje się jednak, że w przypadku danych w których rekordy są ze sobą ściśle powiązane wieloma zależnościami bazy relacyjne mogą okazać się niewystarczające. Wynika to ze sposobu w jaki zależności te są modelowane bazach relacyjnych. Wykorzystywany mianowicie jest mechanizm kluczy obcych, natomiast na poziomie języka zapytań wykonywany jest iloczyn kartezjański co przy dużej ilości danych i~kilku relacjach może być bardzo kosztowne -- zarówno pod względem czasu, jak i wykorzystywanej pamięci. Z punktu widzenia użytkownika jest całkowicie nie do zaakceptowania by obsłużenie jego żądania zajmowało czas rzędu kilkunastu sekund lub nawet minut (ODNOŚNIK DO PORÓWNANIA WYDAJNOŚCIOWEGO). Potrzeba zatem wydajnego mechanizmu, który byłby w stanie spełnić rygorystyczne wymogi wydajnościowe oraz dobrze radzić sobie z danymi powiązanymi wieloma relacjami. Odpowiedzią są bazy grafowe, które do reprezentowania danych stosują strukturę grafu. Jak zostanie to wyjaśnione  w dalszych rozdziałach ma to znaczący wpływ na wydajność i sposób operowania na danych. Celem pracy było stworzenie narzędzia dla języka Scala pozwalającego na efektywne wykorzystanie jednej z najbardziej popularnych baz grafowych. Język ten został wybrany ze względu na dostępność licznych mechanizmów ułatwiających definiowanie tzw. języków dziedzinowych (DSL).
 
 \chapter{Bazy grafowe}
 
 \section{Wstęp}
 
-Z matematycznego punktu widzenia (ODNOŚNIK DO KSIĄŻKI) graf to struktura składająca się ze zbioru wierzchołków oraz zbioru krawędzi. Krawędź reprezentowana jest przez dwa wierchołki które są ze sobą połączone. W przypadku gdy kierunek krawędzi nie jest istotny mówimy o tzw. krawędziach nieskierowanych i kolejność zapisu wierzchołków nie odgrywa roli. Krawędzie skierowane są natomiast reprezentowane jako zbiór par. Bazy grafowe wykorzystują właśnię tę strukturę reprezentowania wszystkich danych rozszerzając ją tylko w nieznaczny sposób (np. dodając pojęcie nazwanych krawędzi). Pomimo faktu iż teoria grafów jest dziedziną niemłodą i znaną od dłuższego czasu to same bazy grafowe są stosunkowo świeżym tworem. Jak wspomina autor bazy Neo4j, w roku 1999 nie istniała praktycznie żadna baza grafowa mogąca być wykorzystana w sposób produkcyjny (ODNOŚNIK DO KSIĄŻKI). Sposób w jaki bazy grafowe prezentują dane implikuje odmienny sposób przeszukiwania i operowania na zbiorze danych. Nie istnieje tutaj pojęcie tabeli znane z baz relacyjnych takich jak MySQL która narzucała by określoną strukturę. Zamiast tego mamy tu do czynienia z wierzchołkami (nazywanymi w dalszej części pracy zamiennie węzłami) które mogą zawierać dowolną ilość pól prostych oraz w przypadku OrientDB również pól złożonych. Pod tym względem przypominają one bazy dokumentowe w których również nie ma narzuconej struktury. W odróżnieniu jednak zarówno od baz relacyjnych jak i dokumentowych relacje między obiektami są zapisywane tutaj za pomocą nazwanych i skierowanych krawędzi. Pojedyńczy węzeł może mieć dowolnie wiele różnych krawędzi wychodzących jak i wchodzących (W dalszej części pracy będziemy używać zamiennie terminu krawędzi i relacji). Przeszukiwanie baz grafowych odbywa się poprzez definiowanie interesujących wzorców w grafie. Dzięki efektywnym algorytmom przeszukiwania grafów taki sposób przechowywania danych ma znaczący wpływ na wydajność.
+Z matematycznego punktu widzenia (ODNOŚNIK DO KSIĄŻKI) graf to struktura składająca się ze zbioru wierzchołków oraz zbioru krawędzi. Krawędź reprezentuje połączenie pomiędzy dwoma wierzchołkami. W przypadku gdy kierunek krawędzi jest istotny mówimy o krawędziach skierowanych. Bazy grafowe wykorzystują właśnię tę strukturę reprezentowania wszystkich danych rozszerzając ją tylko w nieznaczny sposób (np. dodając pojęcie nazwanych krawędzi). Pomimo faktu iż teoria grafów jest dziedziną niemłodą i znaną od dłuższego czasu to same bazy grafowe są stosunkowo świeżym tworem. Jak wspomina autor bazy Neo4j, w roku 1999 nie istniała praktycznie żadna baza grafowa mogąca być wykorzystana w sposób produkcyjny (ODNOŚNIK DO KSIĄŻKI). Sposób w jaki bazy grafowe prezentują dane implikuje odmienny sposób przeszukiwania i operowania na zbiorze danych. Nie istnieje tutaj pojęcie tabeli znane z baz relacyjnych takich jak MySQL która narzucała by określoną strukturę. Zamiast tego mamy tu do czynienia z wierzchołkami (nazywanymi w dalszej części pracy zamiennie węzłami) które mogą zawierać dowolną liczbę pól prostych lub złożonych (jak ma to miejsce np. w bazie OrientDB). Pod tym względem przypominają one bazy dokumentowe w których również nie ma narzuconej struktury. W odróżnieniu jednak zarówno od baz relacyjnych jak i dokumentowych relacje między obiektami są zapisywane tutaj za pomocą nazwanych i skierowanych krawędzi. Pojedyńczy węzeł może mieć dowolnie wiele różnych krawędzi wychodzących jak i wchodzących (w dalszej części pracy będziemy używać zamiennie terminu krawędzi i relacji). Przeszukiwanie baz grafowych odbywa się poprzez definiowanie interesujących wzorców w grafie. Dzięki efektywnym algorytmom przeszukiwania grafów taki sposób przechowywania danych ma znaczący wpływ na wydajność.
 
-Oto przykład ukazujący porównanie wydajności bazy grafowej i bazy MySQL dla analogicznej struktury danych i zapytań skupionych w okół relacji.
+Oto przykład ukazujący porównanie wydajności grafowej bazy Neo4j oraz MySQL dla analogicznej struktury danych i zapytań skupionych wokół relacji.
 
 WYKRES Z MODELEM I ZAPYTANIEM SQL (Pożyczony z książki o neo4j)
 
@@ -67,7 +67,7 @@ WYKRES Z MODELEM I ZAPYTANIEM CYPHER (Pożyczony z książki o neo4j)
 
 WYKRESY Z WYDAJNOŚCIĄ (Pożyczony z książki o neo4j)
 
-Znacząca przewaga neo4j wynika tutaj przede wszystkim z lokalności operacji wykonywanych na danych (tj. nie musimy przeszukiwać wszystkich węzłów a jedynie te które są fizycznie połączone z interesującymi węzłami) w przeciwieństwie do bazy MySQL w której z każdą relacją musimy utworzyć iloczyn kartezjański który wymaga przejrzenia całego zbioru danych.
+Znacząca przewaga neo4j wynika tutaj przede wszystkim z lokalności operacji wykonywanych na danych (tj. nie musimy przeszukiwać wszystkich węzłów a jedynie te które są fizycznie połączone z interesującymi węzłami) w przeciwieństwie do bazy MySQL w której z każdym złączeniem relacji musimy utworzyć iloczyn kartezjański który wymaga przejrzenia całego zbioru danych.
 
 \section{Rodzaje baz grafowych}
 
@@ -97,15 +97,15 @@ Sekcja ,,START" pozwala na ustalenie węzłów startowych od których zacznie si
 
 \lstinputlisting{listings/cypher/start-section.cypher}
 
-Sekcja ,,MATCH" jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać dwóch znajomych takich, że jeden z nich ,,lubi" komentarz wskazywany przez zmienną ,,comment"
+Sekcja ,,MATCH" jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać znajomych ,,johna" ,,lubiących" komentarz wskazywany przez zmienną ,,comment"
 
 \lstinputlisting{listings/cypher/match-section.cypher}
 
-Ostatnim elementem zapytania jest sekcja "RETURN" służąca określania pól które mają zostać zwrócone jako wynik. W poniższym przykładzie zwrócone zostanie pole name oraz wewnętrzny identyfikator węzłów dopasowanych do zmiennej friend.
+Ostatnim elementem zapytania jest sekcja "RETURN" służąca określania pól które mają zostać zwrócone jako wynik. W poniższym przykładzie zwrócone zostanie pole ,,name" oraz wewnętrzny identyfikator węzłów dopasowanych do zmiennej ,,friend".
 
 \lstinputlisting{listings/cypher/return-section.cypher}
 
-Pełne zapytanie wygląda następująco i zwraca ono identyfikator oraz pole ,,name'' węzłów które są połączone krawędzią o nazwie ,,KNOWS" z obiektem john oraz będące połączone krawędzią ,,LIKES" z obiektem o identyfikatorze równym {1}. Poruszając się w domenie sieci społecznościowej zapytanie zwraca znajomych użytkownika John którzy polubili komentarz o identyfikatorze {1}.
+Pełne zapytanie wygląda zwraca identyfikator oraz pole ,,name'' węzłów które są połączone krawędzią o nazwie ,,KNOWS" z obiektem john oraz będące połączone krawędzią ,,LIKES" z obiektem o identyfikatorze równym {1}. Poruszając się w domenie sieci społecznościowej zapytanie zwraca znajomych użytkownika John którzy polubili komentarz o identyfikatorze {1}.
 
 \lstinputlisting{listings/cypher/sample-query.cypher}
 
@@ -113,19 +113,19 @@ Pełne zapytanie wygląda następująco i zwraca ono identyfikator oraz pole ,,n
 
 Język Cypher pozwala również na aktualizację danych w grafie. Podobnie jak w przypadku zapytania służącego do przesukiwania grafu wyrażenie składa się kilku części.
 
-Pierwszą z nich ponownie jest sekcja "START" która pozwala na wybranie wezłów początkowych między którymi będziemy wstawiać relacje. Jest ona opcjonalna jeśli zamierzamy operować wyłącznie na nowych obiektach.
+Pierwszą z nich ponownie jest sekcja ,,START", która pozwala na wybranie wezłów zakotwiczających tworzony wzorzec w strukturze grafu. Jest ona opcjonalna jeśli zamierzamy utworzyć graf niepowiązany z istniejącymi już wierzchołkami.
 
 \lstinputlisting{listings/cypher/start-section.cypher}
 
-Kolejną sekcją jest ,,CREATE" której składnia jest podobna do sekcji ,,MATCH". W przeciwieństwie jednak do ,,MATCH" pozwala ona na tworzenie krawędzi w grafie oraz węzłów. W poniższym przykładzie zostanie utworzony węzeł ,,newFriend" o polu name równym wartości ,,New friend" oraz relacja ,,KNOWS'' łącząca wierzchołek wskazywany przez zmienną john z nowo utworzonym węzłem.
+Kolejną sekcją jest ,,CREATE" której składnia jest podobna do sekcji ,,MATCH". W przeciwieństwie jednak do ,,MATCH" pozwala ona na tworzenie krawędzi w grafie oraz węzłów. W poniższym przykładzie zostanie utworzony węzeł ,,newFriend" o polu ,,name" równym wartości ,,New friend" oraz relacja ,,KNOWS'' łącząca wierzchołek wskazywany przez zmienną ,,john" z nowo utworzonym węzłem.
 
 \lstinputlisting{listings/cypher/create-section.cypher}
 
-Ostatnim elementem jest wykorzystana już wcześniej sekcja RETURN która pozwala na wyciągnięcie danych o nowoutworzonych obiektach takich jak ich identyfikatory.
+Ostatnim elementem jest wykorzystana już wcześniej sekcja RETURN która pozwala na zwrócenie informacji o nowoutworzonych obiektach takich jak ich identyfikatory.
 
 \lstinputlisting{listings/cypher/return-section-2.cypher}
 
-Pełne zapytanie wstawiające do grafu nowy obiekt o polu "name" równym "New Friend" i łączące go z obiektami "john" oraz "comment" wygląda następująco
+Pełne zapytanie wstawiające do grafu nowy obiekt o polu ,,name" równym ,,New Friend" i łączące go z obiektami ,,john" oraz ,,comment" wygląda następująco
 
 \lstinputlisting{listings/cypher/sample-create-query.cypher}
 
@@ -178,9 +178,9 @@ Pattern matching znajduje zastosowanie w neodsl chociażby na etapie serializacj
 
 \chapter{Dostęp do baz danych z wykorzystaniem DSL}
 
-Wszystkie bazy danych udostępniają pewien natywny interfejs do manipulacji na przechowywanych rekordach. W przypadku baz relacyjnych mamy do dyspozycji język SQL. O ile np. sam język SQL jest prostym w użyciu narzędziem to rzadko kiedy z poziomu tworzonego programu chcemy operować bezpośrednio na nim. Potrzebna jest pewna warstwa abstrakcji która ukryje przed programistą pewne różnice w implementacji SQLa w różnych bazach relacyjnych jak i uchroni przed typowymi błędami takimi jak SQL Injection. Rozwiązaniem tego problemu są tzw. mappery bazodanowe takie jak Hibernate. Udostępniają one mechanizmy które pozwalają na zdefiniowanie powiązania pomiędzy klasami programu a tabelami/kolekcjami w bazie danych. Narzędzia te zajmują się tłumaczeniem wywołań odpowiednich metod na zapytania języka obsługiwanego przez daną bazę. Oprócz tego zamiast zwracania generycznych obiektów z wynikami zapytań, zamieniane są one na instancje klas które reprezentują poszczególne rekordy.
+Wszystkie bazy danych udostępniają pewien natywny interfejs do manipulacji na przechowywanych rekordach. W przypadku baz relacyjnych mamy do dyspozycji język SQL. O ile np. sam język SQL jest prostym w użyciu narzędziem to rzadko kiedy z poziomu tworzonego programu chcemy korzystać z niego w sposób bezpośredni. Potrzebna jest pewna warstwa abstrakcji która ukryje przed programistą różnice w implementacji SQLa w różnych bazach relacyjnych jak i uchroni przed typowymi błędami takimi jak nie oczyszczanie danych pochodzących od użytkownika (prowadzących np. do ataków SQL Injection). Rozwiązaniem tego problemu są tzw. mappery bazodanowe takie jak Hibernate. Udostępniają one mechanizmy które pozwalają na zdefiniowanie powiązania pomiędzy klasami programu a tabelami/kolekcjami w bazie danych. Narzędzia te zajmują się tłumaczeniem wywołań odpowiednich metod na zapytania języka obsługiwanego przez daną bazę. Oprócz tego zamiast generycznych obiektów reprezentujących wyniki zapytań zwracają one instancje klas, które reprezentują poszczególne rekordy (np. instancje klas typu Osoba, Komentarz).
 
-Alternatywą dla klasycznych rozwiązań typu Hibernate są tzw. DSLe bazodanowe czyli języki domenowe pozwalające w pewnym uproszczeniu na zapisywanie zapytań danego języka bazodanowego wprost w kodzie programu. Tak budowane zapytania są zwykłymi wywołaniami metod danego języka stąd są automatycznie walidowane na etapie kompilacji.
+Alternatywą dla klasycznych rozwiązań typu Hibernate są języki dziedzinowe (ang. Domain Specific Language) w skrócie DSL pozwalające w pewnym uproszczeniu na zapisywanie zapytań języka bazy danych wprost w kodzie programu. Tak budowane zapytania są zwykłymi wywołaniami metod danego języka stąd są automatycznie walidowane na etapie kompilacji.
 
 Rozdział ten ma na celu przedstawienie istniejących rozwiązań dla baz relacyjnych jak i NoSQL będących inspiracją dla tworzonego narzędzia.
 
@@ -194,15 +194,15 @@ Pierwszym etapem w przypadku narzędzia Squeryl jest stworzenie odwzorowania str
 
 \lstinputlisting{listings/scala/squeryl-schema.scala}
 
-Powyższa struktura odwzorowuje bardzo prostą bazę danych z jedną tabelą Song służącą do przechowywania informacji o utworach muzycznych. Z wykorzystaniem tak zdefiniowanych klas możliwe jest budowanie zapytań bazodanowych. Oto przykładowe z nich
+Powyższa struktura odwzorowuje bardzo prostą bazę danych z jedną tabelą ,,Song" służącą do przechowywania informacji o utworach muzycznych. Z wykorzystaniem tak zdefiniowanych klas możliwe jest budowanie zapytań. Oto przykładowe z nich
 
 \lstinputlisting{listings/scala/squeryl-query.scala}
 
-Służy ono do wyszukiwania piosenek które w tytule zawierają słowo ,,funk". Powyższe wyrażenie mniej więcej takiemu zapytaniu w języku SQL.
+Służy ono do wyszukiwania piosenek które w tytule zawierają słowo ,,funk". Powyższe wyrażenie odpowiada mniej więcej takiemu zapytaniu w języku SQL.
 
 \lstinputlisting{listings/sql/squeryl-query.sql}
 
-Zastosowanie języka dziedzionowego pozwala w pełniejszy sposób wykorzystać możliwości natywnego języka bazy danych przy jednoczesnym zachowaniu zalet rozwiązań typu Hibernate (tj. mapowanie wyników na obiekty oraz kontrola wyrażeń na etapie kompilacji)
+Zastosowanie języka dziedzionowego pozwala w pełniejszy sposób wykorzystać możliwości języka bazy danych przy jednoczesnym zachowaniu zalet rozwiązań typu Hibernate (tj. odwzorowywanie wyników na obiekty oraz kontrola wyrażeń na etapie kompilacji)
 
 \section{Bazy NoSQL}
 
@@ -223,15 +223,15 @@ Przykładowe zapytanie przedstawione jest poniżej
 
 W celu zaprezentowania jednego ze sposobów w jaki można wykorzystać bazy grafowe w nowoczesnych językach jak Scala powstało narzędzie ,,neodsl". Jest to DSL służący do obsługi baz grafowych. W bieżącej implementacji obsługiwana jest tylko jedna z nich, mianowicie Neo4j (stąd projekt wziął swą nazwę). 
 
-Bazy grafowe w sposób znaczący różnią się w sposobie dostępu do danych względem baz relacyjnych. Głównym elementem zapytań w przypadku baz grafowych są tzw. wzorce stąd narzędzie do ich obsługi powinno pozwalać na budowanie dowolnie długich dopasowań. Podobnie jak w bibliotece Squeryl, w ,,neodsl'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze naszej bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
+Głównym elementem zapytań w przypadku baz grafowych są wzorce stąd narzędzie do ich obsługi powinno pozwalać na budowanie dowolnie długich dopasowań. Podobnie jak w bibliotece Squeryl, w ,,neodsl'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
 
 \section{Definiowanie modelu}
 
-Pierwszym krokiem jaki należy wykonać przed definiowaniem zapytań jest utworzenie modelu (tj. zbioru klas) odpowiadającemu jakiemuś fragmentowi rzeczywistości który opisujemy i przechowujemy w bazie danych. Neodsl udostępnia mechanizmy pomocnicze które pozwalają na szybkie odwzorowanie węzłów oraz relacji między nimi.
+Pierwszym krokiem jaki należy wykonać przed definiowaniem zapytań jest utworzenie modelu (tj. zbioru klas) odpowiadającego jakiemuś fragmentowi rzeczywistości który opisujemy i przechowujemy w bazie danych. Neodsl udostępnia mechanizmy pomocnicze które pozwalają na szybkie odwzorowanie węzłów oraz relacji między nimi.
 
 \subsection{Klasa DomainObject}
 
-Wszystkie klasy domenowe powinny rozszerzać klasę DomainObject która dostarcza narzędziu niezbędnych informacji do działania. Jest to klasa generyczna, która wymaga określenia typu klasy którą definiujemy. Konieczność przekazywania typu definiowanej klasy jest technicznym szczegółem, który wymagany jest do prawidłowego funkcjonowania narzędzia.
+Wszystkie klasy domenowe powinny rozszerzać klasę DomainObject która dostarcza narzędziu niezbędnych informacji do działania. Jest to klasa generyczna tj. klasa przyjmująca dodatkowy parametr będący typem. Typ ten powinien odpowiadać klasie którą definiuje programista. Konieczność przekazywania typu definiowanej klasy jest technicznym szczegółem, który wymagany jest do prawidłowego funkcjonowania narzędzia.
 
 Definiowane klasy mogą zawierać dowolne pola proste dostępne w języku Scala tj. Int, Byte, Short, Char, Long, Double, Float, String.
 
@@ -247,19 +247,19 @@ Oto przykładowa klasa domenowa reprezentująca osobę. Zawiera ona pola takie j
 
 \section{Budowanie wzorców}
 
-Zapytania w bazach grafowych skupiają się na wyszukiwaniu określonych wzorców. Z tego powodu główny nacisk w obrębie ekspresywności tworzonego DSLa został położony właśnie na tej części.
+Zapytania w bazach grafowych skupiają się na wyszukiwaniu określonych wzorców. Z tego powodu główny nacisk w obrębie zwięzłości tworzonego DSLa został położony właśnie na tej części.
 
 \subsection{PatternTriple}
-Podstawową strukturą służącą do reprezantacji wzorców jest klasa PatternTriple. Jak sugeruje jej nazwa składa się ona z trzech elementów. Są to kolejno: węzeł początkowy, relacja z określonym kierunkiem oraz tzw. ,,ogon" wzorca. Wspomniany ,,ogon" może być zarówno pojedyńczym węzłem lub też kolejną instancją PatternTriple. Taka struktura pozwala na budowanie w sposób rekurencyjny dowolnie długich wzorców. Warto również wspomnieć tutaj iż klasa PatternTriple jest generyczna i posiada z góry określone typy węzłów jakie mogą pojawiać się w dalszej części wzorca, stąd niemożliwe jest utworzenie instancji wzorca w której zachodziła by niezgodność typów (o to zadba kompilator języka Scala).
+Podstawową strukturą służącą do reprezantacji wzorców jest klasa PatternTriple. Jak sugeruje jej nazwa składa się ona z trzech elementów. Są to kolejno: węzeł początkowy, relacja z określonym kierunkiem oraz tzw. ,,ogon" wzorca. Wspomniany ,,ogon" może być zarówno pojedyńczym węzłem jak i kolejną instancją PatternTriple. Taka struktura pozwala na budowanie w sposób rekurencyjny dowolnie długich wzorców. Warto również dodać iż klasa PatternTriple jest generyczna i posiada z góry określone typy węzłów jakie mogą pojawiać się w dalszej części wzorca.  Niemożliwe jest zatem utworzenie instancji wzorca w której zachodziła by niezgodność typów (o to zadba kompilator języka Scala).
 
 \subsection{PatternBuilder}
-Aby uprościć budowanie trójek wzorca została przygotowana klasa PatternBuilder. Udostępnia ona szereg metod pomocniczych pozwalających na budowanie i rozszerzanie istniejących instancji PatternTriple. Tworzenie instancji budowniczego jest niezwykle proste i odbywa się na etapie definiowania klas domenowych, mianowicie to wspomniane już wcześniej metody -->, <--, -- zwracają instancje klasy PatternBuilder.
+Aby uprościć budowanie trójek wzorca została przygotowana klasa PatternBuilder, która jak sugeruje jej nazwa służy do budowania wzorców (nazywana dalej ,,budowniczym"). Udostępnia ona szereg metod pomocniczych pozwalających na budowanie i rozszerzanie istniejących instancji PatternTriple. Tworzenie instancji budowniczego jest niezwykle proste i odbywa się na etapie definiowania klas domenowych, mianowicie to wspomniane już wcześniej metody -->, <--, -- zwracają instancje klasy PatternBuilder.
 
 Oto przykładowe złożenie kilku wzorców. Wykorzystana została tutaj zaprezentowana wcześniej struktura sieci społecznościowej. Pojawiajace się poniżej zmienne john, friend, matthew są instancjami typu Person podczas gdy wiseComment jest obiektem typu Comment.
 
 \lstinputlisting{listings/scala/dsl/patterns/functional-example-1.scala}
 
-Wynikiem powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tutaj bowiem do czynienia z trzema wzoracami połączonymi operatorem logicznym and. 
+Wynikiem powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tutaj bowiem do czynienia z trzema wzorcami połączonymi operatorem logicznym ,,and". 
 
 \section{Nakładanie warunków na wyniki zapytań}
 
@@ -268,15 +268,15 @@ Aby osiągnąć ten cel potrzebny jest mechanizm pozwalający na analizę wyraż
 
 \subsection{Makra}
 
-Makra są eksperymentalną funkcjonalnością języka Scala wprowadzone w wersji WERSJA. Są one, podobnie jak w przypadku makr znanych z języka C, wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie definiują żadnego specyficznego do tego typu zadań mini-języka. Zamiast tego mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężny mechanizm.
+Makra są eksperymentalną funkcjonalnością języka Scala wprowadzone w wersji WERSJA. Są one, podobnie jak w przypadku makr znanych z języka C, wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie definiują żadnego specyficznego dla tego typu zadań mini-języka. Zamiast tego mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężny mechanizm.
 
-Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć specjalny obiekt (w Scali jest to tzw. singleton do którego definiowania służy specjalna instrukcja) z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała a jedynie słowo kluczowe macro wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Powinna ona zawierać dwie listy parametrów. Pierwsza z nich powinna przyjmować jeden parametr tzw. Context skupiający w sobie wszystkie zebrane przez kompilator informacje na temat kodu programu. Druga lista powinna zawierać drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością powinno być również drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
+Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt (w językach typu Java realizowany za pomocą wzorca Singleton, w Scali istnieje dedykowana instrukcja) z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała a jedynie słowo kluczowe macro wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Zawiera ona dwie listy parametrów. Pierwsza z nich zawiera jeden parametr tzw. kontekst (typu Context) skupiający w sobie wszystkie zebrane przez kompilator informacje na temat kodu programu. Druga lista zawiera drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
 
 Przykładowa definicja makra powinna nieco rozjaśnić sposób ich użycia.
 
 \lstinputlisting{listings/scala/macro-sample.scala}
 
-W powyższym przykładzie zdefiniowane zostało makro o nazwie assert przyjmujące dwa argumenty. Pierwszym z nich jest wyrażenie typu Boolean, kolejny to wiadomość króra powinna zostac wyświetlona w przypadku gdy wyrażenie logiczne okaże się fałszywe. Metoda implementująca posiada dwie listy parametrów. W pierwszej przekazywany jest omówiony wcześniej Context, w drugiej przekazane będą drzewa składniowe wyrażeń przekazanych do wywołania metody assert. Przykładowe zastosowanie makra w tym przypadku to np. zamiana wyrażenia logicznego na napis i wypisanie go w całości w przypadku gdy asercja nie jest spełniona.
+W powyższym przykładzie zdefiniowane zostało makro o nazwie assert przyjmujące dwa argumenty. Pierwszym z nich jest wyrażenie typu Boolean, kolejny to wiadomość która powinna zostać wyświetlona w przypadku gdy wyrażenie logiczne okaże się fałszywe. Przykładowe zastosowanie makra w tym przypadku to np. zamiana wyrażenia logicznego na napis i wypisanie go w całości w przypadku gdy asercja nie jest spełniona.
 
 \subsection{Przetwarzanie wyrażeń typu Boolean}
 
@@ -297,7 +297,7 @@ Jak widać, na poziomie implementacji logiki makra wszystko ogranicza się do wy
 
 \section{Serializacja do języka Cypher}
 
-W każdym zapytaniu języka Cypher da się wyszczególnić kilka głównych składowych odpowiadającym odmiennym zadaniom. Przykładem może być chociażby zapytanie do wyszukiwania danych w grafie które składa się z sekcji Start, Match oraz Return. Te same sekcje pojawiają się również w innych rodzajach zapytań (jak chociażby w zapytaniu służącym do aktualizacji danych w grafie może pojawić się sekcja Start). Z tego powodu kod służący do serializaci poszczególnych sekcji  został podzielony na kilka osobnych obiektów działających w sposób niezależny. Dzięki temu możliwe jest ponowne wykorzystanie kodu w przypadku implementacji różnych rodzajów zapytań.
+W każdym zapytaniu języka Cypher da się wyszczególnić kilka głównych składowych odpowiadającym odmiennym zadaniom. Przykładem może być chociażby zapytanie do wyszukiwania danych w grafie które składa się z sekcji Start, Match oraz Return. Te same sekcje pojawiają się również w innych rodzajach zapytań (jak chociażby w zapytaniu służącym do aktualizacji danych w grafie może pojawić się sekcja Start). Z tego powodu kod służący do serializacji poszczególnych sekcji  został podzielony na kilka osobnych obiektów działających w sposób niezależny. Dzięki temu możliwe jest ponowne jego wykorzystanie w przypadku implementacji różnych rodzajów zapytań.
 
 \subsection{Struktura}
 
@@ -309,11 +309,11 @@ Aby wygenerowane sekcje były spójne pod względem używanych nazw zmiennych wy
 
 \section{Zwracanie wyników}
 
-Istotnym zadaniem narzędzia miało być ukrycie wewnętrznych mechanizmów bazy danych i danie klientowi złudzenia pracy wyłącznie z klasami które sam zdefiniował. By osiągnąć ten cel na poziomie wykonywania zapytań bazodanowych zwracane dane muszą być przetransformowane do klas domenowych. Zadanie zostało zrealizowane z wykorzystaniem prostego ,,mappera" obiektowego polegającego na mechanizmie refleksji.
+Istotnym zadaniem narzędzia miało być ukrycie wewnętrznych mechanizmów bazy danych i danie klientowi złudzenia pracy wyłącznie z klasami które sam zdefiniował. By osiągnąć ten cel na poziomie wykonywania zapytań zwracane dane muszą być przetransformowane do klas domenowych. Zadanie zostało zrealizowane z wykorzystaniem prostego ,,mappera" obiektowego polegającego na mechanizmie refleksji.
 
 \subsection{Refleksja w Scali}
 
-Język Scala od wersji 2.10 udostępnia mechanizm refleksji dedykowany do tego języka. We wcześniejszych wersjach refleksja mogła być realizowana wyłącznie przy pomocy API udostępnianego razem z językiem Java. Refleksja pozwala na odczytywanie informacji o dowolnej klasie w trakcie działania programu. Informacje jakie można uzyskać to np. zdefiniowane pola, metody czy w szczególności konstruktory. Poza informacją o dostępnych polach istnieje również możliwość modyfikacji pól, wywoływania metod czy tworzenia instancji danego typu. Jest to zatem nieodzowny mechanizm stosowany przy implementacji narzędzi tworzących obiekty w sposób dynamiczny.
+Język Scala od wersji 2.10 udostępnia mechanizm refleksji dedykowany do tego języka. We wcześniejszych wersjach refleksja mogła być realizowana wyłącznie przy pomocy API udostępnianego razem z językiem Java. Refleksja pozwala na odczytywanie informacji o dowolnej klasie w trakcie działania programu. Informacje jakie można uzyskać to np. zdefiniowane pola, metody czy w szczególności konstruktory. Poza informacją o dostępnych polach istnieje również możliwość ich modyfikacji, wywoływania metod czy tworzenia instancji danego typu. Jest to zatem nieodzowny mechanizm stosowany przy implementacji narzędzi tworzących obiekty w sposób dynamiczny.
 
 Oczywistą wadą refleksji jest dużo mniejsza wydajność niż w przypadku bezpośredniego operowania na klasie.
 
@@ -321,13 +321,13 @@ WYKRES Z PORÓWNANIEM WYDAJNOŚCI REFLEKSJI VS BEZPOŚREDNI DOSTĘP
 
 \subsection{Mapper obiektowy}
 
-Po wykonaniu zapytania baza danych zwraca wyniki w określonym przez siebie formacie. Może to być np. format JSON w przypadku RESTowej implementacji. Oczywiście narzędzia do obsługi bazy neo4j dostarczają natywnych narzędzi do obsługi wyników. Zajmują się one obsługą poszczególnych pól i rozpoznawaniem typu wartości. Stworzone narzędzie również udostępnia tego typu interfejsy mające na celu ujednolicić dostęp do różnych baz grafowych bądź różnych implementacji. Interfejsem opakowującym pojedyńczy wynik zapytania jest ResultItem. Zadaniem implementacji tego interfejsu jest dostarczanie struktury mapy hashującej która dla określonej nazwy pola zwraca jego wartość otrzymaną z silnika bazy danych. Jedyną dostępną implementacją jest Neo4jResultItem które zajmuje się tłumaczeniem wyników otrzymanych z serwisu REST.
+Po wykonaniu zapytania baza danych zwraca wyniki w określonym przez siebie formacie. Może to być np. format JSON w przypadku RESTowej implementacji. Oczywiście narzędzia do obsługi bazy neo4j dostarczają natywnych narzędzi do obsługi wyników. Zajmują się one obsługą poszczególnych pól i rozpoznawaniem typu wartości. Stworzone narzędzie również udostępnia tego typu interfejsy mające na celu ujednolicić dostęp do różnych baz grafowych bądź różnych implementacji. Interfejsem opakowującym pojedyńczy wynik zapytania jest ResultItem. Zadaniem implementacji tego interfejsu jest dostarczanie struktury odwzorowania która dla określonej nazwy pola zwraca jego wartość otrzymaną z silnika bazy danych. Jedyną dostępną implementacją jest Neo4jResultItem które zajmuje się tłumaczeniem wyników otrzymanych z serwisu REST.
 
-Sam silnik bazodanowy powinien implementować interfejs ExecutionEngine. Interfejs ten wymaga by jego implementacja dostarczała wyłącznie jedną metodę jaką jest exec. Metoda ta powinna dla każdego obsługiwanego przez neodsl zapytania zlecać wykonanie oraz zwrócić wyniki w postaci kolekcji obiektów typu ResultItem.
+Silnik obsługujący wybraną bazę grafową powinien implementować interfejs ExecutionEngine. Interfejs ten wymaga by jego implementacja dostarczała metodę exec. Metoda ta powinna dla każdego obsługiwanego przez neodsl zapytania zlecać jego wykonanie oraz zwracać wyniki w postaci kolekcji obiektów typu ResultItem.
 
-Oczywiście ResultItem jest dość ogólnym typem i nie odpowiada on strukturze stworzonej przez programistę wykorzystującego narzędzie. Potrzebny jest zatem mechanizm zajmujący się zamianą obiektów typu ResultItem na instancje klas wybranego typu definiowanego przez klienta aplikacji. Zadanie to realizuje tzw. ObjectMapper. Domyślna implementacja mappera tj. NodeObjectMapper wykorzystuje wspomniany już mechanizm refleksji. Tworzy on najpierw instancję danej klasy a następnie modyfikuje pola o takiej samej nazwie jak te określone w tablicy hashującej (dostępnej w obiektach typu ResultItem).
+Oczywiście ResultItem jest dość ogólnym typem i nie odpowiada strukturze stworzonej przez programistę wykorzystującego narzędzie. Potrzebny jest zatem mechanizm zajmujący się zamianą obiektów typu ResultItem na instancje klas wybranego typu definiowanego przez klienta aplikacji. Zadanie to realizuje ObjectMapper. Domyślna implementacja mappera tj. NodeObjectMapper wykorzystuje wspomniany już mechanizm refleksji. Tworzy on najpierw instancję danej klasy a następnie modyfikuje pola o takiej samej nazwie jak te określone w tablicy haszującej (dostępnej w obiektach typu ResultItem).
 
-W implementacji nie istnieje żaden mechanizm cache'owania jednak nic nie stoi na przeszkodzie by w przyszłości wprowadzić taką warstwę i podnieść w znaczący sposób wydajność całego narzędzia.
+Ze względu na problemy wydajnościowe jakich dostarcza mechanizm refleksji został wprowadzony mechanizm pamięci podręcznej dla informacji pozyskanych w sposób dynamiczny.
 
 \chapter{Przykłady wykorzystania}
 
@@ -335,11 +335,11 @@ W tym rozdziale postaram się zaprezentować kompletne przykłady zastosowania n
 
 \subsection{Sieć społecznościowa}
 
-Sieci społecznościowe koncentrują się w okół osób i relacji między nimi. Potrzeba zatem reprezentacji osób które będą przechowywane w bazie danych. Służyć do tego będzie prosta klasa Person zawierająca jedno pole name odpowiadające imieniu danej osoby. Poza polem opisującym osobę zawierać ona będzie pola określające relacje jakimi związana jest osoba z innymi obiektami naszej sieci społecznościowej. Relacjami są w tym przypadku "KNOWS" wiążąca znajomych oraz "WROTE" która zostanie opisana szczegółowo razem z obiektami typu Comment.
+Sieci społecznościowe koncentrują się wokół osób i relacji między nimi. Potrzeba zatem reprezentacji osób które będą przechowywane w bazie danych. Służyć do tego będzie prosta klasa Person zawierająca jedno pole name odpowiadające imieniu danej osoby. Poza polem opisującym osobę zawierać ona będzie pola określające relacje łączące ją z innymi obiektami naszej sieci społecznościowej. Będą to ,,KNOWS" wiążąca znajomych oraz ,,WROTE" która zostanie opisana szczegółowo razem z obiektami typu Comment.
 
 Person Snippet
 
-Kolejnym obiektem składowanym w bazie będą komentarze reprezentowane przez klasę Comment. Typową relacją między osobą a komentarzem jest relacja autorstwa określająca kto napisał dany komentarz. Realizowana będzie ona za pomocą krawędzi "WROTE". Kolejną akcją dokonywaną na komentarzach jest głosowanie tj. wydanie aprobaty przez daną osobę. Relacja ta nazywa się "LIKES".
+Kolejnym obiektem składowanym w bazie będą komentarze reprezentowane przez klasę Comment. Typową relacją między osobą a komentarzem jest relacja autorstwa określająca kto napisał dany komentarz. Realizowana będzie ona za pomocą krawędzi ,,WROTE". Kolejną akcją dokonywaną na komentarzach jest głosowanie tj. wydanie aprobaty przez daną osobę. Relacja ta nazywa się ,,LIKES".
 
 Comment snippet
 
@@ -347,11 +347,11 @@ Comment snippet
 
 \chapter{Zmiany w Neo4j 2.0 względem 1.x}
 
-Stworzone narzędzie było projektowane z myślą o wersji 1.9.x która w momencie pisania większej części pracy była obowiązującym stabilnym wydaniem. Wersja druga przyniosła znaczące zmiany które wymagają omówienia (które stoją w sprzeczności z częścią opisanych tu mechanizmów).
+Stworzone narzędzie było projektowane z myślą o wersji 1.9.x która w momencie pisania większej części pracy była obowiązującym stabilnym wydaniem. Wersja druga przyniosła znaczące zmiany, które wymagają omówienia (stoją one w sprzeczności z częścią opisanych tu mechanizmów).
 
 Jedną z bardziej istotnych zmian jest tak zwany mechanizm etykietowania który pozwala na grupowanie węzłów. Poza możliwością określenia typu każdego węzła możliwe stało się nakładanie tzw. więzów (ang. Constraints) na określone typy. Pozwala to na definiowanie czegoś w rodzaju schematu bazy danych znanego z baz relacyjnych. Pojawienie się mechanizmu etykiet miało również wpływ na rozszerzenie języka Cypher. Możliwe jest np. wyszukiwanie wzorców z węzłami określonego typu.
 
-Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W przypadku wydań z serii 1.x narzut związany z obsługą indeksowania był zrzucony na programistę. W dodatku by wykorzystać dany indeks w zapytaniu trzeba było zażądać tego w sposób jawny w sekcji START. Obecnie indeksy dużo bardziej funkcjonalność znaną z baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w zapytaniu natomiast zarządzanie indeksami stało się możliwe z poziomu języka Cypher.
+Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W przypadku wydań z serii 1.x narzut związany z obsługą indeksowania był zrzucony na programistę. W dodatku by wykorzystać dany indeks w zapytaniu trzeba było zażądać tego w sposób jawny w sekcji START. Obecnie indeksy przypominają w dużo większym stopniu funkcjonalność znaną z baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w zapytaniu, natomiast samo zarządzanie nimi stało się możliwe z poziomu języka Cypher.
 
 Zmiany dotknęły również języka Cypher który jak określają twórcy stał się bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji START. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
 

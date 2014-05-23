@@ -1,16 +1,13 @@
 \documentclass[brudnopis]{xmgr}
 
 \usepackage{listings}
-% "define" Scala
-\lstdefinelanguage{scala}{morekeywords={class,object,trait,extends,with,new,if,while,for,def,val,var,this},
-otherkeywords={->,=>},
-sensitive=true,
-morecomment=[l]{//},
-morecomment=[s]{/*}{*/},
-morestring=[b]"}
-% Default settings for code listings
-\lstset{frame=tb,language=scala,aboveskip=3mm,belowskip=3mm,showstringspaces=false,columns=flexible,basicstyle={\small\ttfamily}}
 
+% "define" Scala
+
+\usepackage{lstlang0}
+
+% Default settings for code listings
+\lstset{frame=tb,language=Scala,aboveskip=3mm,belowskip=3mm,showstringspaces=false,columns=flexible,basicstyle={\small\ttfamily}}
 
 %\defaultfontfeatures{Scale=MatchLowercase}
 %\setmainfont[Numbers=OldStyle,Ligatures=TeX]{Minion Pro}
@@ -75,10 +72,8 @@ Znacząca przewaga neo4j wynika tutaj przede wszystkim z lokalności operacji wy
 
 Rozróżniamy dwa główne rodzaje baz grafowych. Pierwszym z nich są bazy które pozwalają operować na przechowywanych danych jak na grafach, mających jednak odmienny sposób składowania danych. Popularnym rozwiązaniem jest np. przechowywanie struktury grafowej w bazach relacyjnych. Niestety takie rozwiązanie nie pozwala na pełne wykorzystanie potencjału drzemiącego w przechowywaniu danych w postaci grafów. Przykładem takiej bazy jest FlockDB która znajduje zastosowanie w popularnym serwisie społecznościowym Twitter. Ze względu na małą uniwersalność tego typu rozwiązań (zazwyczaj są one dostosowane do konkretnego przypadku użycia) bazy tego typu nie będą omawiane w tej pracy.
 
-\subsection{Bazy natywne}
+\subsection{Bazy z grafowym magazynem danych}
 Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko przedstawiają dane w formie grafów ale również wykorzystują strukturę grafów do ich składowania. Zaletą takiego podejścia jest to iż przeszukiwanie może okazać się o wiele wydajniejsze niż równoważne zapytanie do bazy z relacyjnym magazynem danych. Powodem tego jest lokalność operacji wykonywanych na grafie. W odróżnieniu od baz relacyjnych gdzie by wyszukać dane powiązane pewną relacją wymagane jest wykonanie iloczynu kartezjańskiego na całych zbiorach danych. W przypadku ogromnej liczby rekordów taka operacja może okazać się wielce niewydajna. W przypadku baz grafowych nie ma potrzeby odwiedzania wszystkich danych bowiem poruszamy się tylko w obrębie obiektów w bezpośredni sposób związanych ze sobą krawędziami. Przykładem takiej bazy jest np. Neo4J której została poświęcona znaczna część tej pracy.
-
-\section{Wiodące bazy}
 
 \chapter{Neo4j}
 
@@ -93,19 +88,19 @@ Cypher jest językiem zapytań stworzonym specjalnie na potrzeby neo4j pozwalaj�
 
 Najistotniejszą funkcjonalnością baz danych jest możliwość przeszukiwania zbioru rekordów. Zapytanie służące do odczytywania informacji składa się z trzech podstawowych części.
 
-Sekcja ,,START" pozwala na ustalenie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 2.0 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe. Bez tego zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej comment przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast john będzie wskazywał na węzły znajdujące się w indeksie nazwanym ,,nameIndex'' oraz zawierające pole ,,name'' o wartości równej ,,John"
+Sekcja \texttt{START} pozwala na ustalenie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 2.0 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe. Bez tego zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej comment przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast john będzie wskazywał na węzły znajdujące się w indeksie nazwanym \texttt{nameIndex} oraz zawierające pole \texttt{name} o wartości równej ,,John"
 
 \lstinputlisting{listings/cypher/start-section.cypher}
 
-Sekcja ,,MATCH" jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać znajomych ,,johna" ,,lubiących" komentarz wskazywany przez zmienną ,,comment"
+Sekcja \texttt{MATCH} jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać znajomych johna ,,lubiących" komentarz wskazywany przez zmienną \texttt{comment}
 
 \lstinputlisting{listings/cypher/match-section.cypher}
 
-Ostatnim elementem zapytania jest sekcja "RETURN" służąca określania pól które mają zostać zwrócone jako wynik. W poniższym przykładzie zwrócone zostanie pole ,,name" oraz wewnętrzny identyfikator węzłów dopasowanych do zmiennej ,,friend".
+Ostatnim elementem zapytania jest sekcja \texttt{RETURN} służąca określania pól które mają zostać zwrócone jako wynik. W poniższym przykładzie zwrócone zostanie pole \texttt{name} oraz wewnętrzny identyfikator węzłów dopasowanych do zmiennej \texttt{friend}.
 
 \lstinputlisting{listings/cypher/return-section.cypher}
 
-Pełne zapytanie wygląda zwraca identyfikator oraz pole ,,name'' węzłów które są połączone krawędzią o nazwie ,,KNOWS" z obiektem john oraz będące połączone krawędzią ,,LIKES" z obiektem o identyfikatorze równym {1}. Poruszając się w domenie sieci społecznościowej zapytanie zwraca znajomych użytkownika John którzy polubili komentarz o identyfikatorze {1}.
+Pełne zapytanie wygląda zwraca identyfikator oraz pole \texttt{name} węzłów które są połączone krawędzią o nazwie \texttt{KNOWS} z obiektem \texttt{john} oraz będące połączone krawędzią \texttt{LIKES} z obiektem o identyfikatorze równym {1}. Poruszając się w domenie sieci społecznościowej zapytanie zwraca znajomych użytkownika ,,John" którzy polubili komentarz o identyfikatorze {1}.
 
 \lstinputlisting{listings/cypher/sample-query.cypher}
 
@@ -113,11 +108,11 @@ Pełne zapytanie wygląda zwraca identyfikator oraz pole ,,name'' węzłów któ
 
 Język Cypher pozwala również na aktualizację danych w grafie. Podobnie jak w przypadku zapytania służącego do przesukiwania grafu wyrażenie składa się kilku części.
 
-Pierwszą z nich ponownie jest sekcja ,,START", która pozwala na wybranie wezłów zakotwiczających tworzony wzorzec w strukturze grafu. Jest ona opcjonalna jeśli zamierzamy utworzyć graf niepowiązany z istniejącymi już wierzchołkami.
+Pierwszą z nich ponownie jest sekcja \texttt{START}, która pozwala na wybranie wezłów zakotwiczających tworzony wzorzec w strukturze grafu. Jest ona opcjonalna jeśli zamierzamy utworzyć graf niepowiązany z istniejącymi już wierzchołkami.
 
 \lstinputlisting{listings/cypher/start-section.cypher}
 
-Kolejną sekcją jest ,,CREATE" której składnia jest podobna do sekcji ,,MATCH". W przeciwieństwie jednak do ,,MATCH" pozwala ona na tworzenie krawędzi w grafie oraz węzłów. W poniższym przykładzie zostanie utworzony węzeł ,,newFriend" o polu ,,name" równym wartości ,,New friend" oraz relacja ,,KNOWS'' łącząca wierzchołek wskazywany przez zmienną ,,john" z nowo utworzonym węzłem.
+Kolejną sekcją jest \texttt{CREATE} której składnia jest podobna do sekcji \texttt{MATCH}. W przeciwieństwie jednak do \texttt{MATCH} pozwala ona na tworzenie krawędzi w grafie oraz węzłów. W poniższym przykładzie zostanie utworzony węzeł \texttt{newFriend} o polu \texttt{name} równym wartości ,,New friend" oraz relacja \texttt{KNOWS} łącząca wierzchołek wskazywany przez zmienną \texttt{john} z nowo utworzonym węzłem.
 
 \lstinputlisting{listings/cypher/create-section.cypher}
 
@@ -125,7 +120,7 @@ Ostatnim elementem jest wykorzystana już wcześniej sekcja RETURN która pozwal
 
 \lstinputlisting{listings/cypher/return-section-2.cypher}
 
-Pełne zapytanie wstawiające do grafu nowy obiekt o polu ,,name" równym ,,New Friend" i łączące go z obiektami ,,john" oraz ,,comment" wygląda następująco
+Pełne zapytanie wstawiające do grafu nowy obiekt o polu \texttt{name} równym ,,New Friend" i łączące go z obiektami \texttt{john} oraz \texttt{comment} wygląda następująco
 
 \lstinputlisting{listings/cypher/sample-create-query.cypher}
 
@@ -143,11 +138,11 @@ Jedną z możliwości jest tzw. embedded mode który polega na wykorzystaniu udo
 
 \chapter{Język Scala}
 
-Scala jest statycznie typowanym językiem programowania który łączy w sobie idee programowania obiektowego oraz funkcyjnego. Połączenie tych dwóch paradygmatów było jednym ze środków do osiągnięcia głównego z założeń twórców jakim było stworzenie języka który jest skalowalny oraz zwięzły. Skalowalność w tym przypadku polega na przystosowaniu języka do prostych zadań jak np. niewielkie skrypty oraz do ogromnych projektów jakie realizuje się w językach typu Java czy C\#.
+Scala jest statycznie typowanym językiem programowania który łączy w sobie idee programowania obiektowego oraz funkcyjnego. Połączenie tych dwóch paradygmatów było jednym ze środków do osiągnięcia głównego z założeń twórców jakim było stworzenie języka, który jest skalowalny oraz zwięzły. Skalowalność w tym przypadku polega na przystosowaniu języka do prostych zadań jak np. niewielkie skrypty oraz do ogromnych projektów jakie realizuje się w językach typu Java czy C\#.
 
-Do dyspozycji programisty zostało oddanych szereg mechanizmów pozwalających na ,,rozszerzanie" składni języka. Jednym z nich jest np. możliwość definiowania operatorów takich jak *, +, - itd. oraz wywoływania ich w postaci infixowej. Pozwala to na budowanie złożonych klas których użycie przypomina zwykłe wyrażenia arytmetyczne które, w większości języków programowania są obsługiwane w sposób szczególny. Scala jest natomiast tak elastycznym narzędziem iż pozwala nawet na definiowanie znanych struktur kontrolnych takich jak np. pętla while (jest to zasługa tego iż Scala jest językiem funkcyjnym i funkcje mogą być przekazywane jak zwykłe obiekty).
+Do dyspozycji programisty zostało oddanych szereg mechanizmów pozwalających na ,,rozszerzanie" składni języka. Jednym z nich jest np. możliwość definiowania operatorów takich jak\texttt{*}, \texttt{+}, \texttt{-} oraz wywoływania ich w postaci infixowej. Pozwala to na budowanie złożonych klas których użycie przypomina zwykłe wyrażenia arytmetyczne, które w większości języków programowania są obsługiwane w sposób szczególny. Scala jest natomiast tak elastycznym narzędziem iż pozwala nawet na definiowanie znanych struktur kontrolnych takich jak np. pętla while (jest to zasługa tego iż Scala jest językiem funkcyjnym i funkcje mogą być przekazywane jak zwykłe obiekty).
 
-Pomimo faktu iż jest to język statycznie typowany, nie wymaga on od programisty jawnego określania typu w każdej sytuacji. System inferencji typów jest na tyle rozbudowany iż w wielu przypadkach możliwe jest całkowite pominięcie określania typów zmiennych. Jest to kolejna cecha poza wieloma innymi (takimi jak np. brak konieczności kończenia linii średnikiem) wpływająca na zwięzłość kodu pisanego w tym języku.
+Pomimo faktu iż jest to język statycznie typowany, nie wymaga on od programisty jawnego określania typu w każdej sytuacji. System inferencji typów jest na tyle rozbudowany iż w wielu przypadkach możliwe jest całkowite pominięcie określania typów zmiennych. Jest to kolejna cecha poza wieloma innymi wpływająca na zwięzłość kodu pisanego w tym języku.
 
 Właśnie z powodów zwięzłości oraz łatwości z jaką możliwe jest rozszerzanie składni, Scala została wybrana do stworzenia języka dziedzinowego do obsługi baz grafowych.
 
@@ -158,19 +153,28 @@ Języki takie jak Java, C\# czy C++ są obiektowymi językami programowania opar
 \subsection{Podstawy składni}
 Składnia Scali była inspirowana takimi językami jak C\# czy Java stąd doświadczonym programistom nie powinno sprawiać trudności czytanie kodu języka Scala. Oczywiście jak zostało to już wspomniane w odróżnieniu od wspomnianych języków Scala wprowadza szereg usprawnień wpływających na zwięzłość pisanego kodu. Nie ma np. potrzeby kończenia każdej linii średnikiem czy jawnego określania typu każdej zmiennej (o ile system interferencji jest w stanie określić jej typ).
 
-Poniżej przedstawiona jest prosta klasa w języku Scala w której zdefiniowane są dwa pola: name oraz age. Razem z nazwą klasy zdefiniowany jest również konstruktor główny w którym możliwe jest określanie pól składowych z użyciem słów kluczowych val lub var (służą one odpowiednio do deklarowania stałych lub zmiennych). Poza tym klasa zawiera jedną metodę ,,sayHello" która wyświetla komunikat.
+Istotną różnicą w stosunku do Javy czy C\# wpływającą na czytelność kodu jest sposób w jaki definiuje się zmienne czy parametry metod. Mianowicie, najpierw określa się ich nazwy a w drugiej kolejności typ (który może być całkowicie pominięty jeśli da się go określić z systemu inferencji). Taka kolejność wynika z faktu iż programista czytający kod bardziej zainteresowany jest nazwą aniżeli typem zmiennej. Poniżej kilka przykładowych deklaracji stałych i zmiennych.
+
+\lstinputlisting{listings/scala/val-var-declarations.scala}
+
+Metody w języku scala definuje się z użyciem słowa kluczowego \texttt{def}. Podobnie jak w przypadku zmiennych typ zwracanej wartości określany jest po zdefiniowaniu nazwy i może być on całkowicie pominięty jeśli da się go określić z ciała metody. Poniżej przykłady kilku funkcji.
+
+\lstinputlisting{listings/scala/functions-example.scala}
+
+Klasy definiuje się z użyciem słowa kluczowego \texttt{class} podobnie jak ma to miejsce w Javie. To na co warto zwrócić uwagę to fakt iż klasy języka Scala posiadają tzw. konstruktor główny. Jego parametry wejściowe określa się bezpośrednio po nazwie klasy natomiast jego implementacja powinna być zawarta bezpośrednio w ciele klasy. W ramach listy parametrów konstruktora głównego możliwe jest również zdefiniowanie pól składowych klasy z użyciem słów kluczowych val lub var (służą one odpowiednio do deklarowania stałych lub zmiennych). Wszelkie przęciążone konstruktory (które definiuje się podobnie jak w Javie) muszą skorzystać w sposób pośredni lub bezpośredni z konstruktora głównego.
+
+Poniżej przedstawiona jest prosta klasa Person w języku Scala. W konstruktorze głównym zdefiniowane zostały dwa pola składowe: \texttt{name} oraz \texttt{age}.
 
 \lstinputlisting{listings/scala/simple-class-person.scala}
 
+Poza tym klasa zawiera jedną metodę \texttt{sayHello} która wyświetla komunikat.
 Zdefiniowanej powyżej klasie odpowiada poniższy kod w języku Java.
 
 \lstinputlisting{listings/java/simple-class-person.java}
 
-Nawet tak prosty przykład pokazuje jak zwięzłym językiem jest Scala.
-
 \subsection{Pattern Matching}
 
-Jednym z bardziej istotnych mechanizmów języka niespotykanym w takich językach jak Java jest tzw. Pattern Matching (dopasowywanie do wzorca). Pozwala on na definiowanie specjalnych klas (ang. Case Classes) które można dopasowywać i wyciągać ich składowe z wykorzystaniem specjalnej składni. Przypomina to trochę instrukcję ,,switch" o dużo bardziej zaawansowanym działaniu. Oto przykład pozwalający na wyświetlenie wartości przechowywanych w liściach struktury drzewa reprezentowanej właśnie przy pomocy tzw. case classes.
+Jednym z bardziej istotnych mechanizmów języka niespotykanym w takich językach jak Java jest tzw. Pattern Matching (dopasowywanie do wzorca). Pozwala on na definiowanie specjalnych klas (ang. Case Classes) które można dopasowywać i wyciągać ich składowe z wykorzystaniem specjalnej składni. Przypomina to trochę instrukcję \texttt{switch} o dużo bardziej zaawansowanym działaniu. Oto przykład pozwalający na wyświetlenie wartości przechowywanych w liściach struktury drzewa reprezentowanej właśnie przy pomocy tzw. case classes.
 
 \lstinputlisting{listings/scala/pattern-matching-trees.scala}
 
@@ -229,19 +233,19 @@ Głównym elementem zapytań w przypadku baz grafowych są wzorce stąd narzędz
 
 Pierwszym krokiem jaki należy wykonać przed definiowaniem zapytań jest utworzenie modelu (tj. zbioru klas) odpowiadającego jakiemuś fragmentowi rzeczywistości który opisujemy i przechowujemy w bazie danych. Neodsl udostępnia mechanizmy pomocnicze które pozwalają na szybkie odwzorowanie węzłów oraz relacji między nimi.
 
-\subsection{Klasa DomainObject}
+\subsection{Klasa \texttt{DomainObject}}
 
-Wszystkie klasy domenowe powinny rozszerzać klasę DomainObject która dostarcza narzędziu niezbędnych informacji do działania. Jest to klasa generyczna tj. klasa przyjmująca dodatkowy parametr będący typem. Typ ten powinien odpowiadać klasie którą definiuje programista. Konieczność przekazywania typu definiowanej klasy jest technicznym szczegółem, który wymagany jest do prawidłowego funkcjonowania narzędzia.
+Wszystkie klasy domenowe powinny rozszerzać klasę \texttt{DomainObject} która dostarcza narzędziu niezbędnych informacji do działania. Jest to klasa generyczna tj. klasa przyjmująca dodatkowy parametr będący typem. Typ ten powinien odpowiadać klasie którą definiuje programista. Konieczność przekazywania typu definiowanej klasy jest technicznym szczegółem, który wymagany jest do prawidłowego funkcjonowania narzędzia.
 
-Definiowane klasy mogą zawierać dowolne pola proste dostępne w języku Scala tj. Int, Byte, Short, Char, Long, Double, Float, String.
+Definiowane klasy mogą zawierać dowolne pola proste dostępne w języku Scala tj. \texttt{Int}, \texttt{Byte}, \texttt{Short}, \texttt{Char}, \texttt{Long}, \texttt{Double}, \texttt{Float}, \texttt{String}.
 
 \subsection{Relacje}
 
-Najistotniejszą informacją w przypadku baz grafowych są relacje czy też krawędzie wychodzące z węzłów danego typu. Należy je zdefiniować jako pola w klasie domenowej. Nie ma oczywiście potrzeby tworzenia obiektów w sposób ręczny gdyż klasa DomainObject udostępnia metody pomocnicze pozwalające na definiowanie relacji. Są to metody  -->, <--, -- które jednocześnie określają kierunek. Metody te są generyczne i pozwalają na określenie typu obiektów pomiędzy którymi zachodzić będzie relacja. Przyjmują one jeden parametr typu String który pozwala na zdefiniowanie nazwy relacji czy też krawędzi.
+Najistotniejszą informacją w przypadku baz grafowych są relacje czy też krawędzie wychodzące z węzłów danego typu. Należy je zdefiniować jako pola w klasie domenowej. Nie ma oczywiście potrzeby tworzenia obiektów w sposób ręczny gdyż klasa DomainObject udostępnia metody pomocnicze pozwalające na definiowanie relacji. Są to metody  -->, <--, -- które jednocześnie określają kierunek. Metody te są generyczne i pozwalają na określenie typu obiektów pomiędzy którymi zachodzić będzie relacja. Przyjmują one jeden parametr typu \texttt{String} który pozwala na zdefiniowanie nazwy relacji czy też krawędzi.
 
 \subsection{Przykład modelu}
 
-Oto przykładowa klasa domenowa reprezentująca osobę. Zawiera ona pola takie jak name, surname odpowiadające imieniu i nazwisku osoby oraz pola definiujące krawędzie wchodzące i wychodzące z węzłów tego typu. Są to relacje knows która definiuje krawędź wychodzącą do obiektów typu Person oraz wrote która jest relacją skierowaną do naszego obiektu i jest powiązana z obiektem typu Comment.
+Oto przykładowa klasa domenowa reprezentująca osobę. Zawiera ona pola takie jak \texttt{name}, \texttt{surname} odpowiadające imieniu i nazwisku osoby oraz pola definiujące krawędzie wchodzące i wychodzące z węzłów tego typu. Są to relacje \texttt{knows} która definiuje krawędź wychodzącą do obiektów typu \texttt{Person} oraz \texttt{wrote} która jest relacją skierowaną do naszego obiektu i jest powiązana z obiektem typu \texttt{Comment}.
 
 \lstinputlisting{listings/scala/dsl/sample-model.scala}
 
@@ -249,13 +253,13 @@ Oto przykładowa klasa domenowa reprezentująca osobę. Zawiera ona pola takie j
 
 Zapytania w bazach grafowych skupiają się na wyszukiwaniu określonych wzorców. Z tego powodu główny nacisk w obrębie zwięzłości tworzonego DSLa został położony właśnie na tej części.
 
-\subsection{PatternTriple}
+\subsection{Podstawowa struktura -- klasa \texttt{PatternTriple}}
 Podstawową strukturą służącą do reprezantacji wzorców jest klasa PatternTriple. Jak sugeruje jej nazwa składa się ona z trzech elementów. Są to kolejno: węzeł początkowy, relacja z określonym kierunkiem oraz tzw. ,,ogon" wzorca. Wspomniany ,,ogon" może być zarówno pojedyńczym węzłem jak i kolejną instancją PatternTriple. Taka struktura pozwala na budowanie w sposób rekurencyjny dowolnie długich wzorców. Warto również dodać iż klasa PatternTriple jest generyczna i posiada z góry określone typy węzłów jakie mogą pojawiać się w dalszej części wzorca.  Niemożliwe jest zatem utworzenie instancji wzorca w której zachodziła by niezgodność typów (o to zadba kompilator języka Scala).
 
-\subsection{PatternBuilder}
+\subsection{Budowniczy wzorców \texttt{PatternBuilder}}
 Aby uprościć budowanie trójek wzorca została przygotowana klasa PatternBuilder, która jak sugeruje jej nazwa służy do budowania wzorców (nazywana dalej ,,budowniczym"). Udostępnia ona szereg metod pomocniczych pozwalających na budowanie i rozszerzanie istniejących instancji PatternTriple. Tworzenie instancji budowniczego jest niezwykle proste i odbywa się na etapie definiowania klas domenowych, mianowicie to wspomniane już wcześniej metody -->, <--, -- zwracają instancje klasy PatternBuilder.
 
-Oto przykładowe złożenie kilku wzorców. Wykorzystana została tutaj zaprezentowana wcześniej struktura sieci społecznościowej. Pojawiajace się poniżej zmienne john, friend, matthew są instancjami typu Person podczas gdy wiseComment jest obiektem typu Comment.
+Oto przykładowe złożenie kilku wzorców. Wykorzystana została tutaj zaprezentowana wcześniej struktura sieci społecznościowej. Pojawiajace się poniżej zmienne \texttt{john}, \texttt{friend}, \texttt{matthew} są instancjami typu \texttt{Person} podczas gdy \texttt{wiseComment} jest obiektem typu \texttt{Comment}.
 
 \lstinputlisting{listings/scala/dsl/patterns/functional-example-1.scala}
 
@@ -264,24 +268,24 @@ Wynikiem powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tu
 \section{Nakładanie warunków na wyniki zapytań}
 
 Jednym z bardziej istotnych mechanizmów przy przeszukiwaniu baz danych jest możliwość nakładania warunków na zwracane wyniki. Założeniem projektu było aby dało się wyrażać warunki logiczne bez potrzeby wprowadzania nowej składni innej niż ta dostarczana przez sam język Scala. 
-Aby osiągnąć ten cel potrzebny jest mechanizm pozwalający na analizę wyrażeń typu Boolean. Język Scala udostępnia mechanizm makr pozwalający na analizę i modyfikację wyrażeń języka, w szczególności wyrażeń typu Boolean. Dzięki temu, możliwe jest po uprzedniej analizie wyrażenia typu Boolean utworzenia struktury rozpoznawanej przez neodsl którą można w prosty sposób zamienić na wyrażenie języka Cypher.
+Aby osiągnąć ten cel potrzebny jest mechanizm pozwalający na analizę wyrażeń typu \texttt{Boolean}. Język Scala udostępnia mechanizm makr pozwalający na analizę i modyfikację wyrażeń języka, w szczególności wyrażeń typu \texttt{Boolean}. Dzięki temu, możliwe jest po uprzedniej analizie wyrażenia typu \texttt{Boolean} utworzenia struktury rozpoznawanej przez neodsl którą można w prosty sposób zamienić na wyrażenie języka Cypher.
 
 \subsection{Makra}
 
 Makra są eksperymentalną funkcjonalnością języka Scala wprowadzone w wersji WERSJA. Są one, podobnie jak w przypadku makr znanych z języka C, wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie definiują żadnego specyficznego dla tego typu zadań mini-języka. Zamiast tego mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężny mechanizm.
 
-Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt (w językach typu Java realizowany za pomocą wzorca Singleton, w Scali istnieje dedykowana instrukcja) z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała a jedynie słowo kluczowe macro wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Zawiera ona dwie listy parametrów. Pierwsza z nich zawiera jeden parametr tzw. kontekst (typu Context) skupiający w sobie wszystkie zebrane przez kompilator informacje na temat kodu programu. Druga lista zawiera drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
+Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt (w językach typu Java realizowany za pomocą wzorca Singleton, w Scali istnieje dedykowana instrukcja) z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała a jedynie słowo kluczowe \texttt{macro} wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Zawiera ona dwie listy parametrów. Pierwsza z nich zawiera jeden parametr tzw. kontekst (typu \texttt{Context}) skupiający w sobie wszystkie zebrane przez kompilator informacje na temat kodu programu. Druga lista zawiera drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
 
 Przykładowa definicja makra powinna nieco rozjaśnić sposób ich użycia.
 
 \lstinputlisting{listings/scala/macro-sample.scala}
 
-W powyższym przykładzie zdefiniowane zostało makro o nazwie assert przyjmujące dwa argumenty. Pierwszym z nich jest wyrażenie typu Boolean, kolejny to wiadomość która powinna zostać wyświetlona w przypadku gdy wyrażenie logiczne okaże się fałszywe. Przykładowe zastosowanie makra w tym przypadku to np. zamiana wyrażenia logicznego na napis i wypisanie go w całości w przypadku gdy asercja nie jest spełniona.
+W powyższym przykładzie zdefiniowane zostało makro o nazwie assert przyjmujące dwa argumenty. Pierwszym z nich jest wyrażenie typu \texttt{Boolean}, kolejny to wiadomość która powinna zostać wyświetlona w przypadku gdy wyrażenie logiczne okaże się fałszywe. Przykładowe zastosowanie makra w tym przypadku to np. zamiana wyrażenia logicznego na napis i wypisanie go w całości w przypadku gdy asercja nie jest spełniona.
 
-\subsection{Przetwarzanie wyrażeń typu Boolean}
+\subsection{Przetwarzanie wyrażeń typu \texttt{Boolean}}
 
-Zastosowanie makr w przypadku neodsl polega na zamianie wyrażeń typu Boolean na własną strukturę którą będzie można w prosty sposób serializować do języka Cypher. 
-Strukturę tę rozpoczyna cecha Condition której potomkami są takie klasy jak And, Or, Not które odpowiednio reprezentują koniunkcję, alternatywę i zaprzeczenie warunków oraz PropertyComparison która odpowiada porównaniu pól obiektów z dziedziny.
+Zastosowanie makr w przypadku neodsl polega na zamianie wyrażeń typu \texttt{Boolean} na własną strukturę którą będzie można w prosty sposób serializować do języka Cypher. 
+Strukturę tę rozpoczyna cecha \texttt{Condition} której potomkami są takie klasy jak \texttt{And}, \texttt{Or}, \texttt{Not} które odpowiednio reprezentują koniunkcję, alternatywę i zaprzeczenie warunków oraz \texttt{PropertyComparison} która odpowiada porównaniu pól obiektów z dziedziny.
 
 OBRAZEK Z HIERARCHIĄ KLAS
 
@@ -297,15 +301,15 @@ Jak widać, na poziomie implementacji logiki makra wszystko ogranicza się do wy
 
 \section{Serializacja do języka Cypher}
 
-W każdym zapytaniu języka Cypher da się wyszczególnić kilka głównych składowych odpowiadającym odmiennym zadaniom. Przykładem może być chociażby zapytanie do wyszukiwania danych w grafie które składa się z sekcji Start, Match oraz Return. Te same sekcje pojawiają się również w innych rodzajach zapytań (jak chociażby w zapytaniu służącym do aktualizacji danych w grafie może pojawić się sekcja Start). Z tego powodu kod służący do serializacji poszczególnych sekcji  został podzielony na kilka osobnych obiektów działających w sposób niezależny. Dzięki temu możliwe jest ponowne jego wykorzystanie w przypadku implementacji różnych rodzajów zapytań.
+W każdym zapytaniu języka Cypher da się wyszczególnić kilka głównych składowych odpowiadającym odmiennym zadaniom. Przykładem może być chociażby zapytanie do wyszukiwania danych w grafie które składa się z sekcji \texttt{START}, \texttt{MATCH} oraz \texttt{RETURN}. Te same sekcje pojawiają się również w innych rodzajach zapytań (jak chociażby w zapytaniu służącym do aktualizacji danych w grafie może pojawić się sekcja \texttt{START}). Z tego powodu kod służący do serializacji poszczególnych sekcji  został podzielony na kilka osobnych obiektów działających w sposób niezależny. Dzięki temu możliwe jest ponowne jego wykorzystanie w przypadku implementacji różnych rodzajów zapytań.
 
 \subsection{Struktura}
 
-Głównym obiektem zajmującym się serializacją jest CypherSerializer. Jego zadaniem jest obsługa wszystkich rodzajów zapytań i delegowanie serializacji do odpowiednich klas odpowiadających za dany typ.
+Głównym obiektem zajmującym się serializacją jest \texttt{CypherSerializer}. Jego zadaniem jest obsługa wszystkich rodzajów zapytań i delegowanie serializacji do odpowiednich klas odpowiadających za dany typ.
 
-Jedną z takich klas jest SelectSerializer, która odpowiada za serializację zapytań typu Select służących do wydobywania danych z bazy. Realizuje ona swoje zadanie z wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: StartSerializer, MatchSerializer, ReturnSerializer, WhereSerializer.
+Jedną z takich klas jest \texttt{SelectSerializer}, która odpowiada za serializację zapytań typu Select służących do wydobywania danych z bazy. Realizuje ona swoje zadanie z wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: \texttt{StartSerializer}, \texttt{MatchSerializer}, \texttt{ReturnSerializer}, \texttt{WhereSerializer}.
 
-Aby wygenerowane sekcje były spójne pod względem używanych nazw zmiennych wykorzystywany jest obiekt implementujący interfejs NameResolver. Jego jedyną odpowiedzialnością jest przydzielanie nazw obiektom typu Node (wszystkie klasy dziedziczące po DomainObject dziedziczą również po Node). Domyślna implementacja którą jest BasicNameResolver przydziela nazwy według następującej konwencji. Węzłom pojawiających się w zapytaniu o określonym wewnętrznym identyfikatorze przydzielona nazwa to wartość identyfikatora z prefixem "id\_", pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem "n\_". Przykładowe nazwy to np. ,,id\_10" przydzielona dla węzła o identyfkatorze równym 10 oraz ,,n\_2" która może być przydzielona dowolnemu anonimowemu wierzchołkowi. Oczywiście głównym wymogiem klasy implementującej ten interfejs jest by dla danego węzła zawsze zwracana była ta sama nazwa, tylko w ten sposób możliwe jest zachowanie spójności nazw.
+Aby wygenerowane sekcje były spójne pod względem używanych nazw zmiennych wykorzystywany jest obiekt implementujący interfejs \texttt{NameResolver}. Jego jedyną odpowiedzialnością jest przydzielanie nazw obiektom typu \texttt{Nod}e (wszystkie klasy dziedziczące po \texttt{DomainObject} dziedziczą również po \texttt{Node}). Domyślna implementacja którą jest \texttt{BasicNameResolve}r przydziela nazwy według następującej konwencji. Węzłom pojawiających się w zapytaniu o określonym wewnętrznym identyfikatorze przydzielona nazwa to wartość identyfikatora z prefixem ,,id\_", pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem ,,n\_". Przykładowe nazwy to np. ,,id\_10" przydzielona dla węzła o identyfkatorze równym 10 oraz ,,n\_2" która może być przydzielona dowolnemu anonimowemu wierzchołkowi. Oczywiście głównym wymogiem klasy implementującej ten interfejs jest by dla danego węzła zawsze zwracana była ta sama nazwa, tylko w ten sposób możliwe jest zachowanie spójności nazw.
 
 \section{Zwracanie wyników}
 
@@ -321,11 +325,11 @@ WYKRES Z PORÓWNANIEM WYDAJNOŚCI REFLEKSJI VS BEZPOŚREDNI DOSTĘP
 
 \subsection{Mapper obiektowy}
 
-Po wykonaniu zapytania baza danych zwraca wyniki w określonym przez siebie formacie. Może to być np. format JSON w przypadku RESTowej implementacji. Oczywiście narzędzia do obsługi bazy neo4j dostarczają natywnych narzędzi do obsługi wyników. Zajmują się one obsługą poszczególnych pól i rozpoznawaniem typu wartości. Stworzone narzędzie również udostępnia tego typu interfejsy mające na celu ujednolicić dostęp do różnych baz grafowych bądź różnych implementacji. Interfejsem opakowującym pojedyńczy wynik zapytania jest ResultItem. Zadaniem implementacji tego interfejsu jest dostarczanie struktury odwzorowania która dla określonej nazwy pola zwraca jego wartość otrzymaną z silnika bazy danych. Jedyną dostępną implementacją jest Neo4jResultItem które zajmuje się tłumaczeniem wyników otrzymanych z serwisu REST.
+Po wykonaniu zapytania baza danych zwraca wyniki w określonym przez siebie formacie. Może to być np. format JSON w przypadku REST--owej implementacji. Oczywiście narzędzia do obsługi bazy neo4j dostarczają natywnych narzędzi do obsługi wyników. Zajmują się one obsługą poszczególnych pól i rozpoznawaniem typu wartości. Stworzone narzędzie również udostępnia tego typu interfejsy mające na celu ujednolicić dostęp do różnych baz grafowych bądź różnych implementacji. Interfejsem opakowującym pojedyńczy wynik zapytania jest \texttt{ResultItem}. Zadaniem implementacji tego interfejsu jest dostarczanie struktury odwzorowania która dla określonej nazwy pola zwraca jego wartość otrzymaną z silnika bazy danych. Jedyną dostępną implementacją jest \texttt{Neo4jResultItem} które zajmuje się tłumaczeniem wyników otrzymanych z serwisu REST.
 
-Silnik obsługujący wybraną bazę grafową powinien implementować interfejs ExecutionEngine. Interfejs ten wymaga by jego implementacja dostarczała metodę exec. Metoda ta powinna dla każdego obsługiwanego przez neodsl zapytania zlecać jego wykonanie oraz zwracać wyniki w postaci kolekcji obiektów typu ResultItem.
+Silnik obsługujący wybraną bazę grafową powinien implementować interfejs \texttt{ExecutionEngine}. Interfejs ten wymaga by jego implementacja dostarczała metodę \texttt{exec}. Metoda ta powinna dla każdego obsługiwanego przez neodsl zapytania zlecać jego wykonanie oraz zwracać wyniki w postaci kolekcji obiektów typu \texttt{ResultItem}.
 
-Oczywiście ResultItem jest dość ogólnym typem i nie odpowiada strukturze stworzonej przez programistę wykorzystującego narzędzie. Potrzebny jest zatem mechanizm zajmujący się zamianą obiektów typu ResultItem na instancje klas wybranego typu definiowanego przez klienta aplikacji. Zadanie to realizuje ObjectMapper. Domyślna implementacja mappera tj. NodeObjectMapper wykorzystuje wspomniany już mechanizm refleksji. Tworzy on najpierw instancję danej klasy a następnie modyfikuje pola o takiej samej nazwie jak te określone w tablicy haszującej (dostępnej w obiektach typu ResultItem).
+Oczywiście \texttt{ResultItem} jest dość ogólnym typem i nie odpowiada strukturze stworzonej przez programistę wykorzystującego narzędzie. Potrzebny jest zatem mechanizm zajmujący się zamianą obiektów typu \texttt{ResultItem} na instancje klas wybranego typu definiowanego przez klienta aplikacji. Zadanie to realizuje \texttt{ObjectMapper}. Domyślna implementacja mappera tj. \texttt{NodeObjectMapper} wykorzystuje wspomniany już mechanizm refleksji. Tworzy on najpierw instancję danej klasy a następnie modyfikuje pola o takiej samej nazwie jak te określone w tablicy haszującej (dostępnej w obiektach typu \texttt{ResultItem}).
 
 Ze względu na problemy wydajnościowe jakich dostarcza mechanizm refleksji został wprowadzony mechanizm pamięci podręcznej dla informacji pozyskanych w sposób dynamiczny.
 
@@ -335,11 +339,11 @@ W tym rozdziale postaram się zaprezentować kompletne przykłady zastosowania n
 
 \subsection{Sieć społecznościowa}
 
-Sieci społecznościowe koncentrują się wokół osób i relacji między nimi. Potrzeba zatem reprezentacji osób które będą przechowywane w bazie danych. Służyć do tego będzie prosta klasa Person zawierająca jedno pole name odpowiadające imieniu danej osoby. Poza polem opisującym osobę zawierać ona będzie pola określające relacje łączące ją z innymi obiektami naszej sieci społecznościowej. Będą to ,,KNOWS" wiążąca znajomych oraz ,,WROTE" która zostanie opisana szczegółowo razem z obiektami typu Comment.
+Sieci społecznościowe koncentrują się wokół osób i relacji między nimi. Potrzeba zatem reprezentacji osób które będą przechowywane w bazie danych. Służyć do tego będzie prosta klasa Person zawierająca jedno pole name odpowiadające imieniu danej osoby. Poza polem opisującym osobę zawierać ona będzie pola określające relacje łączące ją z innymi obiektami naszej sieci społecznościowej. Będą to \texttt{KNOWS} wiążąca znajomych oraz \texttt{WROTE} która zostanie opisana szczegółowo razem z obiektami typu Comment.
 
 Person Snippet
 
-Kolejnym obiektem składowanym w bazie będą komentarze reprezentowane przez klasę Comment. Typową relacją między osobą a komentarzem jest relacja autorstwa określająca kto napisał dany komentarz. Realizowana będzie ona za pomocą krawędzi ,,WROTE". Kolejną akcją dokonywaną na komentarzach jest głosowanie tj. wydanie aprobaty przez daną osobę. Relacja ta nazywa się ,,LIKES".
+Kolejnym obiektem składowanym w bazie będą komentarze reprezentowane przez klasę Comment. Typową relacją między osobą a komentarzem jest relacja autorstwa określająca kto napisał dany komentarz. Realizowana będzie ona za pomocą krawędzi \texttt{WROTE}. Kolejną akcją dokonywaną na komentarzach jest głosowanie tj. wydanie aprobaty przez daną osobę. Relacja ta nazywa się \texttt{LIKES}.
 
 Comment snippet
 
@@ -351,9 +355,9 @@ Stworzone narzędzie było projektowane z myślą o wersji 1.9.x która w momenc
 
 Jedną z bardziej istotnych zmian jest tak zwany mechanizm etykietowania który pozwala na grupowanie węzłów. Poza możliwością określenia typu każdego węzła możliwe stało się nakładanie tzw. więzów (ang. Constraints) na określone typy. Pozwala to na definiowanie czegoś w rodzaju schematu bazy danych znanego z baz relacyjnych. Pojawienie się mechanizmu etykiet miało również wpływ na rozszerzenie języka Cypher. Możliwe jest np. wyszukiwanie wzorców z węzłami określonego typu.
 
-Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W przypadku wydań z serii 1.x narzut związany z obsługą indeksowania był zrzucony na programistę. W dodatku by wykorzystać dany indeks w zapytaniu trzeba było zażądać tego w sposób jawny w sekcji START. Obecnie indeksy przypominają w dużo większym stopniu funkcjonalność znaną z baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w zapytaniu, natomiast samo zarządzanie nimi stało się możliwe z poziomu języka Cypher.
+Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W przypadku wydań z serii 1.x narzut związany z obsługą indeksowania był zrzucony na programistę. W dodatku by wykorzystać dany indeks w zapytaniu trzeba było zażądać tego w sposób jawny w sekcji \texttt{START}. Obecnie indeksy przypominają w dużo większym stopniu funkcjonalność znaną z baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w zapytaniu, natomiast samo zarządzanie nimi stało się możliwe z poziomu języka Cypher.
 
-Zmiany dotknęły również języka Cypher który jak określają twórcy stał się bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji START. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
+Zmiany dotknęły również języka Cypher który jak określają twórcy stał się bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
 
 \section{Potencjalne funkcjonalności}
 

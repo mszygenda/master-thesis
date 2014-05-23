@@ -1,14 +1,17 @@
-class BoolExprToConditionMacro[C <: Context](val context: C) extends BooleanExpressionTransformer with ConditionsCodeBuilder {
+class BoolExprToConditionMacro[C <: Context](val context: C) 
+extends BooleanExpressionTransformer with ConditionsCodeBuilder {
   import context._
 
-  override def onComparison(leftOp: Tree, cmpOperator: BinaryComparisonOperator, rightOp: Tree): Tree = {
+  override def onComparison
+  (leftOp: Tree, cmpOperator: BinaryComparisonOperator, rightOp: Tree): Tree = {
     val leftSelector = buildSelector(leftOp)
     val rightSelector = buildSelector(rightOp)
 
     buildPropertyComparison(leftSelector, cmpOperator, rightSelector)
   }
 
-  override def onUnaryLogicalOperation(leftOp: Tree, operator: UnaryLogicalOperator): Tree = {
+  override def onUnaryLogicalOperation
+  (leftOp: Tree, operator: UnaryLogicalOperator): Tree = {
     operator match {
       case Not => {
         buildNot(leftOp)
@@ -16,7 +19,8 @@ class BoolExprToConditionMacro[C <: Context](val context: C) extends BooleanExpr
     }
   }
 
-  override def onBinaryLogicalOperation(leftOp: Tree, operator: BinaryLogicalOperator, rightOp: Tree): Tree = {
+  override def onBinaryLogicalOperation
+  (leftOp: Tree, operator: BinaryLogicalOperator, rightOp: Tree): Tree = {
     operator match {
       case Or => {
         buildOr(leftOp, rightOp)
@@ -27,7 +31,8 @@ class BoolExprToConditionMacro[C <: Context](val context: C) extends BooleanExpr
     }
   }
 
-  override def onCustomUnaryOperator(leftOp: Tree, customOp: CustomOperator): Tree = {
+  override def onCustomUnaryOperator
+  (leftOp: Tree, customOp: CustomOperator): Tree = {
     val propSelector = buildObjectPropertySelector(leftOp, customOp.name)
     val trueValueSelector = buildSimpleValueSelector(literal(true))
 

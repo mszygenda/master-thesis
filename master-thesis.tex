@@ -56,15 +56,19 @@ W ostatnich latach można było zaobserwować pojawienie się wielu baz danych z
 
 Z matematycznego punktu widzenia (ODNOŚNIK DO KSIĄŻKI) graf to struktura składająca się ze zbioru wierzchołków oraz zbioru krawędzi. Krawędź reprezentuje połączenie pomiędzy dwoma wierzchołkami. W przypadku gdy kierunek krawędzi jest istotny mówimy o krawędziach skierowanych. Bazy grafowe wykorzystują właśnię tę strukturę reprezentowania wszystkich danych rozszerzając ją tylko w nieznaczny sposób (np. dodając pojęcie nazwanych krawędzi). Pomimo faktu iż teoria grafów jest dziedziną niemłodą i znaną od dłuższego czasu to same bazy grafowe są stosunkowo świeżym tworem. Jak wspomina autor bazy Neo4j, w roku 1999 nie istniała praktycznie żadna baza grafowa mogąca być wykorzystana w sposób produkcyjny (ODNOŚNIK DO KSIĄŻKI). Sposób w jaki bazy grafowe prezentują dane implikuje odmienny sposób przeszukiwania i operowania na zbiorze danych. Nie istnieje tutaj pojęcie tabeli znane z baz relacyjnych takich jak MySQL która narzucała by określoną strukturę. Zamiast tego mamy tu do czynienia z wierzchołkami (nazywanymi w dalszej części pracy zamiennie węzłami) które mogą zawierać dowolną liczbę pól prostych lub złożonych (jak ma to miejsce np. w bazie OrientDB). Pod tym względem przypominają one bazy dokumentowe w których również nie ma narzuconej struktury. W odróżnieniu jednak zarówno od baz relacyjnych jak i dokumentowych relacje między obiektami są zapisywane tutaj za pomocą nazwanych i skierowanych krawędzi. Pojedyńczy węzeł może mieć dowolnie wiele różnych krawędzi wychodzących jak i wchodzących (w dalszej części pracy będziemy używać zamiennie terminu krawędzi i relacji). Przeszukiwanie baz grafowych odbywa się poprzez definiowanie interesujących wzorców w grafie. Dzięki efektywnym algorytmom przeszukiwania grafów taki sposób przechowywania danych ma znaczący wpływ na wydajność.
 
-Oto przykład ukazujący porównanie wydajności grafowej bazy Neo4j oraz MySQL dla analogicznej struktury danych i zapytań skupionych wokół relacji.
+Aby dać czytelnikowi pogląd na to jak bardzo efektywne mogą okazać bazy grafowe w porównaniu z bazami relacyjnymi przedstawiony został przykład pochodzący z książki ,,Graph Databases". Ukazuje on porównanie wydajnościowe grafowej bazy Neo4j oraz MySQL dla analogicznej struktury danych. Poniższa ilustracja przedstawia prosty schemat bazy relacyjnej z dwoma tabelami służącymi do przechowywania osób i relacji ,,znajomości" między nimi.
 
-WYKRES Z MODELEM I ZAPYTANIEM SQL (Pożyczony z książki o neo4j)
+\includegraphics[scale=0.75]{images/relational-schema-friends.png}
 
-WYKRES Z MODELEM I ZAPYTANIEM CYPHER (Pożyczony z książki o neo4j)
+Przykładowe zapytanie SQL do wyszukiwania znajomych znajomych osoby o imieniu Alicja wygląda następująco.
 
-WYKRESY Z WYDAJNOŚCIĄ (Pożyczony z książki o neo4j)
+\includegraphics[scale=0.75]{images/relational-schema-friends-fof-query.png}
 
-Znacząca przewaga neo4j wynika tutaj przede wszystkim z lokalności operacji wykonywanych na danych (tj. nie musimy przeszukiwać wszystkich węzłów a jedynie te które są fizycznie połączone z interesującymi węzłami) w przeciwieństwie do bazy MySQL w której z każdym złączeniem relacji musimy utworzyć iloczyn kartezjański który wymaga przejrzenia całego zbioru danych.
+Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania.
+
+\includegraphics[scale=0.75]{images/relational-schema-friends-results.png}
+
+Jak można zaobserować na powyższym przykładzie, różnica pomiędzy MySQL i Neo4j w czasie wykonania zapytań dla głębokości trzy i większej jest znacząca na korzyść tej drugiej. Wynika to z odmiennego sposobu w jaki odbywa się przeszukiwanie w tych bazach. W przypadku baz relacyjnych wzrost ,,głębokości" zapytania wiąże się z tworzeniem kolejnego iloczynu kartezjańskiego. Dopiero po jego utworzeniu dane nieistotne są odrzucane z wyników. W przypadku dużego zbioru danych takie działanie odbija się na wydajności całego zapytania. Inaczej sytuacja wygląda w bazach grafowych w których rozpatrywane są wyłącznie węzły związane ze sobą krawędziami (jest to tzw. lokalność operacji).
 
 \section{Rodzaje baz grafowych}
 
@@ -298,6 +302,14 @@ Pierwszą z nich są tzw. klasy transformujące (ang. Transformers) które zajmu
 \lstinputlisting{listings/scala/boolean-macro-implementation.scala}
 
 Jak widać, na poziomie implementacji logiki makra wszystko ogranicza się do wywołań kilku metod poprzedzonych sekcją dopasowywania do wzorca (ang. Pattern Matching) znanego z języka Scala.
+
+Przykładowe użycie stworzonego makra wygląda następująco
+
+\lstinputlisting{listings/scala/macro-usage.scala}
+
+W powyższym przykładzie \texttt{nameCondition} oraz  \texttt{nameConditionImplicit} przechowuje poniższą wartość
+
+\lstinputlisting{listings/scala/macro-usage-result.scala}
 
 \section{Serializacja do języka Cypher}
 

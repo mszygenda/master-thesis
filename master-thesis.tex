@@ -276,8 +276,12 @@ Wynikiem powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tu
 
 \section{Nakładanie warunków na wyniki zapytań}
 
-Jednym z bardziej istotnych mechanizmów przy przeszukiwaniu baz danych jest możliwość nakładania warunków na zwracane wyniki. Założeniem projektu było aby dało się wyrażać warunki logiczne bez potrzeby wprowadzania nowej składni innej niż ta dostarczana przez sam język Scala. 
-Aby osiągnąć ten cel potrzebny jest mechanizm pozwalający na analizę wyrażeń typu \texttt{Boolean}. Język Scala udostępnia mechanizm makr pozwalający na analizę i modyfikację wyrażeń języka, w szczególności wyrażeń typu \texttt{Boolean}. Dzięki temu, możliwe jest po uprzedniej analizie wyrażenia typu \texttt{Boolean} utworzenia struktury rozpoznawanej przez neodsl którą można w prosty sposób zamienić na wyrażenie języka Cypher.
+Jednym z bardziej istotnych mechanizmów przy przeszukiwaniu baz danych jest możliwość nakładania warunków na zwracane wyniki. Założeniem projektu było aby dało się wyrażać warunki logiczne bez potrzeby wprowadzania nowej składni innej niż ta dostarczana przez sam język Scala. Oto przykład demonstrujący w jaki sposób można nakładać warunki na zapytania w neodsl.
+
+\inputminted{scala}{listings/scala/dsl/query-with-simple-condition.scala}
+
+Aby osiągnąć ten cel potrzebny okazał się mechanizm pozwalający na analizę wyrażeń typu \texttt{Boolean}. W języku Scala zadanie to może być zrealizowane z wykorzystaniem tzw. makr. 
+Dzięki nim, możliwa jest podmiana wyrażenia typu \texttt{Boolean} na strukturę rozpoznawaną przez neodsl, która w efekcie końcowym zamieniana jest na zapytanie języka Cypher.
 
 \subsection{Makra}
 
@@ -316,15 +320,21 @@ W powyższym przykładzie \texttt{nameCondition} oraz  \texttt{nameConditionImpl
 
 \section{Serializacja do języka Cypher}
 
-W każdym zapytaniu języka Cypher da się wyszczególnić kilka głównych składowych odpowiadającym odmiennym zadaniom. Przykładem może być chociażby zapytanie do wyszukiwania danych w grafie które składa się z sekcji \texttt{START}, \texttt{MATCH} oraz \texttt{RETURN}. Te same sekcje pojawiają się również w innych rodzajach zapytań (jak chociażby w zapytaniu służącym do aktualizacji danych w grafie może pojawić się sekcja \texttt{START}). Z tego powodu kod służący do serializacji poszczególnych sekcji  został podzielony na kilka osobnych obiektów działających w sposób niezależny. Dzięki temu możliwe jest ponowne jego wykorzystanie w przypadku implementacji różnych rodzajów zapytań.
+By zbudowane z wykorzystaniem NeoDSL zapytania mogły być wykonane przez serwer bazy danych muszą być one zamienione na wyrażenia języka Cypher. Sekcja ta ma na celu opisanie struktur realizujących to zadanie. 
+
+W każdym zapytaniu języka Cypher da się wyszczególnić kilka głównych składowych odpowiadającym odmiennym zadaniom. Przykładem może być chociażby zapytanie do wyszukiwania danych w grafie które składa się z sekcji \texttt{START}, \texttt{MATCH} oraz \texttt{RETURN}. Te same sekcje pojawiają się również w innych rodzajach zapytań (jak chociażby w zapytaniu służącym do aktualizacji danych może pojawić się sekcja \texttt{START}). Z tego powodu kod służący do serializacji poszczególnych sekcji  został podzielony na kilka osobnych obiektów działających w sposób niezależny. Dzięki temu możliwe jest ponowne jego wykorzystanie w przypadku implementacji różnych rodzajów zapytań.
 
 \subsection{Struktura}
 
-Głównym obiektem zajmującym się serializacją jest \texttt{CypherSerializer}. Jego zadaniem jest obsługa wszystkich rodzajów zapytań i delegowanie serializacji do odpowiednich klas odpowiadających za dany typ.
+Głównym obiektem zajmującym się serializacją jest \texttt{CypherSerializer}. Jego zadaniem jest obsługa wszystkich rodzajów zapytań i delegowanie serializacji do klas odpowiedzialnych za dany typ.
 
-Jedną z takich klas jest \texttt{SelectSerializer}, która odpowiada za serializację zapytań typu Select służących do wydobywania danych z bazy. Realizuje ona swoje zadanie z wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: \texttt{StartSerializer}, \texttt{MatchSerializer}, \texttt{ReturnSerializer}, \texttt{WhereSerializer}.
+Jedną z nich jest \texttt{SelectSerializer}, która odpowiada za serializację zapytań typu Select służących do wydobywania danych z bazy. Realizuje ona swoje zadanie z wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: \texttt{StartSerializer}, \texttt{MatchSerializer}, \texttt{ReturnSerializer}, \texttt{WhereSerializer}. Ponżej przedstawiona została graficzna reprezentacja powiązań pomiędzy poszczególnymi klasami.
 
-Aby wygenerowane sekcje były spójne pod względem używanych nazw zmiennych wykorzystywany jest obiekt implementujący interfejs \texttt{NameResolver}. Jego jedyną odpowiedzialnością jest przydzielanie nazw obiektom typu \texttt{Nod}e (wszystkie klasy dziedziczące po \texttt{DomainObject} dziedziczą również po \texttt{Node}). Domyślna implementacja którą jest \texttt{BasicNameResolve}r przydziela nazwy według następującej konwencji. Węzłom pojawiających się w zapytaniu o określonym wewnętrznym identyfikatorze przydzielona nazwa to wartość identyfikatora z prefixem ,,id\_", pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem ,,n\_". Przykładowe nazwy to np. ,,id\_10" przydzielona dla węzła o identyfkatorze równym 10 oraz ,,n\_2" która może być przydzielona dowolnemu anonimowemu wierzchołkowi. Oczywiście głównym wymogiem klasy implementującej ten interfejs jest by dla danego węzła zawsze zwracana była ta sama nazwa, tylko w ten sposób możliwe jest zachowanie spójności nazw.
+\includegraphics[scale=0.5]{images/cypher-serialization-uml.png}
+
+\subsection{Uwspólnianie nazw zmiennych}
+
+W zapytaniach języka Cypher węzłom oraz relacjom mogą zostać nadane nazwy służące do odwoływania się do nich w dalszych częściach zapytania. Ze względu na fakt iż poszczególne sekcje serializowane są w sposób niezależny potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja którą jest \texttt{BasicNameResolver} przydziela nazwy według następującej konwencji. Węzłom pojawiających się w zapytaniu o określonym wewnętrznym identyfikatorze przydzielona nazwa to wartość identyfikatora z prefixem ,,id\_", pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem ,,n\_". Przykładowe nazwy to np. ,,id\_10" przydzielona dla węzła o identyfkatorze równym 10 oraz ,,n\_2" która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
 
 \section{Zwracanie wyników}
 

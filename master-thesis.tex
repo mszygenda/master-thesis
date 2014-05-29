@@ -294,11 +294,9 @@ W powyższym przykładzie zdefiniowane zostało makro o nazwie assert przyjmują
 \subsection{Przetwarzanie wyrażeń typu \texttt{Boolean}}
 
 Zastosowanie makr w przypadku neodsl polega na zamianie wyrażeń typu \texttt{Boolean} na własną strukturę którą będzie można w prosty sposób serializować do języka Cypher. 
-Strukturę tę rozpoczyna cecha \texttt{Condition} której potomkami są takie klasy jak \texttt{And}, \texttt{Or}, \texttt{Not} które odpowiednio reprezentują koniunkcję, alternatywę i zaprzeczenie warunków oraz \texttt{PropertyComparison} która odpowiada porównaniu pól obiektów z dziedziny.
+Strukturę tę rozpoczyna cecha \texttt{Condition} której potomkami są takie klasy jak \texttt{And}, \texttt{Or}, \texttt{Not} które odpowiednio reprezentują koniunkcję, alternatywę i zaprzeczenie warunków oraz \texttt{PropertyComparison} która odpowiada porównaniu pól obiektów z dziedziny. Poniżej przedstawiony został diagram klas
 
-OBRAZEK Z HIERARCHIĄ KLAS
-
-Implementacja:
+\includegraphics[scale=0.5]{images/conditions-uml.png}
 
 W makrach można wyszczególnić dwa rodzaje operacji. Są to przechodzenie drzewa składniowego i wyszukiwanie interesującyh wzorców oraz budowanie drzew składniowych wyrażeń którymi mają być zastąpione znalezione wzorce. Z tego powodu implementacja makra służącego do transformowania wyrażeń logicznych została podzielona na dwie części realizujące te dwa zadania.
 

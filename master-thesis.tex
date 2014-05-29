@@ -1,9 +1,12 @@
 \documentclass[brudnopis]{xmgr}
 
+% minted listings
+\usepackage{minted}
+\usemintedstyle{trac}
+\fvset{fontsize=\small}
+
 \usepackage{listings}
-
 % "define" Scala
-
 \usepackage{lstlang0}
 
 % Default settings for code listings
@@ -62,7 +65,7 @@ Aby dać czytelnikowi pogląd na to jak bardzo efektywne mogą okazać bazy graf
 
 Przykładowe zapytanie SQL do wyszukiwania znajomych znajomych osoby o imieniu Alicja wygląda następująco.
 
-\includegraphics[scale=0.75]{images/relational-schema-friends-fof-query.png}
+\inputminted{sql}{listings/sql/relational-schema-friends-fof-query.sql}
 
 Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania.
 
@@ -94,19 +97,20 @@ Najistotniejszą funkcjonalnością baz danych jest możliwość przeszukiwania 
 
 Sekcja \texttt{START} pozwala na ustalenie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 2.0 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe. Bez tego zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej comment przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast john będzie wskazywał na węzły znajdujące się w indeksie nazwanym \texttt{nameIndex} oraz zawierające pole \texttt{name} o wartości równej ,,John"
 
-\lstinputlisting{listings/cypher/start-section.cypher}
+
+\inputminted{cypher}{listings/cypher/start-section.cypher}
 
 Sekcja \texttt{MATCH} jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać znajomych johna ,,lubiących" komentarz wskazywany przez zmienną \texttt{comment}
 
-\lstinputlisting{listings/cypher/match-section.cypher}
+\inputminted{cypher}{listings/cypher/match-section.cypher}
 
 Ostatnim elementem zapytania jest sekcja \texttt{RETURN} służąca określania pól które mają zostać zwrócone jako wynik. W poniższym przykładzie zwrócone zostanie pole \texttt{name} oraz wewnętrzny identyfikator węzłów dopasowanych do zmiennej \texttt{friend}.
 
-\lstinputlisting{listings/cypher/return-section.cypher}
+\inputminted{cypher}{listings/cypher/return-section.cypher}
 
 Pełne zapytanie wygląda zwraca identyfikator oraz pole \texttt{name} węzłów które są połączone krawędzią o nazwie \texttt{KNOWS} z obiektem \texttt{john} oraz będące połączone krawędzią \texttt{LIKES} z obiektem o identyfikatorze równym {1}. Poruszając się w domenie sieci społecznościowej zapytanie zwraca znajomych użytkownika ,,John" którzy polubili komentarz o identyfikatorze {1}.
 
-\lstinputlisting{listings/cypher/sample-query.cypher}
+\inputminted{cypher}{listings/cypher/sample-query.cypher}
 
 \subsection{Modyfikacja danych}
 
@@ -114,19 +118,19 @@ Język Cypher pozwala również na aktualizację danych w grafie. Podobnie jak w
 
 Pierwszą z nich ponownie jest sekcja \texttt{START}, która pozwala na wybranie wezłów zakotwiczających tworzony wzorzec w strukturze grafu. Jest ona opcjonalna jeśli zamierzamy utworzyć graf niepowiązany z istniejącymi już wierzchołkami.
 
-\lstinputlisting{listings/cypher/start-section.cypher}
+\inputminted{cypher}{listings/cypher/start-section.cypher}
 
 Kolejną sekcją jest \texttt{CREATE} której składnia jest podobna do sekcji \texttt{MATCH}. W przeciwieństwie jednak do \texttt{MATCH} pozwala ona na tworzenie krawędzi w grafie oraz węzłów. W poniższym przykładzie zostanie utworzony węzeł \texttt{newFriend} o polu \texttt{name} równym wartości ,,New friend" oraz relacja \texttt{KNOWS} łącząca wierzchołek wskazywany przez zmienną \texttt{john} z nowo utworzonym węzłem.
 
-\lstinputlisting{listings/cypher/create-section.cypher}
+\inputminted{cypher}{listings/cypher/create-section.cypher}
 
 Ostatnim elementem jest wykorzystana już wcześniej sekcja RETURN która pozwala na zwrócenie informacji o nowoutworzonych obiektach takich jak ich identyfikatory.
 
-\lstinputlisting{listings/cypher/return-section-2.cypher}
+\inputminted{cypher}{listings/cypher/return-section-2.cypher}
 
 Pełne zapytanie wstawiające do grafu nowy obiekt o polu \texttt{name} równym ,,New Friend" i łączące go z obiektami \texttt{john} oraz \texttt{comment} wygląda następująco
 
-\lstinputlisting{listings/cypher/sample-create-query.cypher}
+\inputminted{cypher}{listings/cypher/sample-create-query.cypher}
 
 \section{Programistyczne sposoby dostępu do neo4j}
 
@@ -159,28 +163,29 @@ Składnia Scali była inspirowana takimi językami jak C\# czy Java stąd doświ
 
 Istotną różnicą w stosunku do Javy czy C\# wpływającą na czytelność kodu jest sposób w jaki definiuje się zmienne czy parametry metod. Mianowicie, najpierw określa się ich nazwy a w drugiej kolejności typ (który może być całkowicie pominięty jeśli da się go określić z systemu inferencji). Taka kolejność wynika z faktu iż programista czytający kod bardziej zainteresowany jest nazwą aniżeli typem zmiennej. Poniżej kilka przykładowych deklaracji stałych i zmiennych.
 
-\lstinputlisting{listings/scala/val-var-declarations.scala}
+\inputminted{scala}{listings/scala/val-var-declarations.scala}
+\inputminted{scala}{listings/scala/val-var-declarations.scala}
 
 Metody w języku scala definuje się z użyciem słowa kluczowego \texttt{def}. Podobnie jak w przypadku zmiennych typ zwracanej wartości określany jest po zdefiniowaniu nazwy i może być on całkowicie pominięty jeśli da się go określić z ciała metody. Poniżej przykłady kilku funkcji.
 
-\lstinputlisting{listings/scala/functions-example.scala}
+\inputminted{scala}{listings/scala/functions-example.scala}
 
 Klasy definiuje się z użyciem słowa kluczowego \texttt{class} podobnie jak ma to miejsce w Javie. To na co warto zwrócić uwagę to fakt iż klasy języka Scala posiadają tzw. konstruktor główny. Jego parametry wejściowe określa się bezpośrednio po nazwie klasy natomiast jego implementacja powinna być zawarta bezpośrednio w ciele klasy. W ramach listy parametrów konstruktora głównego możliwe jest również zdefiniowanie pól składowych klasy z użyciem słów kluczowych val lub var (służą one odpowiednio do deklarowania stałych lub zmiennych). Wszelkie przęciążone konstruktory (które definiuje się podobnie jak w Javie) muszą skorzystać w sposób pośredni lub bezpośredni z konstruktora głównego.
 
 Poniżej przedstawiona jest prosta klasa Person w języku Scala. W konstruktorze głównym zdefiniowane zostały dwa pola składowe: \texttt{name} oraz \texttt{age}.
 
-\lstinputlisting{listings/scala/simple-class-person.scala}
+\inputminted{scala}{listings/scala/simple-class-person.scala}
 
 Poza tym klasa zawiera jedną metodę \texttt{sayHello} która wyświetla komunikat.
 Zdefiniowanej powyżej klasie odpowiada poniższy kod w języku Java.
 
-\lstinputlisting{listings/java/simple-class-person.java}
+\inputminted{scala}{listings/java/simple-class-person.java}
 
 \subsection{Pattern Matching}
 
 Jednym z bardziej istotnych mechanizmów języka niespotykanym w takich językach jak Java jest tzw. Pattern Matching (dopasowywanie do wzorca). Pozwala on na definiowanie specjalnych klas (ang. Case Classes) które można dopasowywać i wyciągać ich składowe z wykorzystaniem specjalnej składni. Przypomina to trochę instrukcję \texttt{switch} o dużo bardziej zaawansowanym działaniu. Oto przykład pozwalający na wyświetlenie wartości przechowywanych w liściach struktury drzewa reprezentowanej właśnie przy pomocy tzw. case classes.
 
-\lstinputlisting{listings/scala/pattern-matching-trees.scala}
+\inputminted{scala}{listings/scala/pattern-matching-trees.scala}
 
 Pattern matching znajduje zastosowanie w neodsl chociażby na etapie serializacji struktury zapytań baz grafowych do języka natywnego obsługiwanego przez konkretną bazę.
 
@@ -200,15 +205,15 @@ Sztandarowym przykładem DSLa bazodanowego dla języka Scala jest projekt Squery
 
 Pierwszym etapem w przypadku narzędzia Squeryl jest stworzenie odwzorowania struktury bazy danych. Definiuje się ją z wykorzystaniem zwykłych klas języka Scala oraz specjalnej klasy Schema. Przykładowa struktura (przykład z dokumentacji Squeryla)
 
-\lstinputlisting{listings/scala/squeryl-schema.scala}
+\inputminted{scala}{listings/scala/squeryl-schema.scala}
 
 Powyższa struktura odwzorowuje bardzo prostą bazę danych z jedną tabelą ,,Song" służącą do przechowywania informacji o utworach muzycznych. Z wykorzystaniem tak zdefiniowanych klas możliwe jest budowanie zapytań. Oto przykładowe z nich
 
-\lstinputlisting{listings/scala/squeryl-query.scala}
+\inputminted{scala}{listings/scala/squeryl-query.scala}
 
 Służy ono do wyszukiwania piosenek które w tytule zawierają słowo ,,funk". Powyższe wyrażenie odpowiada mniej więcej takiemu zapytaniu w języku SQL.
 
-\lstinputlisting{listings/sql/squeryl-query.sql}
+\inputminted{sql}{listings/sql/squeryl-query.sql}
 
 Zastosowanie języka dziedzionowego pozwala w pełniejszy sposób wykorzystać możliwości języka bazy danych przy jednoczesnym zachowaniu zalet rozwiązań typu Hibernate (tj. odwzorowywanie wyników na obiekty oraz kontrola wyrażeń na etapie kompilacji)
 
@@ -219,13 +224,13 @@ MongoDB jest jedną z popularniejszych baz dokumentowych. Pozwala ona na przecho
 \subsection{Rogue}
 Jedną z bibliotek do obsługi MongoDB z poziomu języka Scala jest Rogue. Podobnie jak Squeryl udostępnia ona DSL służący do budowania zapytań. Oto przykładowa klasa modelu składowanego w MongoDB
 
-\lstinputlisting{listings/scala/rogue-model.scala}
+\inputminted{scala}{listings/scala/rogue-model.scala}
 
 Do definiowania pól konieczne jest tworzenie obiektów rozszerzających cechę Field. Rogue wymaga od programisty napisania nieco więcej kodu niż Squeryl. Zaprezentowane rozwiązanie ma jednak tę zaletę iż dzięki specjalnym typom jak np. LongField dużo łatwiejsze stało się tworzenie DSLa który nie musi zajmować się obsługą typów wbudowanych w język Scala.
 
 Przykładowe zapytanie przedstawione jest poniżej
 
-\lstinputlisting{listings/scala/rogue-query.scala}
+\inputminted{scala}{listings/scala/rogue-query.scala}
 
 \chapter{DSL do baz grafowych}
 
@@ -251,7 +256,7 @@ Najistotniejszą informacją w przypadku baz grafowych są relacje czy też kraw
 
 Oto przykładowa klasa domenowa reprezentująca osobę. Zawiera ona pola takie jak \texttt{name}, \texttt{surname} odpowiadające imieniu i nazwisku osoby oraz pola definiujące krawędzie wchodzące i wychodzące z węzłów tego typu. Są to relacje \texttt{knows} która definiuje krawędź wychodzącą do obiektów typu \texttt{Person} oraz \texttt{wrote} która jest relacją skierowaną do naszego obiektu i jest powiązana z obiektem typu \texttt{Comment}.
 
-\lstinputlisting{listings/scala/dsl/sample-model.scala}
+\inputminted{scala}{listings/scala/dsl/sample-model.scala}
 
 \section{Budowanie wzorców}
 
@@ -265,7 +270,7 @@ Aby uprościć budowanie trójek wzorca została przygotowana klasa PatternBuild
 
 Oto przykładowe złożenie kilku wzorców. Wykorzystana została tutaj zaprezentowana wcześniej struktura sieci społecznościowej. Pojawiajace się poniżej zmienne \texttt{john}, \texttt{friend}, \texttt{matthew} są instancjami typu \texttt{Person} podczas gdy \texttt{wiseComment} jest obiektem typu \texttt{Comment}.
 
-\lstinputlisting{listings/scala/dsl/patterns/functional-example-1.scala}
+\inputminted{scala}{listings/scala/dsl/patterns/functional-example-1.scala}
 
 Wynikiem powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tutaj bowiem do czynienia z trzema wzorcami połączonymi operatorem logicznym ,,and". 
 
@@ -282,7 +287,7 @@ Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt (w j�
 
 Przykładowa definicja makra powinna nieco rozjaśnić sposób ich użycia.
 
-\lstinputlisting{listings/scala/macro-sample.scala}
+\inputminted{scala}{listings/scala/macro-sample.scala}
 
 W powyższym przykładzie zdefiniowane zostało makro o nazwie assert przyjmujące dwa argumenty. Pierwszym z nich jest wyrażenie typu \texttt{Boolean}, kolejny to wiadomość która powinna zostać wyświetlona w przypadku gdy wyrażenie logiczne okaże się fałszywe. Przykładowe zastosowanie makra w tym przypadku to np. zamiana wyrażenia logicznego na napis i wypisanie go w całości w przypadku gdy asercja nie jest spełniona.
 
@@ -299,17 +304,17 @@ W makrach można wyszczególnić dwa rodzaje operacji. Są to przechodzenie drze
 
 Pierwszą z nich są tzw. klasy transformujące (ang. Transformers) które zajmują się wyszukiwaniem wzorców w drzewie i zamianą ich na docelowe wyrażenia oraz budowniczy (ang. Builders) zajmujący się tworzeniem drzewa składniowego wspomnianych wyrażeń. Odseparowanie tych dwóch czynności oraz wprowadzenie kilku poziomów w hierarchi klas pozwoliło na stworzenie prostego w analizie kodu wspomnianego makra co jest kluczowe gdyż mechanizm makr jest sam w sobie dość skomplikowany.  Ze względu na niewielką ilość kodu pozwoliłem sobie na zamieszczenie implementacji makra poniżej.
 
-\lstinputlisting{listings/scala/boolean-macro-implementation.scala}
+\inputminted{scala}{listings/scala/boolean-macro-implementation.scala}
 
 Jak widać, na poziomie implementacji logiki makra wszystko ogranicza się do wywołań kilku metod poprzedzonych sekcją dopasowywania do wzorca (ang. Pattern Matching) znanego z języka Scala.
 
 Przykładowe użycie stworzonego makra wygląda następująco
 
-\lstinputlisting{listings/scala/macro-usage.scala}
+\inputminted{scala}{listings/scala/macro-usage.scala}
 
 W powyższym przykładzie \texttt{nameCondition} oraz  \texttt{nameConditionImplicit} przechowuje poniższą wartość
 
-\lstinputlisting{listings/scala/macro-usage-result.scala}
+\inputminted{scala}{listings/scala/macro-usage-result.scala}
 
 \section{Serializacja do języka Cypher}
 

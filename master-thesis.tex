@@ -364,15 +364,21 @@ W tym rozdziale postaram się zaprezentować kompletne przykłady zastosowania n
 
 \subsection{Sieć społecznościowa}
 
-Sieci społecznościowe koncentrują się wokół osób i relacji między nimi. Potrzeba zatem reprezentacji osób które będą przechowywane w bazie danych. Służyć do tego będzie prosta klasa Person zawierająca jedno pole name odpowiadające imieniu danej osoby. Poza polem opisującym osobę zawierać ona będzie pola określające relacje łączące ją z innymi obiektami naszej sieci społecznościowej. Będą to \texttt{KNOWS} wiążąca znajomych oraz \texttt{WROTE} która zostanie opisana szczegółowo razem z obiektami typu Comment.
+Sieć społecznościowa jest idealnym modelem do przechowywania w bazie grafowej. W naszej przykładowej sieci ,,NeoSocial" przechowywane będą osoby reprezentowane przez prostą klasę \texttt{Person}. Zawierać ona będzie tylko jedno pole \texttt{name} służące do przechowywania imienia. Osoby znajdujące się naszej sieci społecznościowej powiązane będą relacją ,,znajomości" realizowaną przez krawędź \texttt{KNOWS}. Poza osobami, w bazie przechowywane będą również komentarze. Podobnie jak klasa \texttt{Person} będzie to prosta klasa z jednym polem (\texttt{content} odpowiadającemu treści komentarza). Będą one powiązane z osobami aż dwoma relacjami. Są nimi relacja ,,autorstwa" (\texttt{WROTE}) wiążąca komentarz z jego autorem oraz akcja ,,aprobaty" dla wpisu (\texttt{LIKES}). Poniżej przedstawiony jest fragment ze zdefiniowanymi klasami.
 
-Person Snippet
-
-Kolejnym obiektem składowanym w bazie będą komentarze reprezentowane przez klasę Comment. Typową relacją między osobą a komentarzem jest relacja autorstwa określająca kto napisał dany komentarz. Realizowana będzie ona za pomocą krawędzi \texttt{WROTE}. Kolejną akcją dokonywaną na komentarzach jest głosowanie tj. wydanie aprobaty przez daną osobę. Relacja ta nazywa się \texttt{LIKES}.
-
-Comment snippet
+\inputminted{scala}{listings/scala/examples/socialnetwork/domain-classes.scala}
 
 \subsection{Zapytania w sieci społecznościowej}
+
+Zapytania związane z osobami zostaną zdefiniowane w ramach obiekt Person (W Scali jest to tzw. obiekt stowarzyszony z klasą Person, o metodach obiektu można myśleć jak o statycznych metodach klasy Person).
+
+Poniżej przedstawione są jedne z prostszych zapytań służących do wydobywania znajomych danej osoby.
+
+\inputminted{scala}{listings/scala/examples/socialnetwork/person-friends-query.scala}
+
+Ciekawszym i często używanym przykładem w kontekście baz grafowych jest zapytanie służące do wyszukiwania znajomych znajomych danej osoby. Oto ono zdefiniowane rprzy pomocy NeoDSL.
+
+\inputminted{scala}{listings/scala/examples/socialnetwork/person-fof-query.scala}
 
 \chapter{Zmiany w Neo4j 2.0 względem 1.x}
 

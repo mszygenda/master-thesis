@@ -1,6 +1,6 @@
 BOOK=master-thesis
 
-TEX=xelatex
+TEX=xelatex -shell-escape
 BIBTEX=bibtex
 
 .PHONY: pdf

@@ -100,8 +100,7 @@ Cypher jest językiem zapytań stworzonym specjalnie na potrzeby neo4j pozwalaj�
 
 Najistotniejszą funkcjonalnością baz danych jest możliwość przeszukiwania zbioru rekordów. Zapytanie służące do odczytywania informacji składa się z trzech podstawowych części.
 
-Sekcja \texttt{START} pozwala na ustalenie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfiaktora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 2.0 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe. Bez tego zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej comment przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast john będzie wskazywał na węzły znajdujące się w indeksie nazwanym \texttt{nameIndex} oraz zawierające pole \texttt{name} o wartości równej ,,John"
-
+Sekcja \texttt{START} pozwala na ustalenie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfikatora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 2.0 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe. Bez tego zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej comment przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast john będzie wskazywał na węzły znajdujące się w indeksie nazwanym \texttt{nameIndex} oraz zawierające pole \texttt{name} o wartości równej ,,John".
 
 \inputminted{cypher}{listings/cypher/start-section.cypher}
 
@@ -141,13 +140,39 @@ Pełne zapytanie wstawiające do grafu nowy obiekt o polu \texttt{name} równym 
 
 Neo4j udostępnia kilka odmiennych sposobów dostępu do bazy. Rozdział ten ma na celu przedstawienie każdego z nich.
 
-\subsection{Embedded mode}
+\subsection{Java Core API -- Embedded mode}
 
-Jedną z możliwości jest tzw. embedded mode który polega na wykorzystaniu udostępnionego API dla języka Java. Polega to na wykorzystaniu wewnętrznych struktur bazy. Rozwiązanie idealnie nadaje się w przypadku gdy potrzebna jest większa kontrola nad bazą danych i potrzebne są bardziej zaawansowane mechanizmy wyszukiwania danych. Oczywistą wadą jest fakt, że do wykorzystania tego mechanizmu potrzebna jest lokalna instancja bazy danych.
+Jednym z nich jest tzw. Java Core API czyli zestaw klas i interfejsów dostępnych dla języka Java. Udostępionych został szereg mechanizmów pozwalających na operowanie na węzłach i relacjach w sposób bezpośredni.
+
+Aby móc z nich skorzystać potrzebna jest instancja bazy. Można ją utworzyć (lub skorzystać z już istniejącej) w następujący sposób.
+
+\inputminted{java}{listings/java/neo4j-core-api-dbcreate.java}
+
+Powyższy fragment kodu powinien utworzyć instancję bazy pod ścieżką ,,/tmp/neo4j".
+
+Z wykorzystaniem tak utworzonej bazy danych możliwe jest wstawianie oraz odczytywanie węzłów i relacji. Oto przykładowy fragment kodu demonstrujący podstawowe operacje.
+
+\inputminted{java}{listings/java/neo4j-core-api-use.java}
+
+Oczywistą wadą jest fakt, że do wykorzystania tego mechanizmu potrzebna jest lokalna instancja bazy danych.
+
+\subsection{Traversal Framework API}
+
+Uzupełnieniem poprzedniego mechanizmu jest tzw. Traversal Framework który pozwala w prosty sposób na definiowanie algorytmu przechodzenia po grafie. Podstawowym interfejsem jest \texttt{TraversalDescription} który służy do określania zasad przechodzenia grafu. Oczywiście nikt nie wymaga od programisty by tworzył złożoną implementację algorytmu odwiedzania grafu. Neo4j udostępnia szereg metod udostępniajacych zachowania do przechodzenia po krawędziach określonego typu oraz służące do komponowania ich ze sobą.
+
+Poniżej przedstawiony został przykład w jaki sposób można zdefiniować ,,opis" wyszukiwania węzłów połączonych w sposób bezpośredni krawędzią ,,KNOWS" z wierzchołkiem \texttt{john}
+
+\inputminted{java}{listings/java/neo4j-traversal-api-knows.java}
 
 \subsection{REST mode}
 
-\subsection{Zapytania Cypher}
+Ostatnim ze sposobów na dostęp do bazy Neo4j jest skorzystanie z serwisu REST--owego udostępnionego przez bazę danych. Polega to na wystawieniu usługi z wykorzystaniem protokołu HTTP obsługującej szereg żądań związanych z obsługą bazy danych. Niewątpliwą zaletą tego podejścia jest niezależność od platformy. Z wystawionego serwisu można skorzystać z poziomu praktycznie każdego języka programowania. Dodatkowo, w odróżnieniu od embedded mode nie ma potrzeby aby baza danych znajdowała się na tym samym serwerze co aplikacja.
+
+Usługa serwera udostępnia standardowe akcje służące do tworzenia, wyszukiwania węzłów oraz relacji czy też uruchamiania zapytań języka Cypher. Ze względu na swoją uniwersalność właśnie ten sposób dostępu do bazy danych został wykorzystany w narzędziu będącym przedmiotem tej pracy.
+
+Oto przykładowe żądanie zlecające wykonanie zapytania języka Cypher (wysłane z wykorzystaniem narzędzia ,,curl")
+
+\inputminted{bash}{listings/bash/neo4j-rest-cypher.sh}
 
 \chapter{Język Scala}
 
@@ -371,13 +396,15 @@ W tym rozdziale postaram się zaprezentować kompletne przykłady zastosowania n
 
 Sieć społecznościowa jest idealnym modelem do przechowywania w bazie grafowej. W naszej przykładowej sieci ,,NeoSocial" przechowywane będą osoby reprezentowane przez prostą klasę \texttt{Person}. Zawierać ona będzie tylko jedno pole \texttt{name} służące do przechowywania imienia. Osoby znajdujące się naszej sieci społecznościowej powiązane będą relacją ,,znajomości" realizowaną przez krawędź \texttt{KNOWS}. Poza osobami, w bazie przechowywane będą również komentarze. Podobnie jak klasa \texttt{Person} będzie to prosta klasa z jednym polem (\texttt{content} odpowiadającemu treści komentarza). Będą one powiązane z osobami aż dwoma relacjami. Są nimi relacja ,,autorstwa" (\texttt{WROTE}) wiążąca komentarz z jego autorem oraz akcja ,,aprobaty" dla wpisu (\texttt{LIKES}). Poniżej przedstawiony jest fragment ze zdefiniowanymi klasami.
 
+\includegraphics[scale=0.5]{images/socialnetwork-data.png}
+
 \inputminted{scala}{listings/scala/examples/socialnetwork/domain-classes.scala}
 
 \subsection{Zapytania w sieci społecznościowej}
 
 Zapytania związane z osobami zostaną zdefiniowane w ramach obiekt Person (W Scali jest to tzw. obiekt stowarzyszony z klasą Person, o metodach obiektu można myśleć jak o statycznych metodach klasy Person).
 
-Poniżej przedstawione są jedne z prostszych zapytań służących do wydobywania znajomych danej osoby.
+Poniżej przedstawione jedno z prostszych zapytań służących do wydobywania znajomych danej osoby.
 
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-friends-query.scala}
 

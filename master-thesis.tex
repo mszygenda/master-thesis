@@ -433,9 +433,21 @@ Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W
 
 Zmiany dotknęły również języka Cypher który jak określają twórcy stał się bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
 
-\section{Potencjalne funkcjonalności}
+\section{Potencjalne funkcjonalności NeoDSL}
+
+NeoDSL nie jest skończonym narzędziem. Praca miała na celu zaprezentowanie wygodnego sposobu przeszukiwania baz grafowych w języku Scala, jednak do wykorzystania produkcyjnego potrzebnych jest kilka dodatkowych funkcjonalności.
 
 \subsection{Aktualizacja danych}
+
+Jedną z nich jest możliwość aktualizowania i wstawiania danych. W swojej bieżącej implementacji możliwe jest jedynie przeszukiwanie bazy bez jakiejkolwiek możliwośći zmian stanu. 
+
+Osiągnięcie tego celu ten możliwe byłoby z wykorzystaniem istniejących już struktur. Budowanie wzorców nie wymagałoby praktycznie żadnej zmiany a jedynym istotnym elementem byłaby implementacja zapytań oraz ich serializacja do języka Cypher.
+
+\subsection{Sortowanie oraz dodatkowe ograniczenia na wyniki}
+
+Obecnie możliwe jest definiowanie prostych ograniczeń na zwracane wyniki (jak porównanie wartości pól węzłów). Nie ma natomiast możliwości wyrażenia ograniczenia unikalności na zwracane wyniki czy też określania kolejności w jakiej będą one przekazywane. Oczywiście mowa tutaj o wyrażaniu tych ograniczeń w taki sposób aby mogły być one zrealizowane przez serwer bazy danych. Nic nie stoi na przeszkodzie aby skorzystać ze standardowych funkcjonalności kolekcji języka Scala i spełnić je po stronie klienta.
+
+Implementacja tego typu zachowań mogłaby zostać zrealizowana w podobny sposób w jaki możliwe jest nakładanie warunków na pola zwracanych węzłów tj. z wykorzystaniem makr. Konieczna byłaby bowiem analiza wyrażeń, które służą np. do wskazania pola po jakim powinno odbywać się sortowanie.
 
 % zakończenie 
 \summary

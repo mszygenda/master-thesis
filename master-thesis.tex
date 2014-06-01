@@ -218,7 +218,7 @@ Jednym z bardziej istotnych mechanizmów języka niespotykanym w takich językac
 
 \inputminted{scala}{listings/scala/pattern-matching-trees.scala}
 
-Pattern matching znajduje zastosowanie w neodsl chociażby na etapie serializacji struktury zapytań baz grafowych do języka natywnego obsługiwanego przez konkretną bazę.
+Pattern matching znajduje zastosowanie w NeoDSL chociażby na etapie serializacji struktury zapytań baz grafowych do języka natywnego obsługiwanego przez konkretną bazę.
 
 \chapter{Dostęp do baz danych z wykorzystaniem DSL}
 
@@ -265,9 +265,9 @@ Przykładowe zapytanie przedstawione jest poniżej
 
 \chapter{DSL do baz grafowych}
 
-W celu zaprezentowania jednego ze sposobów w jaki można wykorzystać bazy grafowe w nowoczesnych językach jak Scala powstało narzędzie ,,neodsl". Jest to DSL służący do obsługi baz grafowych. W bieżącej implementacji obsługiwana jest tylko jedna z nich, mianowicie Neo4j (stąd projekt wziął swą nazwę). 
+W celu zaprezentowania jednego ze sposobów w jaki można wykorzystać bazy grafowe w nowoczesnych językach jak Scala powstało narzędzie ,,NeoDSL". Jest to DSL służący do obsługi baz grafowych. W bieżącej implementacji obsługiwana jest tylko jedna z nich, mianowicie Neo4j (stąd projekt wziął swą nazwę). 
 
-Głównym elementem zapytań w przypadku baz grafowych są wzorce stąd narzędzie do ich obsługi powinno pozwalać na budowanie dowolnie długich dopasowań. Podobnie jak w bibliotece Squeryl, w ,,neodsl'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
+Głównym elementem zapytań w przypadku baz grafowych są wzorce stąd narzędzie do ich obsługi powinno pozwalać na budowanie dowolnie długich dopasowań. Podobnie jak w bibliotece Squeryl, w ,,NeoDSL'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
 
 \section{Definiowanie modelu}
 
@@ -307,12 +307,12 @@ Wynikiem powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tu
 
 \section{Nakładanie warunków na wyniki zapytań}
 
-Jednym z bardziej istotnych mechanizmów przy przeszukiwaniu baz danych jest możliwość nakładania warunków na zwracane wyniki. Założeniem projektu było aby dało się wyrażać warunki logiczne bez potrzeby wprowadzania nowej składni innej niż ta dostarczana przez sam język Scala. Oto przykład demonstrujący w jaki sposób można nakładać warunki na zapytania w neodsl.
+Jednym z bardziej istotnych mechanizmów przy przeszukiwaniu baz danych jest możliwość nakładania warunków na zwracane wyniki. Założeniem projektu było aby dało się wyrażać warunki logiczne bez potrzeby wprowadzania nowej składni innej niż ta dostarczana przez sam język Scala. Oto przykład demonstrujący w jaki sposób można nakładać warunki na zapytania w NeoDSL.
 
 \inputminted{scala}{listings/scala/dsl/query-with-simple-condition.scala}
 
 Aby osiągnąć ten cel potrzebny okazał się mechanizm pozwalający na analizę wyrażeń typu \texttt{Boolean}. W języku Scala zadanie to może być zrealizowane z wykorzystaniem tzw. makr. 
-Dzięki nim, możliwa jest podmiana wyrażenia typu \texttt{Boolean} na strukturę rozpoznawaną przez neodsl, która w efekcie końcowym zamieniana jest na zapytanie języka Cypher.
+Dzięki nim, możliwa jest podmiana wyrażenia typu \texttt{Boolean} na strukturę rozpoznawaną przez NeoDSL, która w efekcie końcowym zamieniana jest na zapytanie języka Cypher.
 
 \subsection{Makra}
 
@@ -328,7 +328,7 @@ W powyższym przykładzie zdefiniowane zostało makro o nazwie assert przyjmują
 
 \subsection{Przetwarzanie wyrażeń typu \texttt{Boolean}}
 
-Zastosowanie makr w przypadku neodsl polega na zamianie wyrażeń typu \texttt{Boolean} na własną strukturę którą będzie można w prosty sposób serializować do języka Cypher. 
+Zastosowanie makr w przypadku NeoDSL polega na zamianie wyrażeń typu \texttt{Boolean} na własną strukturę którą będzie można w prosty sposób serializować do języka Cypher. 
 Strukturę tę rozpoczyna cecha \texttt{Condition} której potomkami są takie klasy jak \texttt{And}, \texttt{Or}, \texttt{Not} które odpowiednio reprezentują koniunkcję, alternatywę i zaprzeczenie warunków oraz \texttt{PropertyComparison} która odpowiada porównaniu pól obiektów z dziedziny. Poniżej przedstawiony został diagram klas
 
 \includegraphics[scale=0.5]{images/conditions-uml.png}
@@ -383,7 +383,7 @@ WYKRES Z PORÓWNANIEM WYDAJNOŚCI REFLEKSJI VS BEZPOŚREDNI DOSTĘP
 
 Po wykonaniu zapytania baza danych zwraca wyniki w określonym przez siebie formacie. Może to być np. format JSON w przypadku REST--owej implementacji. Oczywiście narzędzia do obsługi bazy neo4j dostarczają natywnych narzędzi do obsługi wyników. Zajmują się one obsługą poszczególnych pól i rozpoznawaniem typu wartości. Stworzone narzędzie również udostępnia tego typu interfejsy mające na celu ujednolicić dostęp do różnych baz grafowych bądź różnych implementacji. Interfejsem opakowującym pojedyńczy wynik zapytania jest \texttt{ResultItem}. Zadaniem implementacji tego interfejsu jest dostarczanie struktury odwzorowania która dla określonej nazwy pola zwraca jego wartość otrzymaną z silnika bazy danych. Jedyną dostępną implementacją jest \texttt{Neo4jResultItem} które zajmuje się tłumaczeniem wyników otrzymanych z serwisu REST.
 
-Silnik obsługujący wybraną bazę grafową powinien implementować interfejs \texttt{ExecutionEngine}. Interfejs ten wymaga by jego implementacja dostarczała metodę \texttt{exec}. Metoda ta powinna dla każdego obsługiwanego przez neodsl zapytania zlecać jego wykonanie oraz zwracać wyniki w postaci kolekcji obiektów typu \texttt{ResultItem}.
+Silnik obsługujący wybraną bazę grafową powinien implementować interfejs \texttt{ExecutionEngine}. Interfejs ten wymaga by jego implementacja dostarczała metodę \texttt{exec}. Metoda ta powinna dla każdego obsługiwanego przez NeoDSL zapytania zlecać jego wykonanie oraz zwracać wyniki w postaci kolekcji obiektów typu \texttt{ResultItem}.
 
 Oczywiście \texttt{ResultItem} jest dość ogólnym typem i nie odpowiada strukturze stworzonej przez programistę wykorzystującego narzędzie. Potrzebny jest zatem mechanizm zajmujący się zamianą obiektów typu \texttt{ResultItem} na instancje klas wybranego typu definiowanego przez klienta aplikacji. Zadanie to realizuje \texttt{ObjectMapper}. Domyślna implementacja mappera tj. \texttt{NodeObjectMapper} wykorzystuje wspomniany już mechanizm refleksji. Tworzy on najpierw instancję danej klasy a następnie modyfikuje pola o takiej samej nazwie jak te określone w tablicy haszującej (dostępnej w obiektach typu \texttt{ResultItem}).
 
@@ -391,7 +391,7 @@ Ze względu na problemy wydajnościowe jakich dostarcza mechanizm refleksji zost
 
 \chapter{Przykłady wykorzystania NeoDSL}
 
-Rozdział ten ma na celu zaprezentowanie kompletnych przykładów zastosowania neodsl. Pierwszym z nich będzie sieć społecznościowa zawierająca kilka podstawowych relacji spotykanych w serwisach społecznościowych.
+Rozdział ten ma na celu zaprezentowanie kompletnych przykładów zastosowania NeoDSL. Pierwszym z nich będzie sieć społecznościowa zawierająca kilka podstawowych relacji spotykanych w serwisach społecznościowych.
 
 \subsection{Sieć społecznościowa}
 

@@ -1,5 +1,6 @@
 \documentclass[brudnopis]{xmgr}
 
+\usepackage{float}
 % minted listings
 \usepackage{minted}
 \usemintedstyle{trac}
@@ -70,7 +71,7 @@ Przykładowe zapytanie SQL do wyszukiwania znajomych znajomych osoby o imieniu A
 
 Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania.
 
-\begin{figure}
+\begin{figure}[H]
 	\includegraphics[scale=0.75]{images/relational-schema-friends-results.png}
 	\caption{Czas wykonania zapytań wraz ze wzrostem głębokości zapytania (Tabela pochodzi z książki ,,Graph Databases")}
 	\label{fig:mysqlvsneo4j_results}
@@ -388,29 +389,39 @@ Oczywiście \texttt{ResultItem} jest dość ogólnym typem i nie odpowiada struk
 
 Ze względu na problemy wydajnościowe jakich dostarcza mechanizm refleksji został wprowadzony mechanizm pamięci podręcznej dla informacji pozyskanych w sposób dynamiczny.
 
-\chapter{Przykłady wykorzystania}
+\chapter{Przykłady wykorzystania NeoDSL}
 
-W tym rozdziale postaram się zaprezentować kompletne przykłady zastosowania neodsl. Pierwszym z nich będzie sieć społecznościowa zawierająca kilka podstawowych relacji spotykanych w serwisach społecznościowych.
+Rozdział ten ma na celu zaprezentowanie kompletnych przykładów zastosowania neodsl. Pierwszym z nich będzie sieć społecznościowa zawierająca kilka podstawowych relacji spotykanych w serwisach społecznościowych.
 
 \subsection{Sieć społecznościowa}
 
-Sieć społecznościowa jest idealnym modelem do przechowywania w bazie grafowej. W naszej przykładowej sieci ,,NeoSocial" przechowywane będą osoby reprezentowane przez prostą klasę \texttt{Person}. Zawierać ona będzie tylko jedno pole \texttt{name} służące do przechowywania imienia. Osoby znajdujące się naszej sieci społecznościowej powiązane będą relacją ,,znajomości" realizowaną przez krawędź \texttt{KNOWS}. Poza osobami, w bazie przechowywane będą również komentarze. Podobnie jak klasa \texttt{Person} będzie to prosta klasa z jednym polem (\texttt{content} odpowiadającemu treści komentarza). Będą one powiązane z osobami aż dwoma relacjami. Są nimi relacja ,,autorstwa" (\texttt{WROTE}) wiążąca komentarz z jego autorem oraz akcja ,,aprobaty" dla wpisu (\texttt{LIKES}). Poniżej przedstawiony jest fragment ze zdefiniowanymi klasami.
+Sieci społecznościowe są idealnym przykładem do prezentowania zalet baz grafowych. Skupiają się one bowiem na relacjach występującymi między osobami takimi jak np. znajomość, partnerstwo. Silniki rekomendacji stosowane w serwisach społecznościowych dostarczają informacji o osobach które użytkownicy mogą znać bazując na powiązaniach znajomych. Proponują one również interesujące strony, informacje w oparciu gusta osób o podobnych zainteresowaniach. Implementacja takich zachowań w bazach grafowych jest niezwykle prosta a wyniki uzyskiwane są bardzo krótkim czasie. Oto przykładowy schemat sieci społecznościowej nazywanej dalej ,,NeoSocial".
 
-\includegraphics[scale=0.5]{images/socialnetwork-data.png}
+\begin{figure}[H]
+	\includegraphics[scale=0.5]{images/socialnetwork-data.png}
+	\caption{Przykładowa sieć społecznościowa ,,NeoSocial"}
+	\label{fig:neosocial_data}
+\end{figure}
+
+Elipsy reprezentują poszczególne węzły, napis w ich wnętrzu odpowiada imieniu osoby lub treści komentarza napisanego przez jednego z użytkowników. Wierzchołki połączone są następującymi krawędziami  ,,KNOWS" -- służącej do modelowania relacji ,,znajomości" pomiędzy osobami, ,,WROTE" -- wskazującej autora komentarza oraz ,,LIKES" łącząca osoby z komentarzami dla których wyrażają oni aprobatę.
+
+Aby odwzorować powyższą strukturę w NeoDSL potrzebne jest utworzenie prostej klasy \texttt{Person} do reprezentowania osób. Zawierać ona będzie pole \texttt{name} odpowiadające imieniu oraz pola odpowiadające relacjom w jakich może znajdować się osoba. Są to kolejno \texttt{knows} oraz \texttt{likes}. Do odwzorowania komentarzy służyć będzie klasa \texttt{Comment}. Składa się ona z pola \texttt{content} przechowującego treść wpisu oraz relacji \texttt{writtenBy}. Pełny fragment kodu znajduje się poniżej.
 
 \inputminted{scala}{listings/scala/examples/socialnetwork/domain-classes.scala}
 
 \subsection{Zapytania w sieci społecznościowej}
 
-Zapytania związane z osobami zostaną zdefiniowane w ramach obiekt Person (W Scali jest to tzw. obiekt stowarzyszony z klasą Person, o metodach obiektu można myśleć jak o statycznych metodach klasy Person).
+Zapytania związane z osobami zostaną zdefiniowane w ramach obiektu Person (W Scali jest to tzw. obiekt stowarzyszony z klasą Person, o jego metodach można myśleć jak o statycznych metodach klasy Person).
 
 Poniżej przedstawione jedno z prostszych zapytań służących do wydobywania znajomych danej osoby.
 
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-friends-query.scala}
 
-Ciekawszym i często używanym przykładem w kontekście baz grafowych jest zapytanie służące do wyszukiwania znajomych znajomych danej osoby. Oto ono zdefiniowane rprzy pomocy NeoDSL.
+Ciekawszym i często używanym przykładem w kontekście baz grafowych jest zapytanie służące do wyszukiwania znajomych znajomych danej osoby. Może być ono użyte przy implementacji silnika rekomendacji znajomych. Oto ono zdefiniowane przy pomocy NeoDSL.
 
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-fof-query.scala}
+
+Powyższe zapytanie uruchomione z argumentem reprezentującym wierzchołek ,,Jessica" \ref{fig:neosocial_data} zwróci dwa wyniki. Będą to węzły ,,Rupert" oraz ,,Anne".
 
 \chapter{Zmiany w Neo4j 2.0 względem 1.x}
 

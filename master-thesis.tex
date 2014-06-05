@@ -365,7 +365,7 @@ Jedną z nich jest \texttt{SelectSerializer}, która odpowiada za serializację 
 
 \subsection{Uwspólnianie nazw zmiennych}
 
-W zapytaniach języka Cypher węzłom oraz relacjom mogą zostać nadane nazwy służące do odwoływania się do nich w dalszych częściach zapytania. Ze względu na fakt iż poszczególne sekcje serializowane są w sposób niezależny potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja którą jest \texttt{BasicNameResolver} przydziela nazwy według następującej konwencji. Węzłom pojawiających się w zapytaniu o określonym wewnętrznym identyfikatorze przydzielona nazwa to wartość identyfikatora z prefixem ,,id\_", pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem ,,n\_". Przykładowe nazwy to np. ,,id\_10" przydzielona dla węzła o identyfkatorze równym 10 oraz ,,n\_2" która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
+W zapytaniach języka Cypher węzłom oraz relacjom nadawane są nazwy służące do odwoływania się do nich w dalszych częściach zapytania. Ze względu na fakt iż poszczególne sekcje serializowane są w sposób niezależny potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja którą jest \texttt{BasicNameResolver} przydziela nazwy według następującej konwencji. Węzłom pojawiających się w zapytaniu o określonym wewnętrznym identyfikatorze przydzielona nazwa to wartość identyfikatora z prefixem ,,id\_", pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem ,,n\_". Przykładowe nazwy to np. ,,id\_10" przydzielona dla węzła o identyfkatorze równym 10 oraz ,,n\_2" która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
 
 \section{Zwracanie wyników}
 
@@ -375,9 +375,25 @@ Istotnym zadaniem narzędzia miało być ukrycie wewnętrznych mechanizmów bazy
 
 Język Scala od wersji 2.10 udostępnia mechanizm refleksji dedykowany do tego języka. We wcześniejszych wersjach refleksja mogła być realizowana wyłącznie przy pomocy API udostępnianego razem z językiem Java. Refleksja pozwala na odczytywanie informacji o dowolnej klasie w trakcie działania programu. Informacje jakie można uzyskać to np. zdefiniowane pola, metody czy w szczególności konstruktory. Poza informacją o dostępnych polach istnieje również możliwość ich modyfikacji, wywoływania metod czy tworzenia instancji danego typu. Jest to zatem nieodzowny mechanizm stosowany przy implementacji narzędzi tworzących obiekty w sposób dynamiczny.
 
-Oczywistą wadą refleksji jest dużo mniejsza wydajność niż w przypadku bezpośredniego operowania na klasie.
+Oczywistą wadą refleksji jest mniejsza wydajność niż w przypadku bezpośredniego operowania na klasie. Na maszynie testowej o poniższych parametrach został wykonany pomiar wydajnościowy porównujący wydajność tworzenia instancji prostych obiektów w sposób bezpośredni, z wykorzystaniem refleksji oraz z refleksją wraz z mechanizmem cache--owania
 
-WYKRES Z PORÓWNANIEM WYDAJNOŚCI REFLEKSJI VS BEZPOŚREDNI DOSTĘP
+\begin{tabular}{|l|l|l|l|}
+  \hline 
+  \textbf{Procesor} & \textbf{Pamięć RAM} & \textbf{Wersja Javy} & \textbf{Rozmiar Sterty} \\
+  \hline
+  Core 2 Duo 2.4 GHz & 4 GB & 1.7.0\_01 & 1024 MB \\
+  \hline
+\end{tabular} 
+
+Oto wyniki tego pomiaru przedstawiające jak wiele razy refleksja okazała się wolniejsza od bezpośredniego operowania na klasie.
+
+\begin{figure}[H]
+	\includegraphics[scale=0.6]{images/reflection-comparison.png}
+	\caption{Porównanie wydajnościowe refleksji w Scali}
+	\label{fig:reflection_comparison}
+\end{figure}
+
+Z powyższego wykresu wynika iż refleksja w podstawowym użyciu jest jest wyraźnie wolniejsza (aż 28 razy) jednak po zastosowaniu mechanizmu pamięci podręcznej wydajność tego mechanizmu znajduje się na akceptowalnym poziomie.
 
 \subsection{Mapper obiektowy}
 
@@ -441,13 +457,17 @@ NeoDSL nie jest skończonym narzędziem. Praca miała na celu zaprezentowanie wy
 
 Jedną z nich jest możliwość aktualizowania i wstawiania danych. W swojej bieżącej implementacji możliwe jest jedynie przeszukiwanie bazy bez jakiejkolwiek możliwośći zmian stanu. 
 
-Osiągnięcie tego celu ten możliwe byłoby z wykorzystaniem istniejących już struktur. Budowanie wzorców nie wymagałoby praktycznie żadnej zmiany a jedynym istotnym elementem byłaby implementacja zapytań oraz ich serializacja do języka Cypher.
+Osiągnięcie tego celu ten możliwe byłoby z wykorzystaniem istniejących już struktur. Budowanie wzorców nie wymagałoby praktycznie żadnej zmiany a jedynym istotnym elementem byłaby implementacja zapytań oraz ich serializacja do języka Cypher. Poniżej przykład potencjalnej implementacji.
+
+\inputminted{scala}{listings/scala/missing-features-update.scala}
 
 \subsection{Sortowanie oraz dodatkowe ograniczenia na wyniki}
 
 Obecnie możliwe jest definiowanie prostych ograniczeń na zwracane wyniki (jak porównanie wartości pól węzłów). Nie ma natomiast możliwości wyrażenia ograniczenia unikalności na zwracane wyniki czy też określania kolejności w jakiej będą one przekazywane. Oczywiście mowa tutaj o wyrażaniu tych ograniczeń w taki sposób aby mogły być one zrealizowane przez serwer bazy danych. Nic nie stoi na przeszkodzie aby skorzystać ze standardowych funkcjonalności kolekcji języka Scala i spełnić je po stronie klienta.
 
-Implementacja tego typu zachowań mogłaby zostać zrealizowana w podobny sposób w jaki możliwe jest nakładanie warunków na pola zwracanych węzłów tj. z wykorzystaniem makr. Konieczna byłaby bowiem analiza wyrażeń, które służą np. do wskazania pola po jakim powinno odbywać się sortowanie.
+Implementacja tego typu zachowań mogłaby zostać zrealizowana w podobny sposób w jaki możliwe jest nakładanie warunków na pola zwracanych węzłów tj. z wykorzystaniem makr. Konieczna byłaby bowiem analiza wyrażeń, które służą np. do wskazania pola po jakim powinno odbywać się sortowanie. Poniżej przykład tego w jaki sposób mogłoby wyglądać wykorzystanie mechanizmu.
+
+\inputminted{scala}{listings/scala/missing-query-features.scala}
 
 % zakończenie 
 \summary

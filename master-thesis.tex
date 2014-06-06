@@ -83,14 +83,14 @@ Jak można zaobserować na powyższym przykładzie, różnica pomiędzy MySQL i 
 
 \subsection{Bazy z relacyjnym magazynem danych}
 
-Rozróżniamy dwa główne rodzaje baz grafowych. Pierwszym z nich są bazy które pozwalają operować na przechowywanych danych jak na grafach, mających jednak odmienny sposób składowania danych. Popularnym rozwiązaniem jest np. przechowywanie struktury grafowej w bazach relacyjnych. Niestety takie rozwiązanie nie pozwala na pełne wykorzystanie potencjału drzemiącego w przechowywaniu danych w postaci grafów. Przykładem takiej bazy jest FlockDB która znajduje zastosowanie w popularnym serwisie społecznościowym Twitter. Ze względu na małą uniwersalność tego typu rozwiązań (zazwyczaj są one dostosowane do konkretnego przypadku użycia) bazy tego typu nie będą omawiane w tej pracy.
+Rozróżniamy dwa główne rodzaje baz grafowych. Pierwszym z nich są bazy które pozwalają operować na przechowywanych danych jak na grafach, mających jednak odmienny sposób składowania danych. Popularnym rozwiązaniem jest np. przechowywanie struktury grafowej w bazach relacyjnych. Niestety takie rozwiązanie nie pozwala na pełne wykorzystanie potencjału drzemiącego w przechowywaniu danych w postaci grafów. Przykładem takiej bazy jest FlockDB\cite{flockdb} która znajduje zastosowanie w popularnym serwisie społecznościowym Twitter. Ze względu na małą uniwersalność tego typu rozwiązań (zazwyczaj są one dostosowane do konkretnego przypadku użycia) bazy tego typu nie będą omawiane w tej pracy.
 
 \subsection{Bazy z grafowym magazynem danych}
 Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko przedstawiają dane w formie grafów ale również wykorzystują strukturę grafów do ich składowania. Zaletą takiego podejścia jest to iż przeszukiwanie może okazać się o wiele wydajniejsze niż równoważne zapytanie do bazy z relacyjnym magazynem danych. Powodem tego jest lokalność operacji wykonywanych na grafie. W odróżnieniu od baz relacyjnych gdzie by wyszukać dane powiązane pewną relacją wymagane jest wykonanie iloczynu kartezjańskiego na całych zbiorach danych. W przypadku ogromnej liczby rekordów taka operacja może okazać się wielce niewydajna. W przypadku baz grafowych nie ma potrzeby odwiedzania wszystkich danych bowiem poruszamy się tylko w obrębie obiektów w bezpośredni sposób związanych ze sobą krawędziami. Przykładem takiej bazy jest np. Neo4J której została poświęcona znaczna część tej pracy.
 
 \chapter{Neo4j}
 
-Neo4j jest natywną bazą grafową napisaną w języku Java. Pozwala ona na przechowywanie węzłów jak i relacji wraz z polami typów prostych takimi jak napisy czy liczby. W implementacji zostało zastosowanych wiele mechanizmów mających na celu osiąnięcie jak najlepszej wydajności przy przeszukiwaniu grafów. Warto tutaj wymienić chociażby sposób w jaki zapisywana jest informacja o krawędziach wychodzących z wierzchołka. Otóż, aby odczytać listę krawędzi dla danego wierzchołka nie ma potrzeby korzystania z żadnego pośredniczącego indeksu, informację tę można odczytać bezpośrednio w jednym kroku (ang. Index-Free Adjacency). Wierzchołki i krawędzie są natomiast zapisywane w plikach w których każdy rekord jest stałego rozmiaru. Pozwala to na bardzo szybkie odczytywanie danych bez konieczności przeglądania pliku w celu odnalezienia właściwego rekordu (wystarczy pomnożyć rozmiar rekordu relacji bądź węzła przez jego identyfikator by uzyskać lokalizację w pliku).
+Neo4j jest natywną bazą grafową napisaną w języku Java. Pozwala ona na przechowywanie węzłów jak i relacji wraz z polami typów prostych takimi jak napisy czy liczby. W implementacji zostało zastosowanych wiele mechanizmów mających na celu osiąnięcie jak najlepszej wydajności przy przeszukiwaniu grafów. Warto tutaj wymienić chociażby sposób w jaki zapisywana jest informacja o krawędziach wychodzących z wierzchołka. Otóż, aby odczytać listę krawędzi dla danego wierzchołka nie ma potrzeby korzystania z żadnego pośredniczącego indeksu, informację tę można odczytać bezpośrednio w jednym kroku (ang. Index-Free Adjacency\cite[s.~5]{Robinson:2013:GD}). Wierzchołki i krawędzie są natomiast zapisywane w plikach w których każdy rekord jest stałego rozmiaru. Pozwala to na bardzo szybkie odczytywanie danych bez konieczności przeglądania pliku w celu odnalezienia właściwego rekordu (wystarczy pomnożyć rozmiar rekordu relacji bądź węzła przez jego identyfikator by uzyskać lokalizację w pliku).
 
 Neo4j jest wydajną i jedną z bardziej rozpoznawalnych baz grafowych. Z tego powodu została ona wybrana do implementacji narzędzia będącego przedmiotem tej pracy.
 
@@ -234,7 +234,7 @@ Rozdział ten ma na celu przedstawienie istniejących rozwiązań dla baz relacy
 
 Sztandarowym przykładem DSLa bazodanowego dla języka Scala jest projekt Squeryl. Umożliwia on zdefiniowanie struktury bazy danych w kodzie programu a następnie budowania zapytań z wykorzystaniem zdefiniowanej wcześniej struktury.
 
-Pierwszym etapem w przypadku narzędzia Squeryl jest stworzenie odwzorowania struktury bazy danych. Definiuje się ją z wykorzystaniem zwykłych klas języka Scala oraz specjalnej klasy Schema. Przykładowa struktura (przykład z dokumentacji Squeryla)
+Pierwszym etapem w przypadku narzędzia Squeryl jest stworzenie odwzorowania struktury bazy danych. Definiuje się ją z wykorzystaniem zwykłych klas języka Scala oraz specjalnej klasy Schema. Przykładowa struktura (przykład z dokumentacji Squeryla\cite{squeryl_schemadefinition})
 
 \inputminted{scala}{listings/scala/squeryl-schema.scala}
 
@@ -253,7 +253,8 @@ Zastosowanie języka dziedzionowego pozwala w pełniejszy sposób wykorzystać m
 MongoDB jest jedną z popularniejszych baz dokumentowych. Pozwala ona na przechowywanie tzw. dokumentów tj. złożonych wartości które mogą być dowolnie zagnieżdżane. Oferuje ona dużą wydajność kosztem zerwania normalizacją i brakiem transakcyjności.
 
 \subsection{Rogue}
-Jedną z bibliotek do obsługi MongoDB z poziomu języka Scala jest Rogue. Podobnie jak Squeryl udostępnia ona DSL służący do budowania zapytań. Oto przykładowa klasa modelu składowanego w MongoDB
+
+Jedną z bibliotek do obsługi MongoDB z poziomu języka Scala jest Rogue. Podobnie jak Squeryl udostępnia ona DSL służący do budowania zapytań. Oto przykładowa klasa modelu składowanego w MongoDB.
 
 \inputminted{scala}{listings/scala/rogue-model.scala}
 
@@ -265,9 +266,9 @@ Przykładowe zapytanie przedstawione jest poniżej
 
 \chapter{DSL do baz grafowych}
 
-W celu zaprezentowania jednego ze sposobów w jaki można wykorzystać bazy grafowe w nowoczesnych językach jak Scala powstało narzędzie ,,NeoDSL". Jest to DSL służący do obsługi baz grafowych. W bieżącej implementacji obsługiwana jest tylko jedna z nich, mianowicie Neo4j (stąd projekt wziął swą nazwę). 
+W celu zaprezentowania jednego ze sposobów w jaki można wykorzystać bazy grafowe w nowoczesnych językach jak Scala powstało narzędzie ,,NeoDSL" (\url{https://github.com/mszygenda/neodsl}). Jest to DSL służący do obsługi baz grafowych. W bieżącej implementacji obsługiwana jest tylko jedna z nich, mianowicie Neo4j (stąd projekt wziął swą nazwę). 
 
-Głównym elementem zapytań w przypadku baz grafowych są wzorce stąd narzędzie do ich obsługi powinno pozwalać na budowanie dowolnie długich dopasowań. Podobnie jak w bibliotece Squeryl, w ,,NeoDSL'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
+Podobnie jak w bibliotece Squeryl, w ,,NeoDSL'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
 
 \section{Definiowanie modelu}
 
@@ -316,7 +317,7 @@ Dzięki nim, możliwa jest podmiana wyrażenia typu \texttt{Boolean} na struktur
 
 \subsection{Makra}
 
-Makra są eksperymentalną funkcjonalnością języka Scala wprowadzone w wersji WERSJA. Są one, podobnie jak w przypadku makr znanych z języka C, wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie definiują żadnego specyficznego dla tego typu zadań mini-języka. Zamiast tego mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężny mechanizm.
+Makra są eksperymentalną funkcjonalnością języka Scala wprowadzone w wersji 2.10.0. Są one, podobnie jak w przypadku makr znanych z języka C, wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie definiują żadnego specyficznego dla tego typu zadań mini-języka. Zamiast tego mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężny mechanizm.
 
 Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt (w językach typu Java realizowany za pomocą wzorca Singleton, w Scali istnieje dedykowana instrukcja) z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała a jedynie słowo kluczowe \texttt{macro} wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Zawiera ona dwie listy parametrów. Pierwsza z nich zawiera jeden parametr tzw. kontekst (typu \texttt{Context}) skupiający w sobie wszystkie zebrane przez kompilator informacje na temat kodu programu. Druga lista zawiera drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
 
@@ -427,7 +428,7 @@ Aby odwzorować powyższą strukturę w NeoDSL potrzebne jest utworzenie prostej
 
 \subsection{Zapytania w sieci społecznościowej}
 
-Zapytania związane z osobami zostaną zdefiniowane w ramach obiektu Person (W Scali jest to tzw. obiekt stowarzyszony z klasą Person, o jego metodach można myśleć jak o statycznych metodach klasy Person).
+Zapytania związane z osobami zostaną zdefiniowane w ramach obiektu \texttt{Person} (W Scali jest to tzw. obiekt stowarzyszony z klasą \texttt{Person}, o jego metodach można myśleć jak o statycznych metodach klasy \texttt{Person}).
 
 Poniżej przedstawione jedno z prostszych zapytań służących do wydobywania znajomych danej osoby.
 
@@ -438,16 +439,6 @@ Ciekawszym i często używanym przykładem w kontekście baz grafowych jest zapy
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-fof-query.scala}
 
 Powyższe zapytanie uruchomione z argumentem reprezentującym wierzchołek ,,Jessica" \ref{fig:neosocial_data} zwróci dwa wyniki. Będą to węzły ,,Rupert" oraz ,,Anne".
-
-\chapter{Zmiany w Neo4j 2.0 względem 1.x}
-
-Stworzone narzędzie było projektowane z myślą o wersji 1.9.x która w momencie pisania większej części pracy była obowiązującym stabilnym wydaniem. Wersja druga przyniosła znaczące zmiany, które wymagają omówienia (stoją one w sprzeczności z częścią opisanych tu mechanizmów).
-
-Jedną z bardziej istotnych zmian jest tak zwany mechanizm etykietowania który pozwala na grupowanie węzłów. Poza możliwością określenia typu każdego węzła możliwe stało się nakładanie tzw. więzów (ang. Constraints) na określone typy. Pozwala to na definiowanie czegoś w rodzaju schematu bazy danych znanego z baz relacyjnych. Pojawienie się mechanizmu etykiet miało również wpływ na rozszerzenie języka Cypher. Możliwe jest np. wyszukiwanie wzorców z węzłami określonego typu.
-
-Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W przypadku wydań z serii 1.x narzut związany z obsługą indeksowania był zrzucony na programistę. W dodatku by wykorzystać dany indeks w zapytaniu trzeba było zażądać tego w sposób jawny w sekcji \texttt{START}. Obecnie indeksy przypominają w dużo większym stopniu funkcjonalność znaną z baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w zapytaniu, natomiast samo zarządzanie nimi stało się możliwe z poziomu języka Cypher.
-
-Zmiany dotknęły również języka Cypher który jak określają twórcy stał się bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
 
 \section{Potencjalne funkcjonalności NeoDSL}
 
@@ -471,13 +462,20 @@ Implementacja tego typu zachowań mogłaby zostać zrealizowana w podobny sposó
 
 % zakończenie 
 \summary
-Podsumowanie
+
+Wykorzystanie języka dziedzinowego do obsługi bazy danych daje duże możliwości.
 
 % załączniki (opcjonalnie):
 \appendix
-\chapter{Tytuł załącznika jeden}
+\chapter{Zmiany w Neo4j 2.0 względem 1.x}
 
-Treść załącznika jeden.
+Stworzone narzędzie było projektowane z myślą o wersji 1.9.x która w momencie pisania większej części pracy była obowiązującym stabilnym wydaniem. Wersja druga przyniosła znaczące zmiany, które wymagają omówienia (stoją one w sprzeczności z częścią opisanych tu mechanizmów).
+
+Jedną z bardziej istotnych zmian jest tak zwany mechanizm etykietowania który pozwala na grupowanie węzłów. Poza możliwością określenia typu każdego węzła możliwe stało się nakładanie tzw. więzów (ang. Constraints) na określone typy. Pozwala to na definiowanie czegoś w rodzaju schematu bazy danych znanego z baz relacyjnych. Pojawienie się mechanizmu etykiet miało również wpływ na rozszerzenie języka Cypher. Możliwe jest np. wyszukiwanie wzorców z węzłami określonego typu.
+
+Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W przypadku wydań z serii 1.x narzut związany z obsługą indeksowania był zrzucony na programistę. W dodatku by wykorzystać dany indeks w zapytaniu trzeba było zażądać tego w sposób jawny w sekcji \texttt{START}. Obecnie indeksy przypominają w dużo większym stopniu funkcjonalność znaną z baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w zapytaniu, natomiast samo zarządzanie nimi stało się możliwe z poziomu języka Cypher.
+
+Zmiany dotknęły również języka Cypher który jak określają twórcy stał się bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
 
 % literatura (obowiązkowo):
 \nocite{*}

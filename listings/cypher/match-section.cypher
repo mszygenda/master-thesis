@@ -1,1 +1,1 @@
-MATCH john-[:KNOWS]->friend->[:LIKES]->comment
+MATCH john-[:KNOWS]->friend-[:LIKES]->comment

@@ -1,3 +1,3 @@
 CREATE 
-newFriend { name: "New friend" },
+newFriend={ name: "New friend" },
 john-[:KNOWS]->newFriend

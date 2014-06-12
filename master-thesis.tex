@@ -82,10 +82,10 @@ Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajom
       \hline 
       \textbf{Głębokość} & \textbf{Czas wykonania dla MySQL} & \textbf{Czas wykonania dla Neo4j} & \textbf{Ilość wyników} \\
       \hline
-      2 & 0.016 & 0.01 & {~}2500 \\
-      3 & 30.267 & 0.168 & {~}110000 \\
-      4 & 1543.505 & 1.359 & {~}600000 \\
-      5 & Nieukończone & 2.132 & {~}800000 \\
+      2 & 0.016 sekund & 0.01 sekund & {~}2500 \\
+      3 & 30.267 sekund & 0.168 sekund & {~}110000 \\
+      4 & 1543.505 sekund & 1.359 sekund & {~}600000 \\
+      5 & Nieukończone & 2.132 sekund & {~}800000 \\
       \hline
    \end{tabular} 
     \caption{Czas wykonania (w sekundach) zapytań wraz ze wzrostem głębokości zapytania (Wyniki pochodzą z książki ,,Neo4j in action"\cite{neo4jinaction})}
@@ -101,7 +101,7 @@ Jak można zaobserować na powyższym przykładzie, różnica pomiędzy MySQL i 
 Rozróżniamy dwa główne rodzaje baz grafowych. Pierwszym z nich są bazy które pozwalają operować na przechowywanych danych jak na grafach, mających jednak odmienny sposób składowania danych. Popularnym rozwiązaniem jest np. przechowywanie struktury grafowej w bazach relacyjnych. Niestety takie rozwiązanie nie pozwala na pełne wykorzystanie potencjału drzemiącego w przechowywaniu danych w postaci grafów. Przykładem takiej bazy jest FlockDB\cite{flockdb} która znajduje zastosowanie w popularnym serwisie społecznościowym Twitter. Ze względu na małą uniwersalność tego typu rozwiązań (zazwyczaj są one dostosowane do konkretnego przypadku użycia) bazy tego typu nie będą omawiane w tej pracy.
 
 \subsection{Bazy z grafowym magazynem danych}
-Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko przedstawiają dane w formie grafów ale również wykorzystują strukturę grafów do ich składowania. Zaletą takiego podejścia jest to iż przeszukiwanie może okazać się o wiele wydajniejsze niż równoważne zapytanie do bazy z relacyjnym magazynem danych. Powodem tego jest lokalność operacji wykonywanych na grafie. W odróżnieniu od baz relacyjnych gdzie by wyszukać dane powiązane pewną relacją wymagane jest wykonanie iloczynu kartezjańskiego na całych zbiorach danych. W przypadku ogromnej liczby rekordów taka operacja może okazać się wielce niewydajna. W przypadku baz grafowych nie ma potrzeby odwiedzania wszystkich danych bowiem poruszamy się tylko w obrębie obiektów w bezpośredni sposób związanych ze sobą krawędziami. Przykładem takiej bazy jest np. Neo4J której została poświęcona znaczna część tej pracy.
+Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko przedstawiają dane w formie grafów ale również wykorzystują strukturę grafów do ich składowania. Zaletą takiego podejścia jest to iż przeszukiwanie może okazać się o wiele wydajniejsze niż równoważne zapytanie do bazy z relacyjnym magazynem danych. Powodem tego jest lokalność operacji wykonywanych na grafie. W odróżnieniu od baz relacyjnych gdzie by wyszukać dane powiązane pewną relacją wymagane jest wykonanie iloczynu kartezjańskiego na całych zbiorach danych. W przypadku ogromnej liczby rekordów taka operacja może okazać się wielce niewydajna. W przypadku baz grafowych nie ma potrzeby odwiedzania wszystkich danych bowiem poruszamy się tylko w obrębie obiektów w bezpośredni sposób związanych ze sobą krawędziami. Przykładem takiej bazy jest np. Neo4j której została poświęcona znaczna część tej pracy.
 
 \chapter{Neo4j}
 
@@ -120,7 +120,7 @@ Sekcja \texttt{START} pozwala na ustalenie węzłów startowych od których zacz
 
 \inputminted{cypher}{listings/cypher/start-section.cypher}
 
-Sekcja \texttt{MATCH} jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić relacje pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać znajomych johna ,,lubiących" komentarz wskazywany przez zmienną \texttt{comment}
+Sekcja \texttt{MATCH} jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić interesujące złączenia pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać znajomych johna ,,lubiących" komentarz wskazywany przez zmienną \texttt{comment}
 
 \inputminted{cypher}{listings/cypher/match-section.cypher}
 
@@ -166,7 +166,7 @@ Do rozpoczęcia pracy potrzebna jest instancja bazy. Można ją utworzyć (lub s
 
 Powyższy fragment kodu powinien utworzyć instancję bazy pod ścieżką ,,/tmp/neo4j".
 
-Z wykorzystaniem tak utworzonej bazy danych możliwe jest wstawianie oraz odczytywanie węzłów i relacji. Oto przykładowy fragment kodu demonstrujący podstawowe operacje.
+Z wykorzystaniem tak utworzonej bazy danych możliwe jest wstawianie oraz odczytywanie węzłów i relacji. Oto fragment kodu demonstrujący podstawowe operacje.
 
 \inputminted{java}{listings/java/neo4j-core-api-use.java}
 
@@ -207,7 +207,7 @@ Języki takie jak Java, C\# czy C++ są obiektowymi językami programowania opar
 \subsection{Podstawy składni}
 Składnia Scali była inspirowana takimi językami jak C\# czy Java stąd doświadczonym programistom nie powinno sprawiać trudności czytanie kodu języka Scala. Oczywiście jak zostało to już wspomniane w odróżnieniu od wspomnianych języków Scala wprowadza szereg usprawnień wpływających na zwięzłość pisanego kodu. Nie ma np. potrzeby kończenia każdej linii średnikiem czy jawnego określania typu każdej zmiennej (o ile system interferencji jest w stanie określić jej typ).
 
-Istotną różnicą w stosunku do Javy czy C\# wpływającą na czytelność kodu jest sposób w jaki definiuje się zmienne czy parametry metod. Mianowicie, najpierw określa się ich nazwy a w drugiej kolejności typ (który może być całkowicie pominięty jeśli da się go określić z systemu inferencji). Taka kolejność wynika z faktu iż programista czytający kod bardziej zainteresowany jest nazwą aniżeli typem zmiennej. Poniżej kilka przykładowych deklaracji stałych i zmiennych.
+Istotną różnicą w stosunku do Javy czy C\# wpływającą na czytelność kodu jest sposób w jaki definiuje się zmienne czy parametry metod. Mianowicie, najpierw określa się ich nazwy a w drugiej kolejności typ (który może być całkowicie pominięty jeśli da się go określić z systemu inferencji). Taka kolejność umotywowana jest tym iż programista czytający kod bardziej zainteresowany jest nazwą aniżeli typem zmiennej. Poniżej kilka przykładowych deklaracji stałych i zmiennych.
 
 \inputminted{scala}{listings/scala/val-var-declarations.scala}
 
@@ -248,7 +248,7 @@ Rozdział ten ma na celu przedstawienie istniejących rozwiązań dla baz relacy
 
 \subsection{Squeryl}
 
-Sztandarowym przykładem DSLa bazodanowego dla języka Scala jest projekt Squeryl. Umożliwia on zdefiniowanie struktury bazy danych w kodzie programu a następnie budowania zapytań z jej wykorzystaniem.
+Sztandarowym przykładem DSLa bazodanowego dla języka Scala jest projekt Squeryl. Umożliwia on definiowanie struktury bazy danych w kodzie programu a następnie budowanie zapytań z jej wykorzystaniem.
 
 Pierwszym etapem w przypadku narzędzia Squeryl jest stworzenie odwzorowania struktury bazy danych. Definiuje się je z wykorzystaniem zwykłych klas języka Scala oraz specjalnej cechy \texttt{Schema}. Przykładowa struktura (przykład z dokumentacji Squeryla\cite{squeryl_schemadefinition})
 
@@ -274,7 +274,7 @@ Jedną z bibliotek do obsługi MongoDB z poziomu języka Scala jest Rogue. Podob
 
 \inputminted{scala}{listings/scala/rogue-model.scala}
 
-Jak można zauważyć na powyższym przykładzie do definiowania pól konieczne jest tworzenie obiektów rozszerzających cechę Field. Skutkuje to tym iż do osiągnięcia takich samych rezultatów jak w przypadku Squeryla potrzebne jest napisanie nieco więcej kodu. Zaprezentowane rozwiązanie ma jednak tę zaletę iż dzięki specjalnym typom jak np. LongField dużo łatwiejsze stało się tworzenie DSLa który nie musi zajmować się obsługą typów wbudowanych w język Scala.
+Jak można zauważyć na powyższym przykładzie do definiowania pól konieczne jest tworzenie obiektów rozszerzających cechę \texttt{Field}. Skutkuje to tym iż do osiągnięcia takich samych rezultatów jak w przypadku Squeryla potrzebne jest napisanie nieco więcej kodu. Zaprezentowane rozwiązanie ma jednak tę zaletę iż dzięki specjalnym typom jak np. \texttt{LongField} dużo łatwiejsze stało się tworzenie DSLa który nie musi zajmować się obsługą typów wbudowanych w język Scala.
 
 Przykładowe zapytanie przedstawione jest poniżej
 
@@ -284,7 +284,7 @@ Przykładowe zapytanie przedstawione jest poniżej
 
 W celu zaprezentowania jednego ze sposobów w jaki można wykorzystać bazy grafowe w nowoczesnych językach jak Scala powstało narzędzie ,,NeoDSL" (\url{https://github.com/mszygenda/neodsl}). Jest to DSL służący do obsługi baz grafowych. W bieżącej implementacji obsługiwana jest tylko jedna z nich, mianowicie Neo4j (stąd projekt wziął swą nazwę). 
 
-Podobnie jak w bibliotece Squeryl, w ,,NeoDSL'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla definiowanie struktury odbywa się wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
+Podobnie jak w bibliotece Squeryl, w ,,NeoDSL'' przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla, odbywa się to wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ręcznego pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
 
 \section{Definiowanie modelu}
 
@@ -320,7 +320,9 @@ Oto przykładowe złożenie kilku wzorców. Wykorzystana została tutaj zaprezen
 
 \inputminted{scala}{listings/scala/dsl/patterns/functional-example-1.scala}
 
-Wynikiem powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tutaj bowiem do czynienia z trzema wzorcami połączonymi operatorem logicznym ,,and". 
+Wynikiem powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tutaj bowiem do czynienia z trzema wzorcami połączonymi operatorem logicznym ,,and". Wzorzec ten odpowiada poniższej sekcji ,,MATCH" języka Cypher.
+
+\inputminted{cypher}{listings/cypher/patterns-dsl-example.cypher}
 
 \section{Nakładanie warunków na wyniki zapytań}
 
@@ -333,9 +335,9 @@ Dzięki nim, możliwa jest podmiana wyrażenia typu \texttt{Boolean} na struktur
 
 \subsection{Makra}
 
-Makra są eksperymentalną funkcjonalnością języka Scala wprowadzone w wersji 2.10.0. Są one, podobnie jak w przypadku makr znanych z języka C, wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie definiują żadnego specyficznego dla tego typu zadań mini-języka. Zamiast tego mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężny mechanizm.
+Makra są eksperymentalną funkcjonalnością języka Scala wprowadzoną w wersji 2.10.0. Są one, podobnie jak w przypadku makr znanych z języka C, wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie definiują żadnego specyficznego dla tego typu zadań mini-języka. Zamiast tego mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężny mechanizm.
 
-Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt (w językach typu Java realizowany za pomocą wzorca Singleton, w Scali istnieje dedykowana instrukcja) z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała a jedynie słowo kluczowe \texttt{macro} wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Zawiera ona dwie listy parametrów. Pierwsza z nich zawiera jeden parametr tzw. kontekst (typu \texttt{Context}) skupiający w sobie wszystkie zebrane przez kompilator informacje na temat kodu programu. Druga lista zawiera drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
+Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt (w językach typu Java realizowany za pomocą wzorca Singleton, w Scali istnieje dedykowana instrukcja) z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała a jedynie słowo kluczowe \texttt{macro} wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Zawiera ona dwie listy parametrów. Pierwsza z nich zawiera jeden parametr tzw. kontekst (typu \texttt{Context}), który udostępnia niezbędne metody do modyfikacji kodu. Druga lista zawiera drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
 
 Przykładowa definicja makra powinna nieco rozjaśnić sposób ich użycia.
 
@@ -456,7 +458,10 @@ Ciekawszym i często używanym przykładem w kontekście baz grafowych jest zapy
 
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-fof-query.scala}
 
-Powyższe zapytanie uruchomione z argumentem reprezentującym wierzchołek ,,Jessica" \ref{fig:neosocial_data} zwróci dwa wyniki. Będą to węzły ,,Rupert" oraz ,,Anne".
+Uruchomienie powyższego zapytania z argumentem reprezentującym wierzchołek ,,Jessica" zwróci węzły ,,Anne" oraz ,,Rupert"\ref{fig:neosocial_data}.
+
+\inputminted{scala}{listings/scala/examples/socialnetwork/person-fof-result.scala}
+\inputminted{text}{listings/text/person-fof-result.txt}
 
 \section{Potencjalne funkcjonalności NeoDSL}
 
@@ -495,7 +500,7 @@ Jedną z bardziej istotnych zmian jest tak zwany mechanizm etykietowania który 
 
 Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W przypadku wydań z serii 1.x narzut związany z obsługą indeksowania był zrzucony na programistę. W dodatku by wykorzystać dany indeks w zapytaniu trzeba było zażądać tego w sposób jawny w sekcji \texttt{START}. Obecnie indeksy przypominają w dużo większym stopniu funkcjonalność znaną z baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w zapytaniu, natomiast samo zarządzanie nimi stało się możliwe z poziomu języka Cypher.
 
-Zmiany dotknęły również języka Cypher który jak określają twórcy stał się bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
+Zmiany dotknęły również języka Cypher który jak określają twórcy stał się jeszcze bardziej deklaratywny. Istotną zmianą jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
 
 % literatura (obowiązkowo):
 \nocite{*}

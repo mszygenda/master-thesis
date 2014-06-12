@@ -6,7 +6,7 @@ val patterns = { john knows matthew } and
 patterns.create
 
 // Węzeł który nie istnieje w bazie
-val newPerson = Person("Andy")
+val andy = Person("Andy")
 
 // Utworzenie nowego węzła i relacji w jednym kroku
 { 

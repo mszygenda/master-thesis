@@ -1,0 +1,6 @@
+Serialized query into: START n_1=node:node_auto_index(name='Jessica')
+MATCH n_1-[:KNOWS]-n_2-[:KNOWS]-n_3
+RETURN id(n_3) AS `n_3.id`,n_3.name
+
+res1: Seq[org.neodsl.tests.example.socialnetwork.Person] = 
+List(Person(Anne), Person(Rupert))

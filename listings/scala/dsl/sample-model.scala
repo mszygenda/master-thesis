@@ -1,7 +1,7 @@
 case class Person(name: String, surname: String) extends DomainObject[Person] {
   val knows = -->[Person]("KNOWS")
-  val likes = -->[Likeable]("LIKES")
   val wrote = -->[Comment]("WROTE")
+  val likes = -->[Comment]("LIKES")
 }
 
 case class Comment(content: String) extends DomainObject[Comment] {

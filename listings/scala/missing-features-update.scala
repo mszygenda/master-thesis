@@ -8,10 +8,8 @@ patterns.create
 // Węzeł który nie istnieje w bazie
 val andy = Person("Andy")
 
-// Utworzenie nowego węzła i relacji w jednym kroku
-{ 
-  john knows andy 
-} createAndSelect(andy)
+// Utworzenie nowego węzła i krawędzi w jednym kroku
+{ john knows andy } createAndSelect(andy)
 
 val bob = Person("Bob")
 

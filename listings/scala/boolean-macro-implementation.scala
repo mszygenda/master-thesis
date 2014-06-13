@@ -3,11 +3,11 @@ extends BooleanExpressionTransformer with ConditionsCodeBuilder {
   import context._
 
   override def onComparison
-  (leftOp: Tree, cmpOperator: BinaryComparisonOperator, rightOp: Tree): Tree = {
+  (leftOp: Tree, cmpOp: BinaryComparisonOperator, rightOp: Tree): Tree = {
     val leftSelector = buildSelector(leftOp)
     val rightSelector = buildSelector(rightOp)
 
-    buildPropertyComparison(leftSelector, cmpOperator, rightSelector)
+    buildPropertyComparison(leftSelector, cmpOp, rightSelector)
   }
 
   override def onUnaryLogicalOperation

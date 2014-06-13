@@ -42,9 +42,9 @@
 \begin{document}
 
 \begin{abstract}
-Wstęp
+Praca ma na celu zademonstrowanie sposobu w jaki można wykorzystać bazy grafowe w nowoczesnych językach takich jak Scala. Jako część programistyczna powstało narzędzie NeoDSL. Jest to mini-język pozwalający na zapisywanie zapytań baz grafowych wprost w kodzie programów pisanych w języku Scala.
 \end{abstract}
-\keywords{Scala, neo4j, DSL, języki domenowe, bazy grafowe}
+\keywords{Scala, Neo4j, DSL, języki dziedzinowe, bazy grafowe}
 
 % tytuł i spis treści
 \maketitle
@@ -53,15 +53,15 @@ Wstęp
 % wstęp
 \introduction
 
-W ostatnich latach można było zaobserwować pojawienie się wielu baz danych zrywających z niepodzielnie dotychczas panującym paradygmatem baz relacyjnych. Mowa tutaj o bazach nazywanych wspólnym hasłem ,,NoSQL" takich jak dokumentowa MongoDB czy też grafowa Neo4j. W określonych warunkach oferują one dużo większą wydajność niż bazy relacyjne. Oczywiście odbywa się to pewnym kosztem. W przypadku baz dokumentowych jest to zerwanie z normalizacją oraz transakcyjnością lub z całkowitą zmianą paradygmatu jak ma to miejsce w przypadku baz grafowych. Poszukiwanie wydajniejszych rozwiązań do składowania danych ma oczywiście swoją przyczynę. Jest to mianowicie fakt iż współczesne aplikacje internetowe muszą obsługiwać miliony użytkowników w czasie rzeczywistym. Baza danych która jest niejednokrotnie głównym elementem układanki musi oczwyiście sprostać tym wymaganiom. Okazuje się jednak, że w przypadku danych w których rekordy są ze sobą ściśle powiązane wieloma zależnościami bazy relacyjne mogą okazać się niewystarczające. Wynika to ze sposobu w jaki zależności te są modelowane bazach relacyjnych. Wykorzystywany mianowicie jest mechanizm kluczy obcych, natomiast na poziomie języka zapytań wykonywany jest iloczyn kartezjański co przy dużej ilości danych i~kilku relacjach może być bardzo kosztowne -- zarówno pod względem czasu, jak i wykorzystywanej pamięci. Z punktu widzenia użytkownika jest całkowicie nie do zaakceptowania by obsłużenie jego żądania zajmowało czas rzędu kilkunastu sekund lub nawet minut \ref{fig:mysqlvsneo4j_results}. Potrzeba zatem wydajnego mechanizmu, który byłby w stanie spełnić rygorystyczne wymogi wydajnościowe oraz dobrze radzić sobie z danymi powiązanymi wieloma relacjami. Odpowiedzią są bazy grafowe, które do reprezentowania danych stosują strukturę grafu. Jak zostanie to wyjaśnione  w dalszych rozdziałach ma to znaczący wpływ na wydajność i sposób operowania na danych. Celem pracy było stworzenie narzędzia dla języka Scala pozwalającego na efektywne wykorzystanie jednej z najbardziej popularnych baz grafowych. Język ten został wybrany ze względu na dostępność licznych mechanizmów ułatwiających definiowanie tzw. języków dziedzinowych (DSL).
+W ostatnich latach można było zaobserwować pojawienie się wielu baz danych zrywających z niepodzielnie dotychczas panującym paradygmatem baz relacyjnych. Mowa tutaj o bazach nazywanych wspólnym hasłem ,,NoSQL" takich jak dokumentowa MongoDB czy też grafowa Neo4j. W określonych warunkach oferują one dużo większą wydajność niż bazy relacyjne. Oczywiście odbywa się to pewnym kosztem. W przypadku baz dokumentowych jest to zerwanie z normalizacją oraz transakcyjnością lub z całkowitą zmianą paradygmatu jak ma to miejsce w przypadku baz grafowych. Poszukiwanie wydajniejszych rozwiązań do składowania danych ma oczywiście swoją przyczynę. Jest to mianowicie fakt iż współczesne aplikacje internetowe muszą obsługiwać miliony użytkowników w czasie rzeczywistym. Baza danych która jest niejednokrotnie głównym elementem układanki musi oczywiście sprostać tym wymaganiom. Okazuje się jednak, że w przypadku danych w których rekordy są ze sobą ściśle powiązane wieloma zależnościami bazy relacyjne mogą nie być rozwiązaniem optymalnym. Wynika to ze sposobu w jaki zależności te są modelowane w bazach relacyjnych. Wykorzystywany mianowicie jest mechanizm kluczy obcych, natomiast na poziomie języka zapytań wykonywany jest iloczyn kartezjański co przy dużej ilości danych i~kilku relacjach może być bardzo kosztowne -- zarówno pod względem czasu, jak i wykorzystywanej pamięci. Z punktu widzenia użytkownika jest całkowicie nie do zaakceptowania by obsłużenie jego żądania zajmowało czas rzędu kilkunastu sekund lub nawet minut (por. \ref{fig:mysqlvsneo4j_results}). Potrzeba zatem wydajnego mechanizmu, który byłby w stanie spełnić rygorystyczne wymogi wydajnościowe oraz dobrze radzić sobie z danymi powiązanymi wieloma relacjami. Odpowiedzią są bazy grafowe, które do reprezentowania danych stosują strukturę grafu. Jak zostanie to wyjaśnione  w dalszych rozdziałach ma to znaczący wpływ na wydajność i sposób operowania na danych. Celem pracy było stworzenie narzędzia dla języka Scala pozwalającego na efektywne wykorzystanie jednej z bardziej popularnych baz grafowych -- Neo4j. Język ten został wybrany ze względu na dostępność licznych mechanizmów ułatwiających definiowanie tzw. języków dziedzinowych (DSL).
 
 \chapter{Bazy grafowe}
 
 \section{Wstęp}
 
-Z matematycznego punktu widzenia \cite{Szepietowski:2010:MD} graf to struktura składająca się ze zbioru wierzchołków oraz zbioru krawędzi. Krawędź reprezentuje połączenie pomiędzy dwoma wierzchołkami. W przypadku gdy kierunek krawędzi jest istotny mówimy o krawędziach skierowanych. Bazy grafowe wykorzystują właśnię tę strukturę reprezentowania wszystkich danych rozszerzając ją tylko w nieznaczny sposób (np. dodając pojęcie nazwanych krawędzi). Pomimo faktu iż teoria grafów jest dziedziną niemłodą i znaną od dłuższego czasu to same bazy grafowe są stosunkowo świeżym tworem. Jak wspomina autor bazy Neo4j, w roku 1999 nie istniała praktycznie żadna baza grafowa mogąca być wykorzystana w sposób produkcyjny \cite{Robinson:2013:GD}. Sposób w jaki bazy grafowe prezentują dane implikuje odmienny sposób przeszukiwania i operowania na zbiorze danych. Nie istnieje tutaj pojęcie tabeli znane z baz relacyjnych takich jak MySQL która narzucała by określoną strukturę. Zamiast tego mamy tu do czynienia z wierzchołkami (nazywanymi w dalszej części pracy zamiennie węzłami) które mogą zawierać dowolną liczbę pól prostych lub złożonych (jak ma to miejsce np. w bazie OrientDB). Pod tym względem przypominają one bazy dokumentowe w których również nie ma narzuconej struktury. W odróżnieniu jednak zarówno od baz relacyjnych jak i dokumentowych relacje między obiektami są zapisywane tutaj za pomocą nazwanych i skierowanych krawędzi. Pojedyńczy węzeł może mieć dowolnie wiele różnych krawędzi wychodzących jak i wchodzących (w dalszej części pracy będziemy używać zamiennie terminu krawędzi i relacji). Przeszukiwanie baz grafowych odbywa się poprzez definiowanie interesujących wzorców w grafie. Dzięki efektywnym algorytmom przeszukiwania grafów taki sposób przechowywania danych ma znaczący wpływ na wydajność.
+Z matematycznego punktu widzenia\cite{Szepietowski:2010:MD} graf to struktura składająca się ze zbioru wierzchołków oraz zbioru krawędzi. Krawędź reprezentuje połączenie pomiędzy dwoma wierzchołkami. W przypadku gdy kierunek krawędzi jest istotny mówimy o grafach skierowanych. Bazy grafowe wykorzystują właśnię tę strukturę reprezentowania wszystkich danych rozszerzając ją tylko w nieznaczny sposób (np. dodając pojęcie nazwanych krawędzi). Pomimo faktu iż teoria grafów jest dziedziną niemłodą to same bazy grafowe są stosunkowo świeżym tworem. Jak wspomina autor bazy Neo4j, w roku 1999 nie istniała praktycznie żadna baza grafowa mogąca być wykorzystana w sposób produkcyjny \cite{Robinson:2013:GD}. Sposób w jaki bazy grafowe prezentują dane implikuje odmienny sposób przeszukiwania i operowania na zbiorze danych. Nie istnieje tutaj pojęcie tabeli znane z baz relacyjnych takich jak MySQL, która narzucała by określoną strukturę. Zamiast tego mamy do czynienia z wierzchołkami (nazywanymi w dalszej części pracy zamiennie węzłami) które mogą zawierać dowolną liczbę pól prostych lub złożonych (jak ma to miejsce np. w bazie OrientDB). Pod tym względem przypominają one bazy dokumentowe w których również nie ma narzuconej struktury. W odróżnieniu jednak zarówno od baz relacyjnych jak i dokumentowych, w bazach grafowych związki między obiektami są zapisywane za pomocą nazwanych i skierowanych krawędzi. Pojedynczy węzeł może mieć dowolnie wiele krawędzi wychodzących jak i wchodzących (w dalszej części pracy będziemy używać zamiennie terminu krawędź i związek). Przeszukiwanie baz grafowych odbywa się poprzez definiowanie interesujących wzorców w grafie. Dzięki efektywnym algorytmom przeszukiwania grafów taki sposób przechowywania danych ma znaczący wpływ na wydajność.
 
-Aby dać czytelnikowi pogląd na to jak bardzo efektywne mogą okazać bazy grafowe w porównaniu z bazami relacyjnymi przedstawiony został eksperyment pochodzący z książki ,,Neo4j In Action"\cite{neo4jinaction}. Ukazuje on porównanie wydajnościowe grafowej bazy Neo4j oraz MySQL dla analogicznej struktury danych. Poniższa ilustracja przedstawia prosty schemat bazy relacyjnej z dwoma tabelami służącymi do przechowywania osób i relacji ,,znajomości" między nimi.
+Aby dać czytelnikowi pogląd na to jak bardzo efektywne mogą być bazy grafowe w porównaniu z bazami relacyjnymi przedstawiony został eksperyment pochodzący z książki ,,Neo4j In Action"\cite{neo4jinaction}. Ukazuje on porównanie wydajnościowe grafowej bazy Neo4j oraz MySQL dla analogicznej struktury danych. Poniższa ilustracja przedstawia prosty schemat bazy relacyjnej z dwiema tabelami służącymi do przechowywania osób i relacji ,,znajomości" między nimi.
 
 \begin{figure}[H]
 	\includegraphics[scale=0.75]{images/relational-schema-friends.png}
@@ -75,7 +75,7 @@ Przykładowe zapytanie SQL do wyszukiwania znajomych znajomych osoby o imieniu A
 	\caption{Przykład z książki ,,Graph Databases"\cite{Robinson:2013:GD}}
 \end{listing}
 
-Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania dla zbioru 1 000 000 rekordów.
+Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z kolejnych instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania dla zbioru 1 000 000 rekordów.
 
 \begin{table}[H]
     \begin{tabular}{|l|l|l|l|}
@@ -92,35 +92,35 @@ Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajom
     \label{fig:mysqlvsneo4j_results}
 \end{table}
 
-Jak można zaobserować na powyższym przykładzie, różnica pomiędzy MySQL i Neo4j w czasie wykonania zapytań dla głębokości trzy i większej jest znacząca na korzyść tej drugiej. Wynika to z odmiennego sposobu w jaki odbywa się przeszukiwanie w tych bazach. W przypadku baz relacyjnych wzrost ,,głębokości" zapytania wiąże się z tworzeniem kolejnego iloczynu kartezjańskiego. Dopiero po jego utworzeniu dane nieistotne są odrzucane z wyników. W przypadku dużego zbioru danych takie działanie odbija się na wydajności całego zapytania. Inaczej sytuacja wygląda w bazach grafowych w których rozpatrywane są wyłącznie węzły związane ze sobą krawędziami (jest to tzw. lokalność operacji).
+Jak można zaobserwować na powyższym przykładzie, różnica pomiędzy MySQL i Neo4j w czasie wykonania zapytań dla głębokości trzy i większej jest znacząca na korzyść tej drugiej. Wynika to z odmiennego sposobu w jaki odbywa się przeszukiwanie w tych bazach. W przypadku baz relacyjnych wzrost ,,głębokości" zapytania wiąże się z tworzeniem kolejnego iloczynu kartezjańskiego. Dopiero po jego utworzeniu dane nieistotne są odrzucane z wyników. W przypadku dużego zbioru danych takie działanie odbija się na wydajności całego zapytania. Inaczej sytuacja wygląda w bazach grafowych w których rozpatrywane są wyłącznie węzły związane ze sobą krawędziami (jest to tzw. lokalność operacji).
 
 \section{Rodzaje baz grafowych}
 
 \subsection{Bazy z relacyjnym magazynem danych}
 
-Rozróżniamy dwa główne rodzaje baz grafowych. Pierwszym z nich są bazy które pozwalają operować na przechowywanych danych jak na grafach, mających jednak odmienny sposób składowania danych. Popularnym rozwiązaniem jest np. przechowywanie struktury grafowej w bazach relacyjnych. Niestety takie rozwiązanie nie pozwala na pełne wykorzystanie potencjału drzemiącego w przechowywaniu danych w postaci grafów. Przykładem takiej bazy jest FlockDB\cite{flockdb} która znajduje zastosowanie w popularnym serwisie społecznościowym Twitter. Ze względu na małą uniwersalność tego typu rozwiązań (zazwyczaj są one dostosowane do konkretnego przypadku użycia) bazy tego typu nie będą omawiane w tej pracy.
+Rozróżniamy dwa główne rodzaje baz grafowych. Pierwszym z nich są bazy które pozwalają operować na przechowywanych danych jak na grafach, mających jednak odmienny sposób składowania danych. Popularnym rozwiązaniem jest np. przechowywanie struktury grafowej w bazach relacyjnych. Niestety takie rozwiązanie nie pozwala na pełne wykorzystanie potencjału drzemiącego w przechowywaniu danych w postaci grafów. Przykładem takiej bazy jest FlockDB\cite{flockdb} która znajduje zastosowanie w popularnym serwisie społecznościowym Twitter. Ze względu na małą uniwersalność tego typu rozwiązań (zazwyczaj są one dostosowane do konkretnego przypadku użycia) nie będą one omawiane w tej pracy.
 
 \subsection{Bazy z grafowym magazynem danych}
 Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko przedstawiają dane w formie grafów ale również wykorzystują strukturę grafów do ich składowania. Zaletą takiego podejścia jest to iż przeszukiwanie może okazać się o wiele wydajniejsze niż równoważne zapytanie do bazy z relacyjnym magazynem danych. Powodem tego jest lokalność operacji wykonywanych na grafie. W odróżnieniu od baz relacyjnych gdzie by wyszukać dane powiązane pewną relacją wymagane jest wykonanie iloczynu kartezjańskiego na całych zbiorach danych. W przypadku ogromnej liczby rekordów taka operacja może okazać się wielce niewydajna. W przypadku baz grafowych nie ma potrzeby odwiedzania wszystkich danych bowiem poruszamy się tylko w obrębie obiektów w bezpośredni sposób związanych ze sobą krawędziami. Przykładem takiej bazy jest np. Neo4j której została poświęcona znaczna część tej pracy.
 
 \chapter{Neo4j}
 
-Neo4j jest natywną bazą grafową napisaną w języku Java. Pozwala ona na przechowywanie węzłów jak i relacji wraz z polami typów prostych takimi jak napisy czy liczby. W implementacji zostało zastosowanych wiele mechanizmów mających na celu osiąnięcie jak najlepszej wydajności przy przeszukiwaniu grafów. Warto tutaj wymienić chociażby sposób w jaki zapisywana jest informacja o krawędziach wychodzących z wierzchołka. Otóż, aby odczytać listę krawędzi dla danego wierzchołka nie ma potrzeby korzystania z żadnego pośredniczącego indeksu, informację tę można odczytać bezpośrednio w jednym kroku (ang. Index-Free Adjacency\cite[s.~5]{Robinson:2013:GD}). Wierzchołki i krawędzie są natomiast zapisywane w plikach w których każdy rekord jest stałego rozmiaru. Pozwala to na bardzo szybkie odczytywanie danych bez konieczności przeglądania pliku w celu odnalezienia właściwego rekordu (wystarczy pomnożyć rozmiar rekordu relacji bądź węzła przez jego identyfikator by uzyskać lokalizację w pliku).
+Neo4j jest natywną bazą grafową napisaną w języku Java. Pozwala ona na przechowywanie węzłów jak i relacji wraz z polami typów prostych takimi jak napisy czy liczby. W implementacji zostało zastosowanych wiele mechanizmów mających na celu osiągnięcie jak najlepszej wydajności przy przeszukiwaniu grafów. Warto tutaj wymienić chociażby sposób w jaki zapisywana jest informacja o krawędziach wychodzących z wierzchołka. Otóż, aby odczytać listę krawędzi dla danego wierzchołka nie ma potrzeby korzystania z żadnego pośredniczącego indeksu, informację tę można odczytać bezpośrednio w jednym kroku (ang. Index-Free Adjacency\cite[s.~5]{Robinson:2013:GD}). Wierzchołki i krawędzie są natomiast zapisywane w plikach w których każdy rekord jest stałego rozmiaru. Pozwala to na bardzo szybkie odczytywanie danych bez konieczności przeglądania pliku w celu odnalezienia właściwego rekordu (wystarczy pomnożyć rozmiar rekordu relacji bądź węzła przez jego identyfikator by uzyskać lokalizację w pliku).
 
-Neo4j jest wydajną i jedną z bardziej rozpoznawalnych baz grafowych. Z tego powodu została ona wybrana do implementacji narzędzia będącego przedmiotem tej pracy.
+Neo4j jest wydajną i jedną z bardziej popularnych baz grafowych. Z tego powodu została ona wybrana do implementacji narzędzia będącego przedmiotem niniejszej pracy.
 
 \section{Język Cypher}
-Cypher jest językiem zapytań stworzonym specjalnie na potrzeby neo4j pozwalającym w sposób deklaratywny przeszukiwać oraz aktualizować bazę grafową. Podobnie jak SQL jest to stosunkowo łatwy w analizie język który oferuje duże możliwości. Podrozdział ten ma na celu zaznajomienie czytelnika z podstawową składnią i sposobem w jaki operuje się na danych w bazach grafowych.
+Cypher jest językiem zapytań stworzonym specjalnie na potrzeby Neo4j pozwalającym w sposób deklaratywny przeszukiwać oraz aktualizować bazę grafową. Podobnie jak SQL jest to stosunkowo łatwy w analizie język który oferuje duże możliwości. Podrozdział ten ma na celu zaznajomienie czytelnika z podstawami składni i sposobem w jaki operuje się za jego pomocą na danych w bazach grafowych.
 
 \subsection{Przeszukiwanie grafu}
 
-Najistotniejszą funkcjonalnością baz danych jest możliwość przeszukiwania zbioru rekordów. Zapytanie służące do odczytywania informacji składa się z trzech podstawowych części.
+Najistotniejszą funkcjonalnością baz danych jest możliwość przeszukiwania zbioru rekordów. W języku Cypher, zapytanie służące do odczytywania informacji składa się z trzech podstawowych części.
 
-Sekcja \texttt{START} pozwala na ustalenie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfikatora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 1.9 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe\footnote{Bez określenia węzłów startowych zapytanie traci zaletę lokalności gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych}. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej comment przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast john będzie wskazywał na węzły znajdujące się w indeksie nazwanym \texttt{nameIndex} oraz zawierające pole \texttt{name} o wartości równej ,,John".
+Sekcja \texttt{START} pozwala na ustalenie węzłów startowych od których zacznie się przeszukiwanie grafu. Wierzchołki można wydobyć na podstawie ich wewnętrznego identyfikatora lub z wykorzystaniem przygotowanego wcześniej indeksu. Sekcja ta do wersji 1.9 była obligatoryjna i mimo iż w nowych wersjach możliwe jest jej całkowite pominięcie zalecane jest aby zawsze określać węzły startowe\footnote{Brak określenia węzłów startowych może negatywnie wpłynąć na wydajność, gdyż do później zdefiniowanego wzorca będzie dopasowany każdy węzeł znajdujący się w bazie danych}. Poniższy przykład ilustruje sposób w jaki można określić wierzchołki początkowe. Zmiennej \texttt{comment} przypisany jest węzeł o wewnętrznym identyfikatorze równym 1, natomiast \texttt{john} będzie wskazywał na węzły znajdujące się w indeksie nazwanym \texttt{nameIndex} oraz zawierające pole \texttt{name} o wartości równej ,,John".
 
 \inputminted{cypher}{listings/cypher/start-section.cypher}
 
-Sekcja \texttt{MATCH} jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji INNER JOIN w języku SQL gdyż pozwala nam określić interesujące złączenia pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać znajomych johna ,,lubiących" komentarz wskazywany przez zmienną \texttt{comment}
+Sekcja \texttt{MATCH} jest główną częścią zapytania, pozwala ona bowiem określić interesujące nas wzorce w grafie. Część ta jest swego rodzaju ,,odpowiednikiem" instrukcji \texttt{INNER JOIN} języka SQL, gdyż pozwala nam określić interesujące powiązania pomiędzy węzłami. Poniżej został zdefiniowany jeden wzorzec który pozwala wyszukać znajomych Johna ,,lubiących" komentarz wskazywany przez zmienną \texttt{comment}
 
 \inputminted{cypher}{listings/cypher/match-section.cypher}
 
@@ -128,15 +128,15 @@ Ostatnim elementem zapytania jest sekcja \texttt{RETURN} służąca określania 
 
 \inputminted{cypher}{listings/cypher/return-section.cypher}
 
-Pełne zapytanie wygląda zwraca identyfikator oraz pole \texttt{name} węzłów które są połączone krawędzią o nazwie \texttt{KNOWS} z obiektem \texttt{john} oraz będące połączone krawędzią \texttt{LIKES} z obiektem o identyfikatorze równym {1}. Poruszając się w domenie sieci społecznościowej zapytanie zwraca znajomych użytkownika ,,John" którzy polubili komentarz o identyfikatorze {1}.
+Pełne zapytanie zwraca identyfikator oraz pole \texttt{name} węzłów które są połączone krawędzią o nazwie \texttt{KNOWS} z obiektem \texttt{john} oraz krawędzią \texttt{LIKES} -- z obiektem o identyfikatorze równym {1}. Poruszając się w domenie sieci społecznościowej zapytanie zwraca znajomych użytkownika ,,John" którzy polubili komentarz o identyfikatorze {1}.
 
 \inputminted{cypher}{listings/cypher/sample-query.cypher}
 
 \subsection{Modyfikacja danych}
 
-Język Cypher pozwala również na aktualizację danych w grafie. Podobnie jak w przypadku zapytania służącego do przesukiwania grafu wyrażenie składa się kilku części.
+Język Cypher pozwala również na aktualizację danych w grafie. Podobnie jak w przypadku zapytania służącego do przeszukiwania grafu wyrażenie składa się kilku części.
 
-Pierwszą z nich ponownie jest sekcja \texttt{START}, która pozwala na wybranie wezłów zakotwiczających tworzony wzorzec w strukturze grafu. Jest ona opcjonalna jeśli zamierzamy utworzyć graf niepowiązany z istniejącymi już wierzchołkami.
+Pierwszą z nich ponownie jest sekcja \texttt{START}, która pozwala na wybranie węzłów zakotwiczających tworzony wzorzec w strukturze grafu. Jest ona opcjonalna jeśli zamierzamy utworzyć graf niepowiązany z istniejącymi już wierzchołkami.
 
 \inputminted{cypher}{listings/cypher/start-section.cypher}
 
@@ -144,7 +144,7 @@ Kolejną sekcją jest \texttt{CREATE} której składnia jest podobna do sekcji \
 
 \inputminted{cypher}{listings/cypher/create-section.cypher}
 
-Ostatnim elementem jest wykorzystana już wcześniej sekcja RETURN która pozwala na zwrócenie informacji o nowoutworzonych obiektach takich jak ich identyfikatory.
+Ostatnim elementem jest wykorzystana już wcześniej sekcja RETURN która pozwala na zwrócenie informacji o nowo-utworzonych obiektach, np. ich identyfikatory.
 
 \inputminted{cypher}{listings/cypher/return-section-2.cypher}
 
@@ -152,15 +152,15 @@ Pełne zapytanie wstawiające do grafu nowy obiekt o polu \texttt{name} równym 
 
 \inputminted{cypher}{listings/cypher/sample-create-query.cypher}
 
-\section{Programistyczne sposoby dostępu do neo4j}
+\section{Programistyczne sposoby dostępu do Neo4j}
 
 Neo4j udostępnia kilka odmiennych sposobów dostępu do bazy. Rozdział ten ma na celu przedstawienie każdego z nich.
 
 \subsection{Java Core API -- Embedded mode}
 
-Jedną z możliwości jest skorzystanie z tzw. Java Core API czyli zestawu klas i interfejsów dostępnych dla języka Java. Udostępionych został szereg mechanizmów pozwalających na operowanie na węzłach i relacjach w sposób bezpośredni.
+Jedną z możliwości jest skorzystanie z tzw. Java Core API czyli zestawu klas i interfejsów dostępnych dla języka Java. Udostępnionych został szereg mechanizmów pozwalających na operowanie na węzłach i relacjach w sposób bezpośredni.
 
-Do rozpoczęcia pracy potrzebna jest instancja bazy. Można ją utworzyć (lub skorzystać z już istniejącej) w następujący sposób.
+\medskip\noindent Do rozpoczęcia pracy potrzebna jest instancja bazy. Można ją utworzyć w następujący sposób.
 
 \inputminted{java}{listings/java/neo4j-core-api-dbcreate.java}
 
@@ -174,7 +174,7 @@ Oczywistą wadą jest fakt, że do wykorzystania tego mechanizmu potrzebna jest 
 
 \subsection{Traversal Framework API}
 
-Uzupełnieniem poprzedniego mechanizmu jest tzw. Traversal Framework który pozwala w prosty sposób na definiowanie algorytmu przechodzenia po grafie. Podstawowym interfejsem jest \texttt{TraversalDescription} który służy do określania zasad przechodzenia grafu. Oczywiście nikt nie wymaga od programisty by tworzył złożoną implementację algorytmu odwiedzania grafu. Neo4j udostępnia szereg metod udostępniajacych zachowania do przechodzenia po krawędziach określonego typu oraz służące do komponowania ich ze sobą.
+Uzupełnieniem poprzedniego mechanizmu jest tzw. Traversal Framework który pozwala w prosty sposób na definiowanie algorytmu przechodzenia po grafie. Podstawowym interfejsem jest \texttt{TraversalDescription} który służy do określania zasad przechodzenia grafu. Oczywiście nikt nie wymaga od programisty by tworzył złożoną implementację algorytmu odwiedzania grafu. Neo4j udostępnia szereg standardowych metod służących do poruszania się po krawędziach określonego typu oraz do komponowania tychże metod ze sobą.
 
 Poniżej przedstawiony został przykład w jaki sposób można zdefiniować ,,opis" metody wyszukiwania węzłów połączonych w sposób bezpośredni krawędzią ,,KNOWS" z wierzchołkiem \texttt{john}
 
@@ -182,7 +182,7 @@ Poniżej przedstawiony został przykład w jaki sposób można zdefiniować ,,op
 
 \subsection{REST mode}
 
-Ostatnim ze sposobów na dostęp do bazy Neo4j jest skorzystanie z serwisu REST--owego\footnote{Serwis REST--owy to usługa udostępniona z wykorzystaniem protokołu HTTP oferująca dostęp do zasobów bazy poprzez ustalone żądania HTTP} udostępnionego przez bazę danych. Niewątpliwą zaletą tego podejścia jest niezależność od platformy. Z wystawionego serwisu można skorzystać z poziomu praktycznie każdego języka programowania. Dodatkowo, w odróżnieniu od embedded mode nie ma potrzeby aby baza danych znajdowała się na tym samym serwerze co aplikacja.
+Ostatnim ze sposobów dostępu do bazy Neo4j jest użycie serwisu REST--owego. W tym trybie korzystając z protokołu HTTP odwołujemy się do usług pozwalających między innymi na wykonywanie poleceń języka Cypher. Niewątpliwą zaletą tego podejścia jest niezależność od platformy. Z wystawionego serwisu można skorzystać z poziomu praktycznie każdego języka programowania. Dodatkowo, w odróżnieniu od embedded mode nie ma potrzeby aby baza danych znajdowała się na tym samym serwerze co aplikacja.
 
 Usługa serwera udostępnia standardowe akcje służące do tworzenia, wyszukiwania węzłów oraz relacji czy też uruchamiania zapytań języka Cypher. Ze względu na swoją uniwersalność właśnie ten sposób dostępu do bazy danych został wykorzystany w narzędziu powstałym w ramach tej pracy.
 
@@ -194,28 +194,28 @@ Oto przykładowe żądanie zlecające wykonanie zapytania języka Cypher (wysła
 
 Scala jest statycznie typowanym językiem programowania który łączy w sobie idee programowania obiektowego oraz funkcyjnego. Połączenie tych dwóch paradygmatów było jednym ze środków do osiągnięcia głównego z założeń twórców jakim było stworzenie języka, który jest skalowalny oraz zwięzły. Skalowalność w tym przypadku polega na przystosowaniu języka do prostych zadań jak np. niewielkie skrypty oraz do ogromnych projektów jakie realizuje się w językach typu Java czy C\#.
 
-Do dyspozycji programisty zostało oddanych szereg mechanizmów pozwalających na ,,rozszerzanie" składni języka. Jednym z nich jest np. możliwość definiowania operatorów takich jak\texttt{*}, \texttt{+}, \texttt{-} oraz wywoływania ich w postaci infixowej. Pozwala to na przykład na budowanie złożonych klas których użycie przypomina zwykłe wyrażenia arytmetyczne, co w innych językach byłoby niemożliwe (ze względu na szczególne traktowanie wbudowanych operatorów). Scala jest natomiast tak elastycznym narzędziem iż pozwala nawet na definiowanie znanych struktur kontrolnych takich jak np. pętla while (jest to zasługa tego iż Scala jest językiem funkcyjnym i funkcje mogą być przekazywane jak zwykłe obiekty).
+Do dyspozycji programisty zostało oddanych szereg mechanizmów pozwalających na ,,rozszerzanie" składni języka. Jednym z nich jest np. możliwość definiowania metod zawierających w nazwie symbole uchodzące w innych językach za specjalne (takie jak \texttt{*}, \texttt{+}, \texttt{-} etc.). Pozwala to na definiowanie ,,operatorów" które w innych językach takich jak Java są traktowane w sposób szczególny. Scala jest tak elastycznym narzędziem iż pozwala nawet na definiowanie znanych struktur kontrolnych takich jak np. pętla \texttt{while}. Warto również wspomnieć o niejawnym przekazywaniu parametrów i wywoływaniu metod. Możliwe jest zdefiniowanie metody której jeden z argumentów dostarczany jest w sposób niejawny (bez wiedzy programisty) poprzez wyszukanie pasującego obiektu w miejscu wywołania metody. Podobnie mechanizm działa w przypadku niejawnych metod gdzie możliwe jest wywołanie ich wykonanie w sytuacji gdy typ przekazywanego wyrażenia jest niezgodny z oczekiwanym.
 
-Pomimo faktu iż jest to język statycznie typowany, nie wymaga on od programisty jawnego określania typu w każdej sytuacji. System inferencji typów jest na tyle rozbudowany iż w wielu przypadkach możliwe jest całkowite pominięcie określania typów zmiennych. Jest to kolejna cecha poza wieloma innymi wpływająca na zwięzłość kodu pisanego w tym języku.
+Pomimo tego, że Scala jest językiem statycznie typowanym, nie wymaga od programisty jawnego określania typu w każdej sytuacji. System inferencji typów jest na tyle rozbudowany iż w wielu przypadkach możliwe jest całkowite pominięcie określania typów zmiennych. Jest to kolejna cecha poza wieloma innymi wpływająca na zwięzłość kodu pisanego w tym języku.
 
 Właśnie z powodów zwięzłości oraz łatwości z jaką możliwe jest rozszerzanie składni, Scala została wybrana do stworzenia języka dziedzinowego do obsługi baz grafowych.
 
 \subsection{Programowanie funkcyjne}
 
-Języki takie jak Java, C\# czy C++ są obiektowymi językami programowania opartymi na paradygmacie programowania imperatywnego. Zakłada on istnienie stanu w programie który podlega ciągłej zmianie. Przeciwieństwem tego podejścia jest programowanie funkcyjne w którym nie istnieje stan a funkcje przekształcają dane wejściowe w wyjściowe bez tzw. efektów ubocznych. Kolejną cechą języków funkcyjnych jest to iż funkcje są traktowane jak zwykłe wartości. Możliwe jest na przykład przechowywanie funkcji w zmiennych, przekazywanie ich jako parametry innych funkcji w identyczny sposób jak dzieje się to z instancjami typów String czy Integer. Scala łączy te dwa odmienne podejścia dając programiście swobodę w wyborze przy implementacji programów.
+Języki takie jak Java, C\# czy C++ są obiektowymi językami programowania opartymi na paradygmacie programowania imperatywnego. Zakłada on istnienie \textit{stanu} w programie, który podlega ciągłej zmianie. Przeciwieństwem tego podejścia jest programowanie funkcyjne, w którym nie istnieje stan, a funkcje przekształcają dane wejściowe w wyjściowe bez tzw. efektów ubocznych. Kolejną cechą języków funkcyjnych jest to iż funkcje są traktowane jak zwykłe wartości. Możliwe jest na przykład przekazywanie ich jako parametrów innych funkcji, w identyczny sposób jak dzieje się to z instancjami typów \texttt{String} czy \texttt{Integer}. Scala łączy te dwa odmienne podejścia dając programiście swobodę w wyborze najbardziej odpowiedniego rozwiązania implementacyjnego.
 
 \subsection{Podstawy składni}
-Składnia Scali była inspirowana takimi językami jak C\# czy Java stąd doświadczonym programistom nie powinno sprawiać trudności czytanie kodu języka Scala. Oczywiście jak zostało to już wspomniane w odróżnieniu od wspomnianych języków Scala wprowadza szereg usprawnień wpływających na zwięzłość pisanego kodu. Nie ma np. potrzeby kończenia każdej linii średnikiem czy jawnego określania typu każdej zmiennej (o ile system interferencji jest w stanie określić jej typ).
+Składnia Scali była inspirowana takimi językami jak C\# czy Java stąd doświadczonym programistom nie powinno sprawiać trudności czytanie kodu w tyn języku. Oczywiście, jak zostało to już wspomniane, w odróżnieniu od wspomnianych języków Scala wprowadza szereg usprawnień wpływających na zwięzłość pisanego kodu. Nie ma np. potrzeby kończenia każdej linii średnikiem czy jawnego określania typu każdej zmiennej (o ile system inferencji jest w stanie go wyliczyć).
 
-Istotną różnicą w stosunku do Javy czy C\# wpływającą na czytelność kodu jest sposób w jaki definiuje się zmienne czy parametry metod. Mianowicie, najpierw określa się ich nazwy a w drugiej kolejności typ (który może być całkowicie pominięty jeśli da się go określić z systemu inferencji). Taka kolejność umotywowana jest tym iż programista czytający kod bardziej zainteresowany jest nazwą aniżeli typem zmiennej. Poniżej kilka przykładowych deklaracji stałych i zmiennych.
+Istotną różnicą w stosunku do Javy czy C\# wpływającą na czytelność kodu jest sposób w jaki definiuje się zmienne czy parametry metod. Mianowicie, najpierw określa się ich nazwy a w drugiej kolejności typ (który może być całkowicie pominięty jeśli da się go określić z systemu inferencji). Taka kolejność umotywowana jest tym iż programista czytający kod bardziej zainteresowany jest nazwą aniżeli typem zmiennej. Poniżej kilka przykładowych deklaracji wartości i zmiennych.
 
 \inputminted{scala}{listings/scala/val-var-declarations.scala}
 
-Metody w języku scala definuje się z użyciem słowa kluczowego \texttt{def}. Podobnie jak w przypadku zmiennych typ zwracanej wartości określany jest po zdefiniowaniu nazwy i może być on całkowicie pominięty jeśli da się go określić z ciała metody. Poniżej przykłady kilku funkcji.
+Metody w języku Scala definiuje się z użyciem słowa kluczowego \texttt{def}. Podobnie jak w przypadku zmiennych typ zwracanej wartości określany jest po zdefiniowaniu nazwy i może być on całkowicie pominięty jeśli da się go określić z ciała metody. Poniżej przykłady kilku funkcji.
 
 \inputminted{scala}{listings/scala/functions-example.scala}
 
-Klasy definiuje się z użyciem słowa kluczowego \texttt{class} podobnie jak ma to miejsce w Javie. To na co warto zwrócić uwagę to fakt iż klasy języka Scala posiadają tzw. konstruktor główny. Jego parametry wejściowe określa się bezpośrednio po nazwie klasy natomiast jego implementacja powinna być zawarta bezpośrednio w ciele klasy. W ramach listy parametrów konstruktora głównego możliwe jest również zdefiniowanie pól składowych klasy z użyciem słów kluczowych val lub var (służą one odpowiednio do deklarowania stałych lub zmiennych). Wszelkie przęciążone konstruktory (które definiuje się podobnie jak w Javie) muszą skorzystać w sposób pośredni lub bezpośredni z konstruktora głównego.
+Klasy definiuje się z użyciem słowa kluczowego \texttt{class} podobnie jak ma to miejsce w Javie. To na co warto zwrócić uwagę, to fakt iż klasy języka Scala posiadają tzw. konstruktor główny. Jego parametry określa się bezpośrednio po nazwie klasy natomiast implementacja powinna być zawarta w ciele klasy. W ramach listy parametrów konstruktora głównego możliwe jest również zdefiniowanie pól składowych klasy z użyciem słów kluczowych \texttt{val} lub \texttt{var} (służą one odpowiednio do deklarowania wartości lub zmiennych). Wszelkie przeciążone konstruktory (które definiuje się podobnie jak w Javie) muszą skorzystać w sposób pośredni lub bezpośredni z konstruktora głównego.
 
 Poniżej przedstawiona została prosta klasa Person w języku Scala. W konstruktorze głównym zdefiniowane zostały dwa pola składowe: \texttt{name} oraz \texttt{age}.
 
@@ -228,7 +228,7 @@ Zdefiniowanej powyżej klasie odpowiada poniższy kod w języku Java.
 
 \subsection{Pattern Matching}
 
-Jednym z bardziej istotnych mechanizmów języka niespotykanym w takich językach jak Java jest tzw. Pattern Matching (dopasowywanie do wzorca). Pozwala on na definiowanie specjalnych klas (ang. Case Classes) które można dopasowywać i wyciągać ich składowe z wykorzystaniem specjalnej składni. Przypomina to trochę instrukcję \texttt{switch} o dużo bardziej zaawansowanym działaniu. Oto przykład użycia tego mechanizmu do wyświetlenia wartości przechowywanych w liściach struktury drzewa reprezentowanej właśnie przy pomocy tzw. case classes.
+Jednym z bardziej istotnych mechanizmów języka niespotykanym w takich językach jak Java jest tzw. Pattern Matching (dopasowywanie do wzorca). Pozwala on na definiowanie specjalnych klas (ang. Case Classes) które można dopasowywać i docierać do ich składowych z wykorzystaniem dedykowanej do tego celu składni. Przypomina to trochę instrukcję \texttt{switch} o dużo bardziej zaawansowanym działaniu. Oto przykład użycia tego mechanizmu do wyświetlenia wartości przechowywanych w liściach struktury drzewa reprezentowanej właśnie przy pomocy tzw. case classes.
 
 \inputminted{scala}{listings/scala/pattern-matching-trees.scala}
 
@@ -238,7 +238,7 @@ Pattern matching znajduje zastosowanie w NeoDSL chociażby na etapie serializacj
 
 \chapter{Dostęp do baz danych z wykorzystaniem DSL}
 
-Wszystkie bazy danych udostępniają pewien natywny interfejs do manipulacji na przechowywanych rekordach. W przypadku baz relacyjnych mamy do dyspozycji język SQL. O ile np. sam język SQL jest prostym w użyciu narzędziem to rzadko kiedy z poziomu tworzonego programu chcemy korzystać z niego w sposób bezpośredni. Potrzebna jest pewna warstwa abstrakcji która ukryje przed programistą różnice w implementacji SQLa w różnych bazach relacyjnych jak i uchroni przed typowymi błędami takimi jak nie oczyszczanie danych pochodzących od użytkownika (prowadzących np. do ataków SQL Injection). Rozwiązaniem tego problemu są tzw. mappery bazodanowe takie jak Hibernate. Udostępniają one mechanizmy które pozwalają na zdefiniowanie powiązania pomiędzy klasami programu a tabelami/kolekcjami w bazie danych. Narzędzia te zajmują się tłumaczeniem wywołań odpowiednich metod na zapytania języka obsługiwanego przez daną bazę. Oprócz tego zamiast generycznych obiektów reprezentujących wyniki zapytań zwracają one instancje klas, które reprezentują poszczególne rekordy (np. instancje klas typu \texttt{Osoba}, \texttt{Komentarz}).
+Wszystkie bazy danych udostępniają pewien natywny interfejs do manipulacji na przechowywanych rekordach. W przypadku baz relacyjnych mamy do dyspozycji odpowiedni dialekt SQL. O ile np. sam język SQL jest prostym w użyciu narzędziem to rzadko kiedy z poziomu tworzonego programu chcemy korzystać z niego w sposób bezpośredni. Potrzebna jest pewna warstwa abstrakcji która ukryje przed programistą różnice w implementacji SQLa w różnych bazach relacyjnych jak i uchroni przed typowymi błędami takimi jak nie oczyszczanie danych pochodzących od użytkownika (prowadzących np. do ataków SQL Injection). Rozwiązaniem tego problemu są tzw. mappery bazodanowe takie jak Hibernate. Udostępniają one mechanizmy które pozwalają na zdefiniowanie powiązania pomiędzy klasami programu a tabelami/kolekcjami w bazie danych. Narzędzia te zajmują się tłumaczeniem wywołań odpowiednich metod na zapytania języka obsługiwanego przez daną bazę. Oprócz tego zamiast generycznych obiektów reprezentujących wyniki zapytań zwracają one instancje klas, które reprezentują poszczególne rekordy (np. instancje klas typu \texttt{Osoba}, \texttt{Komentarz}).
 
 Alternatywą dla klasycznych rozwiązań typu Hibernate są języki dziedzinowe (ang. Domain Specific Language -- w skrócie DSL)  pozwalające w pewnym uproszczeniu na zapisywanie zapytań języka bazy danych wprost w kodzie programu. Tak budowane zapytania są zwykłymi wywołaniami metod danego języka stąd są automatycznie walidowane na etapie kompilacji.
 
@@ -262,11 +262,11 @@ Powyższa struktura odwzorowuje bardzo prostą bazę danych z jedną tabelą \te
 
 \inputminted{sql}{listings/sql/squeryl-query.sql}
 
-Zastosowanie języka dziedzionowego pozwala w pełniejszy sposób wykorzystać możliwości języka bazy danych przy jednoczesnym zachowaniu zalet rozwiązań typu Hibernate (tj. odwzorowywanie wyników na obiekty oraz kontrola wyrażeń na etapie kompilacji).
+Zastosowanie języka dziedzinowego pozwala w pełniejszy sposób wykorzystać możliwości języka bazy danych przy jednoczesnym zachowaniu zalet rozwiązań typu Hibernate (tj. odwzorowywanie wyników na obiekty oraz kontrola wyrażeń na etapie kompilacji).
 
 \section{Bazy NoSQL}
 
-MongoDB jest jedną z popularniejszych baz dokumentowych. Pozwala ona na przechowywanie tzw. dokumentów tj. rekordów nie mających ustalonego z góry schematu. Dodatkowo poza polami prostymi takimi jak liczby czy napisy dozwolone jest zagnieżdżanie w sobie złożonych obiektów. W określonych sytuacjach MongoDB oferuje dużą lepszą wydajność w porówanniu z bazami relacyjnymi. Odbywa się to jednak kosztem zerwania z normalizacją i brakiem transakcyjności.
+MongoDB jest jedną z popularniejszych baz dokumentowych. Pozwala ona na przechowywanie tzw. dokumentów tj. rekordów nie mających ustalonego z góry schematu. Dodatkowo poza polami prostymi takimi jak liczby czy napisy dozwolone jest zagnieżdżanie w sobie złożonych obiektów. W określonych sytuacjach MongoDB oferuje dużą lepszą wydajność w porównaniu z bazami relacyjnymi. Odbywa się to jednak kosztem zerwania z normalizacją i brakiem transakcyjności.
 
 \subsection{Rogue}
 
@@ -274,7 +274,7 @@ Jedną z bibliotek do obsługi MongoDB z poziomu języka Scala jest Rogue. Podob
 
 \inputminted{scala}{listings/scala/rogue-model.scala}
 
-Jak można zauważyć na powyższym przykładzie, do definiowania pól konieczne jest tworzenie obiektów rozszerzających cechę \texttt{Field}. Skutkuje to tym iż do osiągnięcia takich samych rezultatów jak w przypadku Squeryla potrzebne jest napisanie nieco dłuższego kodu. Zaprezentowane rozwiązanie ma jednak tę zaletę, że dzięki specjalnym typom jak np. \texttt{LongField} dużo łatwiejsze stało się tworzenie DSLa który nie musi zajmować się obsługą typów wbudowanych w język Scala.
+Jak można zauważyć na powyższym przykładzie, do definiowania pól konieczne jest tworzenie obiektów rozszerzających cechę \texttt{Field}. Skutkuje to tym iż do osiągnięcia takich samych rezultatów jak w przypadku Squeryl-a potrzebne jest napisanie nieco dłuższego kodu. Zaprezentowane rozwiązanie ma jednak tę zaletę, że dzięki specjalnym typom jak np. \texttt{LongField} dużo łatwiejsze stało się tworzenie DSL-a który nie musi zajmować się obsługą typów wbudowanych w język Scala.
 
 \medskip\noindent Przykładowe zapytanie przedstawione jest poniżej.
 
@@ -285,7 +285,7 @@ Jak można zauważyć na powyższym przykładzie, do definiowania pól konieczne
 W celu zaprezentowania jednego ze sposobów w jaki można wykorzystać bazy grafowe w nowoczesnych językach jak Scala powstało narzędzie NeoDSL\footnote{Dostępne pod adresem \url{https://github.com/mszygenda/neodsl}}. Jest to DSL służący do obsługi baz grafowych.
 Obecnie jedynym obsługiwanym silnikiem bazy danych jest Neo4j. Jednak nic nie stoi na przeszkodzie aby w przyszłości została dodana obsługa innych baz. Wynika to z faktu, że warstwa zajmująca się wykonywaniem zapytań została ujęta w sposób abstrakcyjny.
 
-Podobnie jak w bibliotece Squeryl, w NeoDSL przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryla, odbywa się to wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ,,ręcznego" pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
+Podobnie jak w bibliotece Squeryl, w NeoDSL przed tworzeniem jakichkolwiek zapytań trzeba zdefiniować strukturę bazy danych. Inaczej jednak niż w przypadku Squeryl-a, odbywa się to wyłącznie na poziomie klas domenowych. Nie ma potrzeby tworzenia jednego specjalnego obiektu skupiającego w sobie wszystkie powiązania. Dzięki określonej strukturze możliwe jest budowanie silnie typowanych wzorców i całych zapytań. Jest to niewątpliwą zaletą w stosunku do ,,ręcznego" pisania zapytań języka Cypher. Oczywiście wszystko będzie odpowiadało strukturze bazy pod warunkiem, że model został poprawnie zdefiniowany. Przypomnijmy, że w bazach takich jak Neo4j nie istnieje pojęcie schematu i nie ma z góry określonej struktury. To programista lub narzędzie do obsługi bazy musi zapewnić spójność w tym aspekcie.
 
 \section{Definiowanie modelu}
 
@@ -312,12 +312,12 @@ Rozpatrzmy przykładową klasę domenową reprezentującą osobę. Zawiera ona p
 Zapytania w bazach grafowych skupiają się na wyszukiwaniu określonych wzorców. Z tego powodu główny nacisk w kwestii zwięzłości tworzonego DSLa został położony właśnie na tej części.
 
 \subsection{Podstawowa struktura -- klasa \texttt{PatternTriple}}
-Podstawową strukturą służącą do reprezantacji wzorców jest klasa PatternTriple. Jak sugeruje jej nazwa, składa się ona z trzech elementów. Są to kolejno: węzeł początkowy, krawędź z określonym kierunkiem oraz tzw. ,,ogon" wzorca. Wspomniany ,,ogon" może być zarówno pojedyńczym węzłem jak i kolejną instancją PatternTriple. Taka struktura pozwala na budowanie w sposób rekurencyjny dowolnie długich wzorców. Warto również dodać iż klasa PatternTriple jest generyczna i posiada z góry określone typy węzłów jakie mogą pojawiać się w dalszej części wzorca. Niemożliwe jest zatem utworzenie instancji wzorca, w której zachodziłaby niezgodność typów (o to zadba kompilator języka Scala).
+Podstawową strukturą służącą do reprezentacji wzorców jest klasa PatternTriple. Jak sugeruje jej nazwa, składa się ona z trzech elementów. Są to kolejno: węzeł początkowy, krawędź z określonym kierunkiem oraz tzw. ,,ogon" wzorca. Wspomniany ,,ogon" może być zarówno pojedynczym węzłem jak i kolejną instancją PatternTriple. Taka struktura pozwala na budowanie w sposób rekurencyjny dowolnie długich wzorców. Warto również dodać iż klasa PatternTriple jest generyczna i posiada z góry określone typy węzłów jakie mogą pojawiać się w dalszej części wzorca. Niemożliwe jest zatem utworzenie instancji wzorca, w której zachodziłaby niezgodność typów (o to zadba kompilator języka Scala).
 
 \subsection{Budowniczy wzorców \texttt{PatternBuilder}}
 Aby uprościć budowanie trójek wzorca została przygotowana klasa \texttt{PatternBuilder} (nazywana dalej ,,budowniczym"), która jak sugeruje jej nazwa służy do budowania wzorców. Udostępnia ona szereg metod pomocniczych pozwalających na budowanie i rozszerzanie istniejących instancji PatternTriple. Tworzenie instancji budowniczego jest niezwykle proste i odbywa się na etapie definiowania klas domenowych, instancje klasy PatternBuilder zwracane są przez metody \texttt{-->}, \texttt{<--}, \texttt{--}.
 
-Rozważmy przykładowe złożenie kilku wzorców. Wykorzystuje ono została tutaj zaprezentowaną wcześniej strukturę sieci społecznościowej. Pojawiajace się poniżej zmienne \texttt{john}, \texttt{friend}, \texttt{matthew} są instancjami typu \texttt{Person} podczas gdy \texttt{wiseComment} jest obiektem typu \texttt{Comment}.
+Rozważmy przykładowe złożenie kilku wzorców. Wykorzystuje ono została tutaj zaprezentowaną wcześniej strukturę sieci społecznościowej. Pojawiające się poniżej zmienne \texttt{john}, \texttt{friend}, \texttt{matthew} są instancjami typu \texttt{Person} podczas gdy \texttt{wiseComment} jest obiektem typu \texttt{Comment}.
 
 \inputminted{scala}{listings/scala/dsl/patterns/functional-example-1.scala}
 
@@ -338,7 +338,7 @@ Dzięki nim, możliwa jest transformacja wyrażenia typu \texttt{Boolean} na str
 
 Makra są eksperymentalną funkcjonalnością języka Scala wprowadzoną w wersji 2.10.0. Są one, podobnie jak w przypadku makr znanych z języka C, wykonywane podczas etapu kompilacji jednak dają o wiele więcej możliwości. Najważniejszą różnicą w stosunku do wspomnianego C jest fakt, że makra języka Scala nie wymagają stosowania żadnego specyficznego dla tego typu zadań mini-języka. Zamiast tego, mogą być pisane w języku Scala. Co więcej nie ograniczają się one do prostej zamiany tekstu w kodzie programu jak to bywa w przypadku innych języków, ale pozwalają na modyfikację drzewa składniowego. Oczywiście jest to dużo bardziej zaawansowany mechanizm i jego właściwe wykorzystanie jest bardziej skomplikowane, niemniej w zamian otrzymujemy bardzo potężne narzędzie.
 
-Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt\footnote{W Scali istnieje dedykowana instrukcja do tworzenia pojedyńczej instancji obiektu, natomiast w językach takich jak Java realizowane jest to za pomocą wzorca Singleton} z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała, a jedynie słowo kluczowe \texttt{macro} wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Ma ona dwie listy parametrów. Pierwsza z nich zawiera jeden parametr tzw. kontekst (typu \texttt{Context}), który udostępnia niezbędne metody do modyfikacji kodu. Druga --  drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
+Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt\footnote{W Scali istnieje dedykowana instrukcja do tworzenia pojedynczej instancji obiektu, natomiast w językach takich jak Java realizowane jest to za pomocą wzorca Singleton} z dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała, a jedynie słowo kluczowe \texttt{macro} wraz z nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Ma ona dwie listy parametrów. Pierwsza z nich zawiera jeden parametr tzw. kontekst (typu \texttt{Context}), który udostępnia niezbędne metody do modyfikacji kodu. Druga --  drzewa składniowe wyrażeń jakie zostały przekazane do makra w postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w efekcie służy do zamiany pewnych wyrażeń w kodzie programu na inne podczas etapu kompilacji.
 
 \medskip\noindent Przykładowa definicja makra powinna nieco rozjaśnić sposób ich użycia.
 
@@ -357,9 +357,9 @@ Strukturę tę rozpoczyna cecha \texttt{Condition} której potomkami są takie k
 
 \includegraphics[scale=0.5]{images/conditions-uml.png}
 
-W makrach można wyszczególnić dwa rodzaje operacji. Są to przechodzenie drzewa składniowego i wyszukiwanie interesującyh wzorców oraz budowanie drzew składniowych wyrażeń, którymi mają być zastąpione znalezione wzorce. Z tego powodu implementacja makra służącego do transformowania wyrażeń logicznych została podzielona na dwie części realizujące te zadania.
+W makrach można wyszczególnić dwa rodzaje operacji. Są to przechodzenie drzewa składniowego i wyszukiwanie interesujących wzorców oraz budowanie drzew składniowych wyrażeń, którymi mają być zastąpione znalezione wzorce. Z tego powodu implementacja makra służącego do transformowania wyrażeń logicznych została podzielona na dwie części realizujące te zadania.
 
-Pierwszą z nich są tzw. klasy transformujące (ang. Transformers), które zajmują się wyszukiwaniem wzorców w drzewie i zamianą ich na docelowe wyrażenia. Drugą -- budowniczy (ang. Builders) zajmujący się tworzeniem drzewa składniowego wspomnianych wyrażeń. Odseparowanie tych dwóch czynności oraz wprowadzenie kilku poziomów w hierarchi klas pozwoliło na stworzenie prostego w analizie kodu wspomnianego makra. Jest to kluczowe, gdyż mechanizm makr jest sam w sobie dość skomplikowany.  Ze względu na niewielką objętość kodu pozwoliłem sobie na zamieszczenie implementacji makra poniżej.
+Pierwszą z nich są tzw. klasy transformujące (ang. Transformers), które zajmują się wyszukiwaniem wzorców w drzewie i zamianą ich na docelowe wyrażenia. Drugą -- budowniczy (ang. Builders) zajmujący się tworzeniem drzewa składniowego wspomnianych wyrażeń. Odseparowanie tych dwóch czynności oraz wprowadzenie kilku poziomów w hierarchii klas pozwoliło na stworzenie prostego w analizie kodu wspomnianego makra. Jest to kluczowe, gdyż mechanizm makr jest sam w sobie dość skomplikowany.  Ze względu na niewielką objętość kodu pozwoliłem sobie na zamieszczenie implementacji makra poniżej.
 
 \inputminted{scala}{listings/scala/boolean-macro-implementation.scala}
 
@@ -389,7 +389,7 @@ Jedną z nich jest \texttt{SelectSerializer}, która odpowiada za serializację 
 
 \subsection{Uwspólnianie nazw zmiennych}
 
-W zapytaniach języka Cypher węzłom oraz relacjom nadawane są nazwy służące do odwoływania się do nich w dalszych częściach zapytania. Ze względu na to, że poszczególne sekcje serializowane są w sposób niezależny, potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja, którą jest \texttt{BasicNameResolver} przydziela nazwy według stosownej konwencji. Węzłom pojawiających się w zapytaniu o określonym wewnętrznym identyfikatorze przydzielana jest nazwa o wartości identyfikatora z prefixem \texttt{id\_}. Pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem \texttt{n\_}. Przykładowe nazwy to np. \texttt{id\_10} przydzielona dla węzła o identyfkatorze równym 10 oraz \texttt{n\_2}, która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
+W zapytaniach języka Cypher węzłom oraz relacjom nadawane są nazwy służące do odwoływania się do nich w dalszych częściach zapytania. Ze względu na to, że poszczególne sekcje serializowane są w sposób niezależny, potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja, którą jest \texttt{BasicNameResolver} przydziela nazwy według stosownej konwencji. Węzłom pojawiających się w zapytaniu o określonym wewnętrznym identyfikatorze przydzielana jest nazwa o wartości identyfikatora z prefixem \texttt{id\_}. Pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z prefixem \texttt{n\_}. Przykładowe nazwy to np. \texttt{id\_10} przydzielona dla węzła o identyfikatorze równym 10 oraz \texttt{n\_2}, która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
 
 \section{Zwracanie wyników}
 
@@ -421,7 +421,7 @@ Z powyższego wykresu wynika iż refleksja w podstawowym użyciu jest wyraźnie 
 
 \subsection{Mapper obiektowy}
 
-Po wykonaniu zapytania, baza danych zwraca wyniki w określonym przez siebie formacie. Może to być np. format JSON w przypadku implementacji REST--owej. Oczywiście narzędzia do obsługi bazy Neo4j dostarczają narzędzia do obsługi wyników. Zajmują się one obsługą poszczególnych pól i rozpoznawaniem typu wartości. NeoDSL również udostępnia tego typu interfejsy mające na celu ujednolicenie dostępu do różnych baz grafowych. Interfejsem opakowującym pojedyńczy wynik zapytania jest \texttt{ResultItem}. Zadaniem jego implementacji jest dostarczanie struktury odwzorowania, która dla określonej nazwy pola zwraca jego wartość otrzymaną z silnika bazy danych. Jedyną dostępną implementacją jest \texttt{Neo4jResultItem} które zajmuje się tłumaczeniem wyników otrzymanych z serwisu REST.
+Po wykonaniu zapytania, baza danych zwraca wyniki w określonym przez siebie formacie. Może to być np. format JSON w przypadku implementacji REST--owej. Oczywiście narzędzia do obsługi bazy Neo4j dostarczają narzędzia do obsługi wyników. Zajmują się one obsługą poszczególnych pól i rozpoznawaniem typu wartości. NeoDSL również udostępnia tego typu interfejsy mające na celu ujednolicenie dostępu do różnych baz grafowych. Interfejsem opakowującym pojedynczy wynik zapytania jest \texttt{ResultItem}. Zadaniem jego implementacji jest dostarczanie struktury odwzorowania, która dla określonej nazwy pola zwraca jego wartość otrzymaną z silnika bazy danych. Jedyną dostępną implementacją jest \texttt{Neo4jResultItem} które zajmuje się tłumaczeniem wyników otrzymanych z serwisu REST.
 
 Silnik obsługujący wybraną bazę grafową powinien implementować interfejs \texttt{ExecutionEngine}. Interfejs ten wymaga by jego implementacja dostarczała metodę \texttt{exec}. Metoda ta powinna dla każdego obsługiwanego przez NeoDSL zapytania zlecać jego wykonanie oraz zwracać wyniki w postaci kolekcji obiektów typu \texttt{ResultItem}.
 
@@ -468,11 +468,11 @@ Uruchomienie powyższego zapytania z argumentem reprezentującym wierzchołek ,,
 
 \section{Potencjalne funkcjonalności NeoDSL}
 
-Obecna funkcjonalność NeoDSL obejmje przeszukiwanie bazy danych. Możliwe jest jednak dalsze rozwinięcie funkcjonalności tego narzędzia tak by stało się kompletnym rozwiązaniem dla baz grafowych. W podrozdziale zostaną opisane niektóre z nich wraz z proponowanym sposobem implementacji.
+Obecna funkcjonalność NeoDSL obejmuje przeszukiwanie bazy danych. Możliwe jest jednak dalsze rozwinięcie funkcjonalności tego narzędzia tak by stało się kompletnym rozwiązaniem dla baz grafowych. W podrozdziale zostaną opisane niektóre z nich wraz z proponowanym sposobem implementacji.
 
 \subsection{Aktualizacja danych}
 
-Jedny z istotnych rozszerzeń byłoby dodanie możliwości aktualizowania i wstawiania danych. Aktualnie, możliwe jest jedynie przeszukiwanie bazy bez jakiejkolwiek możliwośći zmian jej stanu. 
+Jednym z istotnych rozszerzeń byłoby dodanie możliwości aktualizowania i wstawiania danych. Aktualnie, możliwe jest jedynie przeszukiwanie bazy bez jakiejkolwiek możliwości zmian jej stanu. 
 
 Osiągnięcie tego celu możliwe byłoby z wykorzystaniem istniejących już struktur. Budowanie wzorców nie wymagałoby praktycznie żadnej zmiany, a jedynym istotnym elementem byłaby implementacja zapytań oraz ich serializacja do języka Cypher. Poniżej przedstawiono przykład potencjalnej implementacji.
 
@@ -491,9 +491,9 @@ Implementacja tego typu zachowań mogłaby też zostać zrealizowana w podobny s
 % zakończenie 
 \summary
 
-Języki dziedzinowe do obsługi baz danych stanowią dla programisty elastyczne narzędzie pozwalające na pełniejsze ich wykorzystanie. Wyrażam nadzieję iż zaprezentowane przykłady takich narzędzi jak ,,Squeryl", ,,Rogue" czy też stworzony w ramach pracy ,,NeoDSL" są tego wystarczającym tego dowodem. Możliwe stało się to za sprawą popularyzacji takich języków jak Scala które dają olbrzymie możliwości w aspekcie ,,rozszerzalności" i elastyczności składni. Warto tutaj podkreślić znaczenie eksperymentalnego mechanizmu makr języka Scala który pozwala na tworzenie jeszcze bardziej zaawansowanych języków DSL. 
+Języki dziedzinowe do obsługi baz danych stanowią dla programisty elastyczne narzędzie pozwalające na pełniejsze ich wykorzystanie. Wyrażam nadzieję iż zaprezentowane przykłady takich narzędzi jak Squery, Rogue czy też stworzony w ramach pracy NeoDSL są tego wystarczającym tego dowodem. Możliwe stało się to za sprawą popularyzacji takich języków jak Scala które dają olbrzymie możliwości w aspekcie ,,rozszerzalności" i elastyczności składni. Warto tutaj podkreślić znaczenie eksperymentalnego mechanizmu makr języka Scala który pozwala na tworzenie jeszcze bardziej zaawansowanych języków DSL. 
 
-Bazy grafowe są interesującą opcją którą warto brać pod uwagę przy projektowaniu aplikacji które muszą sobie radzić pod dużym obciążeniem. Reprezentacja grafowa dużo bardziej odpowiada rzeczywistości którą programiści modelują w swoich programach niż ta którą osiąga się w bazach relacyjnych. Wraz z pojawianiem się kolejnych narzędzi do ich obsługi (takimi jak ,,NeoDSL") można spodziewać się coraz większej popularyzacji tego typu baz.
+Bazy grafowe są interesującą opcją którą warto brać pod uwagę przy projektowaniu aplikacji które muszą sobie radzić pod dużym obciążeniem. Reprezentacja grafowa dużo bardziej odpowiada rzeczywistości którą programiści modelują w swoich programach niż ta którą osiąga się w bazach relacyjnych. Wraz z pojawianiem się kolejnych narzędzi do ich obsługi (takimi jak NeoDSL) można spodziewać się coraz większej popularyzacji tego typu baz.
 
 % załączniki (opcjonalnie):
 \appendix

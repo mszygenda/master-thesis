@@ -1,4 +1,4 @@
-// Rozpoczecie transakcji
+// Rozpoczęcie transakcji
 Transaction tx = graphDb.beginTx();
 
 try {

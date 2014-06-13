@@ -5,6 +5,7 @@
 \usepackage{minted}
 \usemintedstyle{trac}
 \fvset{fontsize=\small}
+\fvset{xleftmargin=2pt}
 
 \usepackage{listings}
 % "define" Scala
@@ -64,31 +65,33 @@ Z matematycznego punktu widzenia\cite{Szepietowski:2010:MD} graf to struktura sk
 Aby dać czytelnikowi pogląd na to jak bardzo efektywne mogą być bazy grafowe w~porównaniu z~bazami relacyjnymi przedstawiony został eksperyment pochodzący z~książki ,,Neo4j In Action"\cite{neo4jinaction}. Ukazuje on porównanie wydajnościowe grafowej bazy Neo4j oraz MySQL dla analogicznej struktury danych. Poniższa ilustracja przedstawia prosty schemat bazy relacyjnej z~dwiema tabelami służącymi do przechowywania osób i~relacji ,,znajomości" między nimi.
 
 \begin{figure}[H]
+        \centering
 	\includegraphics[scale=0.75]{images/relational-schema-friends.png}
-	\caption{Ilustracja pochodzi z~książki ,,Graph Databases"\cite{Robinson:2013:GD}}
+	\caption{Schemat relacyjnej bazy przechowującej osoby i informacje o znajomych. Ilustracja z~książki ,,Graph Databases"\cite{Robinson:2013:GD}}
 \end{figure}
 
 Przykładowe zapytanie SQL do wyszukiwania znajomych znajomych osoby o~imieniu Alicja wygląda następująco.
 
 \begin{listing}[H]
 	\inputminted{sql}{listings/sql/relational-schema-friends-fof-query.sql}
-	\caption{Przykład z~książki ,,Graph Databases"\cite{Robinson:2013:GD}}
+	\caption{Zapytanie SQL do wydobycia znajomych znajomych Alicji. Przykład z~książki ,,Graph Databases"\cite{Robinson:2013:GD}}
 \end{listing}
 
 Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z~kolejnych instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania dla zbioru 1 000 000 rekordów.
 
 \begin{table}[H]
+    \centering
     \begin{tabular}{|l|l|l|l|}
       \hline 
-      \textbf{Głębokość} & \textbf{Czas wykonania dla MySQL} & \textbf{Czas wykonania dla Neo4j} & \textbf{Ilość wyników} \\
+      \textbf{Głębokość} & \textbf{Czas (s) -- MySQL} & \textbf{Czas (s) -- Neo4j} & \textbf{Ilość wyników} \\
       \hline
-      2 & 0.016 sekund & 0.01 sekund & {~}2500 \\
-      3 & 30.267 sekund & 0.168 sekund & {~}110000 \\
-      4 & 1543.505 sekund & 1.359 sekund & {~}600000 \\
-      5 & Nieukończone & 2.132 sekund & {~}800000 \\
+      2 & 0.016 & 0.01 & {~}2500 \\
+      3 & 30.267 & 0.168 & {~}110000 \\
+      4 & 1543.505 & 1.359 & {~}600000 \\
+      5 & Nieukończone & 2.132 & {~}800000 \\
       \hline
    \end{tabular} 
-    \caption{Czas wykonania (w sekundach) zapytań wraz ze wzrostem głębokości zapytania (Wyniki pochodzą z~książki ,,Neo4j in action"\cite{neo4jinaction})}
+    \caption{Czas wykonania zapytań wraz ze wzrostem głębokości zapytania. Eksperyment z~książki ,,Neo4j in action"\cite{neo4jinaction}}
     \label{fig:mysqlvsneo4j_results}
 \end{table}
 
@@ -232,7 +235,7 @@ Jednym z~bardziej istotnych mechanizmów języka niespotykanym w~takich językac
 
 \inputminted{scala}{listings/scala/pattern-matching-trees.scala}
 
-W powyższym przykładzie zdefiniowana została cecha\footnote{W Scali cecha (ang. trait) to mieszanka koncepcji interfejsu oraz klasy abstrakcyjnej. Mogą one posiadać zarówno metody abstrakcyjne jak i~konkretne implementacje.} drzewa (ang. Tree) oraz podklasy liścia (ang. Leaf) przechowującego wartości typu \texttt{Int} i~węzła (ang. Node) posiadającego dwóch potomków. Metoda \texttt{showTree} zdefiniowana w~obiekcie \texttt{TreeProrgram} dopasowuje przekazany argument do wzorców liścia i~węzła. W~ramach tego dopasowania składowe klas zostają przypisane do zmiennych \texttt{left}, \texttt{right} oraz \texttt{value}. W~zależności od przekazanego argumentu wywołany zostanie odpowiedni blok kodu.
+W powyższym przykładzie zdefiniowana została cecha\footnote{W Scali cecha (ang. trait) to mieszanka koncepcji interfejsu oraz klasy abstrakcyjnej. Mogą one posiadać zarówno metody abstrakcyjne jak i~konkretne implementacje.} drzewa (ang. Tree) oraz podklasy liścia (ang. Leaf) przechowującego wartości typu \texttt{Int} i~węzła (ang. Node) posiadającego dwóch potomków. Metoda \texttt{showTree} zdefiniowana w~obiekcie \texttt{TreeProrgram} dopasowuje przekazany argument do wzorców liścia i~węzła. W~ramach tego dopasowania składowe klas zostają przypisane do identyfikatorów \texttt{left}, \texttt{right} oraz \texttt{value}. W~zależności od przekazanego argumentu wywołany zostanie odpowiedni blok kodu.
 
 Pattern matching znajduje zastosowanie w~NeoDSL chociażby na etapie serializacji struktury zapytań do języka Cypher.
 
@@ -311,17 +314,17 @@ Rozpatrzmy przykładową klasę domenową reprezentującą osobę. Zawiera ona p
 
 Zapytania w~bazach grafowych skupiają się na wyszukiwaniu określonych wzorców. Z~tego powodu główny nacisk w~kwestii zwięzłości tworzonego DSLa został położony właśnie na tej części.
 
-\subsection{Podstawowa struktura -- klasa \texttt{PatternTriple}}
+\subsection{Podstawowa struktura -- \texttt{PatternTriple}}
 Podstawową strukturą służącą do reprezentacji wzorców jest klasa PatternTriple. Jak sugeruje jej nazwa, składa się ona z~trzech elementów. Są to kolejno: węzeł początkowy, krawędź z~określonym kierunkiem oraz tzw. ,,ogon" wzorca. Wspomniany ,,ogon" może być zarówno pojedynczym węzłem jak i~kolejną instancją PatternTriple. Taka struktura pozwala na budowanie w~sposób rekurencyjny dowolnie długich wzorców. Warto również dodać iż klasa PatternTriple jest generyczna i~posiada z~góry określone typy węzłów jakie mogą pojawiać się w~dalszej części wzorca. Niemożliwe jest zatem utworzenie instancji wzorca, w~której zachodziłaby niezgodność typów (o to zadba kompilator języka Scala).
 
-\subsection{Budowniczy wzorców \texttt{PatternBuilder}}
+\subsection{Budowniczy wzorców -- \texttt{PatternBuilder}}
 Aby uprościć budowanie trójek wzorca została przygotowana klasa \texttt{PatternBuilder} (nazywana dalej ,,budowniczym"), która jak sugeruje jej nazwa służy do budowania wzorców. Udostępnia ona szereg metod pomocniczych pozwalających na budowanie i~rozszerzanie istniejących instancji PatternTriple. Tworzenie instancji budowniczego jest niezwykle proste i~odbywa się na etapie definiowania klas domenowych, instancje klasy PatternBuilder zwracane są przez metody \texttt{-->}, \texttt{<--}, \texttt{--}.
 
 Rozważmy przykładowe złożenie kilku wzorców. Wykorzystuje ono została tutaj zaprezentowaną wcześniej strukturę sieci społecznościowej. Pojawiające się poniżej zmienne \texttt{john}, \texttt{friend}, \texttt{matthew} są instancjami typu \texttt{Person} podczas gdy \texttt{wiseComment} jest obiektem typu \texttt{Comment}.
 
 \inputminted{scala}{listings/scala/dsl/patterns/functional-example-1.scala}
 
-Wartością powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tutaj bowiem do czynienia z~trzema wzorcami połączonymi operatorem logicznym \texttt{and}. Wzorzec ten odpowiada poniższej sekcji ,,MATCH" języka Cypher.
+Wartością powyższego wyrażenia jest instancja tzw. złożenia wzorców, mamy tutaj bowiem do czynienia z~trzema wzorcami połączonymi operatorem logicznym \texttt{and}. Wzorzec ten odpowiada poniższej sekcji \texttt{MATCH} języka Cypher.
 
 \inputminted{cypher}{listings/cypher/patterns-dsl-example.cypher}
 
@@ -359,7 +362,7 @@ Strukturę tę rozpoczyna cecha \texttt{Condition} której potomkami są takie k
 
 W makrach można wyszczególnić dwa rodzaje operacji. Są to przechodzenie drzewa składniowego i~wyszukiwanie interesujących wzorców oraz budowanie drzew składniowych wyrażeń, którymi mają być zastąpione znalezione wzorce. Z~tego powodu implementacja makra służącego do transformowania wyrażeń logicznych została podzielona na dwie części realizujące te zadania.
 
-Pierwszą z~nich są tzw. klasy transformujące (ang. Transformers), które zajmują się wyszukiwaniem wzorców w~drzewie i~zamianą ich na docelowe wyrażenia. Drugą -- budowniczy (ang. Builders) zajmujący się tworzeniem drzewa składniowego wspomnianych wyrażeń. Odseparowanie tych dwóch czynności oraz wprowadzenie kilku poziomów w~hierarchii klas pozwoliło na stworzenie prostego w~analizie kodu wspomnianego makra. Jest to kluczowe, gdyż mechanizm makr jest sam w~sobie dość skomplikowany.  Ze względu na niewielką objętość kodu pozwoliłem sobie na zamieszczenie implementacji makra poniżej.
+Pierwszą z~nich są tzw. klasy transformujące (ang. Transformers), które zajmują się wyszukiwaniem wzorców w~drzewie i~zamianą ich na docelowe wyrażenia. Drugą -- budowniczy (ang. Builders) zajmujący się tworzeniem drzew składniowych wspomnianych wyrażeń. Odseparowanie tych dwóch czynności oraz wprowadzenie kilku poziomów w~hierarchii klas pozwoliło na stworzenie prostego w~analizie kodu makra. Jest to kluczowe, gdyż mechanizm makr jest sam w~sobie dość skomplikowany.  Ze względu na niewielką objętość kodu pozwoliłem sobie na zamieszczenie implementacji poniżej.
 
 \inputminted{scala}{listings/scala/boolean-macro-implementation.scala}
 
@@ -429,15 +432,16 @@ Oczywiście \texttt{ResultItem} jest dość ogólnym typem i~nie odpowiada struk
 
 Ze względu na problemy wydajnościowe jakich dostarcza mechanizm refleksji, dla informacji pozyskanych w~sposób dynamiczny wprowadzony został mechanizm pamięci podręcznej.
 
-\chapter{Przykłady wykorzystania NeoDSL}
+\chapter{Przykład wykorzystania NeoDSL}
 
 Rozdział ten ma na celu zaprezentowanie kompletnego przykładu zastosowania NeoDSL. Będzie nim społecznościowa zawierająca kilka podstawowych relacji spotykanych w~serwisach społecznościowych.
 
 \subsection{Sieć społecznościowa}
 
-Sieci społecznościowe są idealnym przykładem do prezentowania zalet baz grafowych. Skupiają się one bowiem na relacjach występujących między osobami takimi jak np. znajomość, partnerstwo. Silniki rekomendacji stosowane w~serwisach społecznościowych dostarczają informacji o~osobach, które użytkownicy mogą znać bazując na powiązaniach znajomych. Proponują one również interesujące strony, informacje w~oparciu gusta osób o~podobnych zainteresowaniach. Implementacja takich zachowań w~bazach grafowych jest niezwykle prosta, a~wyniki uzyskiwane są bardzo krótkim czasie. Oto przykładowy schemat sieci społecznościowej nazywanej dalej ,,NeoSocial".
+Sieci społecznościowe są idealnym przykładem do prezentowania zalet baz grafowych. Skupiają się one bowiem na relacjach występujących między osobami takimi jak np. znajomość, partnerstwo, które można rozpatrywać na kilku poziomach głębokości. Silniki rekomendacji stosowane w~serwisach społecznościowych dostarczają informacji o~osobach, które użytkownicy mogą znać bazując na powiązaniach znajomych. Proponują one również interesujące strony, informacje w~oparciu gusta osób o~podobnych zainteresowaniach. Implementacja takich zachowań w~bazach grafowych jest niezwykle prosta, a~wyniki uzyskiwane są bardzo krótkim czasie. Oto przykładowy schemat sieci społecznościowej nazywanej dalej ,,NeoSocial".
 
 \begin{figure}[H]
+        \centering
 	\includegraphics[scale=0.5]{images/socialnetwork-data.png}
 	\caption{Przykładowa sieć społecznościowa ,,NeoSocial"}
 	\label{fig:neosocial_data}
@@ -445,7 +449,7 @@ Sieci społecznościowe są idealnym przykładem do prezentowania zalet baz graf
 
 Elipsy reprezentują poszczególne węzły, napis w~ich wnętrzu odpowiada imieniu osoby lub treści komentarza napisanego przez jednego z~użytkowników. Wierzchołki połączone są następującymi krawędziami  ,,KNOWS" -- służy do modelowania relacji ,,znajomości" pomiędzy osobami, ,,WROTE" -- wskazuje autora komentarza oraz ,,LIKES" -- łączy osoby z~komentarzami dla których wyrażają one aprobatę.
 
-Aby odwzorować powyższą strukturę w~NeoDSL potrzebne jest utworzenie klasy \texttt{Person} do reprezentowania osób. Zawierać ona będzie pole \texttt{name} odpowiadające imieniu oraz pola odpowiadające relacjom w~jakich może znajdować się osoba. Są to \texttt{knows} oraz \texttt{likes}. Do odwzorowania komentarzy służyć będzie klasa \texttt{Comment}. Składa się ona z~pola \texttt{content} przechowującego treść wpisu oraz relacji \texttt{writtenBy}. Pełny fragment kodu znajduje się poniżej.
+Aby odwzorować powyższą strukturę w~NeoDSL potrzebne jest utworzenie klasy \texttt{Person} do reprezentowania osób. Zawierać ona będzie pole \texttt{name} odpowiadające imieniu oraz pola odpowiadające relacjom w~jakich może znajdować się osoba. Są to \texttt{knows} oraz \texttt{likes}. Do odwzorowania komentarzy służyć będzie klasa \texttt{Comment}. Składa się ona z~pola \texttt{content} przechowującego treść wpisu oraz krawędzi \texttt{writtenBy}. Pełny fragment kodu znajduje się poniżej.
 
 \inputminted{scala}{listings/scala/examples/socialnetwork/domain-classes.scala}
 
@@ -466,11 +470,11 @@ Uruchomienie powyższego zapytania z~argumentem reprezentującym wierzchołek ,,
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-fof-result.scala}
 \inputminted{text}{listings/text/person-fof-result.txt}
 
-\section{Potencjalne funkcjonalności NeoDSL}
+\chapter{Potencjalne funkcjonalności NeoDSL}
 
-Obecna funkcjonalność NeoDSL obejmuje przeszukiwanie bazy danych. Możliwe jest jednak dalsze rozwinięcie funkcjonalności tego narzędzia tak by stało się kompletnym rozwiązaniem dla baz grafowych. W~podrozdziale zostaną opisane niektóre z~nich wraz z~proponowanym sposobem implementacji.
+Obecna funkcjonalność NeoDSL obejmuje przeszukiwanie bazy danych. Możliwy jest jednak dalszy rozwój tego narzędzia. W~rozdziale zostaną opisane niektóre z~możliwych do zaimplementowania usprawnień wraz z~proponowanym sposobem implementacji.
 
-\subsection{Aktualizacja danych}
+\section{Aktualizacja danych}
 
 Jednym z~istotnych rozszerzeń byłoby dodanie możliwości aktualizowania i~wstawiania danych. Aktualnie, możliwe jest jedynie przeszukiwanie bazy bez jakiejkolwiek możliwości zmian jej stanu. 
 
@@ -478,7 +482,7 @@ Osiągnięcie tego celu możliwe byłoby z~wykorzystaniem istniejących już str
 
 \inputminted{scala}{listings/scala/missing-features-update.scala}
 
-\subsection{Sortowanie oraz dodatkowe ograniczenia na wyniki}
+\section{Sortowanie oraz dodatkowe ograniczenia na wyniki}
 
 Obecnie możliwe jest definiowanie prostych ograniczeń na zwracane wyniki (jak porównanie wartości pól węzłów). Nie ma natomiast możliwości wyrażenia wymogu unikatowości zwracanych wyników czy też określania kolejności w~jakiej będą one przekazywane. Oczywiście mowa tutaj o~wyrażaniu tych ograniczeń w~taki sposób, aby mogły być one zrealizowane przez serwer bazy danych. Nic nie stoi na przeszkodzie aby spełnić je po stronie klienta korzystając ze standardowych funkcjonalności kolekcji języka Scala.
 
@@ -491,9 +495,13 @@ Implementacja tego typu zachowań mogłaby też zostać zrealizowana w~podobny s
 % zakończenie 
 \summary
 
-Języki dziedzinowe do obsługi baz danych stanowią dla programisty elastyczne narzędzie pozwalające na pełniejsze ich wykorzystanie. Wyrażam nadzieję iż zaprezentowane przykłady takich narzędzi jak Squery, Rogue czy też stworzony w~ramach pracy NeoDSL są tego wystarczającym tego dowodem. Możliwe stało się to za sprawą popularyzacji takich języków jak Scala które dają olbrzymie możliwości w~aspekcie ,,rozszerzalności" i~elastyczności składni. Warto tutaj podkreślić znaczenie eksperymentalnego mechanizmu makr języka Scala który pozwala na tworzenie jeszcze bardziej zaawansowanych języków DSL. 
+Popularyzacja języków takich jak Scala skłania do poszukiwania efektywniejszych i~wygodniejszych w obsłudze narzędzi do baz danych. Projekty takie jak Squeryl czy Rogue pokazują olbrzymi potencjał drzemiący językach dziedzinowych. Ich stosowanie pozwala na wyrażanie zapytań w równie intuicyjny sposób jak możliwe jest to z wykorzystaniem np. SQL-a, dając dodatkowo funkcjonalności takie jak sprawdzanie poprawności wyrażeń na etapie kompilacji i~automatyczne mapowanie wyników na obiekty.
 
-Bazy grafowe są interesującą opcją którą warto brać pod uwagę przy projektowaniu aplikacji które muszą sobie radzić pod dużym obciążeniem. Reprezentacja grafowa dużo bardziej odpowiada rzeczywistości którą programiści modelują w~swoich programach niż ta którą osiąga się w~bazach relacyjnych. Wraz z~pojawianiem się kolejnych narzędzi do ich obsługi (takimi jak NeoDSL) można spodziewać się coraz większej popularyzacji tego typu baz.
+Bazy grafowe stanowią natomiast świeże spojrzenie na problem składowania danych. Reprezentacja grafowa dużo bardziej odpowiada rzeczywistości, którą programiści modelują w~swoich aplikacjach. W~coraz większym stopniu mamy do czynienia z~danymi, które powiązane są wieloma zależnościami. Neo4j jak i~inne bazy grafowe stanowią wydajne rozwiązanie dla tego typu zastosowań.
+
+Powstały w ramach pracy język dziedzinowy był eksperymentem mającym na celu odkrycie ciekawych technik pomocnych przy ich definiowaniu. Jedną z nich jest np. zastosowanie makr języka Scala. Okazuje się, że mechanizm ten może być niezwykle użyteczny i pozwala na osiągnięcie spektakularnych efektów. Zastosowanie tego mechanizmu w NeoDSL pozwoliło na wyrażanie warunków logicznych z wykorzystaniem standardowej składni Scali. Podobne efekty osiągane w~innych narzędziach z wykorzystaniem odmiennych technik niejednokrotnie prowadzą do trudnego w~analizie kodu opartego na sztuczkach programistycznych. Jak się jednak okazuje, przy właściwym wykorzystaniu makr można stworzyć prostą i~czytelną implementację.
+
+Niewątpliwie, potencjał drzemiący w~językach dziedzinowych jest ogromny, a~zastosowanie ich w~przypadku baz danych jest tylko jednym z~wielu. Ciekawymi zastosowaniami DSL-i może być np. język: do definiowania interfejsu użytkownika, budowania XML czy też pisania testów w~formie specyfikacji, która podlega weryfikacji.
 
 % załączniki (opcjonalnie):
 \appendix

@@ -1,6 +1,6 @@
 // Klasa reprezentująca osobę
 class Person extends MongoRecord[Person] 
-             with MongoId[Person] {
+             with ObjectIdKey[Person] {
   def meta = Person
   object name extends StringField(this)
   object age extends LongField(this)

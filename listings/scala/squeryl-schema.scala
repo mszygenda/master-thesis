@@ -5,8 +5,8 @@ class Song(val id: Long,
            val year: Int)
  
 // Obiekt reprezentujący schemat bazy danych. 
-// Powinien on w sobie skupiac 
-// Definicje wszystkich tabel przechowywanych w bazie
+// Powinien on w sobie skupiać definicje 
+// wszystkich tabel przechowywanych w bazie
 object SongSchema extends Schema {
   val songs = table[Song]
 }

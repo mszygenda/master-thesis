@@ -41,6 +41,7 @@
 
 
 \begin{document}
+\nocite{*}
 
 \begin{abstract}
 Praca ma na celu zademonstrowanie sposobu w~jaki można wykorzystać bazy grafowe w~nowoczesnych językach takich jak Scala. Jako część programistyczna powstało narzędzie NeoDSL. Jest to mini-język pozwalający na zapisywanie zapytań baz grafowych wprost w~kodzie programów pisanych w~języku Scala.
@@ -60,7 +61,7 @@ W ostatnich latach można było zaobserwować pojawienie się wielu baz danych z
 
 \section{Wstęp}
 
-Z matematycznego punktu widzenia\cite{Szepietowski:2010:MD} graf to struktura składająca się ze zbioru wierzchołków oraz zbioru krawędzi. Krawędź reprezentuje połączenie pomiędzy dwoma wierzchołkami. W~przypadku gdy kierunek krawędzi jest istotny mówimy o~grafach skierowanych. Bazy grafowe wykorzystują właśnię tę strukturę reprezentowania wszystkich danych rozszerzając ją tylko w~nieznaczny sposób (np. dodając pojęcie nazwanych krawędzi). Pomimo faktu iż teoria grafów jest dziedziną niemłodą to same bazy grafowe są stosunkowo świeżym tworem. Jak wspomina autor bazy Neo4j, w~roku 1999 nie istniała praktycznie żadna baza grafowa mogąca być wykorzystana w~sposób produkcyjny \cite{Robinson:2013:GD}. Sposób w~jaki bazy grafowe prezentują dane implikuje odmienny sposób przeszukiwania i~operowania na zbiorze danych. Nie istnieje tutaj pojęcie tabeli znane z~baz relacyjnych takich jak MySQL, która narzucała by określoną strukturę. Zamiast tego mamy do czynienia z~wierzchołkami (nazywanymi w~dalszej części pracy zamiennie węzłami) które mogą zawierać dowolną liczbę pól prostych lub złożonych (jak ma to miejsce np. w~bazie OrientDB). Pod tym względem przypominają one bazy dokumentowe w~których również nie ma narzuconej struktury. W~odróżnieniu jednak zarówno od baz relacyjnych jak i~dokumentowych, w~bazach grafowych związki między obiektami są zapisywane za pomocą nazwanych i~skierowanych krawędzi. Pojedynczy węzeł może mieć dowolnie wiele krawędzi wychodzących jak i~wchodzących (w dalszej części pracy będziemy używać zamiennie terminu krawędź i~związek). Przeszukiwanie baz grafowych odbywa się poprzez definiowanie interesujących wzorców w~grafie. Dzięki efektywnym algorytmom przeszukiwania grafów taki sposób przechowywania danych ma znaczący wpływ na wydajność.
+Z matematycznego punktu widzenia\cite{Szepietowski:2010:MD} graf to struktura składająca się ze zbioru wierzchołków oraz zbioru krawędzi. Krawędź reprezentuje połączenie pomiędzy dwoma wierzchołkami. W~przypadku gdy kierunek krawędzi jest istotny mówimy o~grafach skierowanych. Bazy grafowe wykorzystują właśnie tę strukturę reprezentowania wszystkich danych rozszerzając ją tylko w~nieznaczny sposób (np. dodając pojęcie nazwanych krawędzi). Pomimo faktu iż teoria grafów jest dziedziną niemłodą to same bazy grafowe są stosunkowo świeżym tworem. Jak wspomina autor bazy Neo4j, w~roku 1999 nie istniała praktycznie żadna baza grafowa mogąca być wykorzystana w~sposób produkcyjny \cite{Robinson:2013:GD}. Sposób w~jaki bazy grafowe prezentują dane implikuje odmienny sposób przeszukiwania i~operowania na zbiorze danych. Nie istnieje tutaj pojęcie tabeli znane z~baz relacyjnych takich jak MySQL, która narzucała by określoną strukturę. Zamiast tego mamy do czynienia z~wierzchołkami (nazywanymi w~dalszej części pracy zamiennie węzłami) które mogą zawierać dowolną liczbę pól prostych lub złożonych (jak ma to miejsce np. w~bazie OrientDB). Pod tym względem przypominają one bazy dokumentowe w~których również nie ma narzuconej struktury. W~odróżnieniu jednak zarówno od baz relacyjnych jak i~dokumentowych, w~bazach grafowych związki między obiektami są zapisywane za pomocą nazwanych i~skierowanych krawędzi. Pojedynczy węzeł może mieć dowolnie wiele krawędzi wychodzących jak i~wchodzących (w dalszej części pracy będziemy używać zamiennie terminu krawędź i~związek). Przeszukiwanie baz grafowych odbywa się poprzez definiowanie interesujących wzorców w~grafie. Dzięki efektywnym algorytmom przeszukiwania grafów taki sposób przechowywania danych ma znaczący wpływ na wydajność.
 
 Aby dać czytelnikowi pogląd na to jak bardzo efektywne mogą być bazy grafowe w~porównaniu z~bazami relacyjnymi przedstawiony został eksperyment pochodzący z~książki ,,Neo4j In Action"\cite{neo4jinaction}. Ukazuje on porównanie wydajnościowe grafowej bazy Neo4j oraz MySQL dla analogicznej struktury danych. Poniższa ilustracja przedstawia prosty schemat bazy relacyjnej z~dwiema tabelami służącymi do przechowywania osób i~relacji ,,znajomości" między nimi.
 
@@ -78,7 +79,7 @@ Przykładowe zapytanie SQL do wyszukiwania znajomych znajomych osoby o~imieniu A
 \end{listing}
 
 \newpage
-Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z~kolejnych instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania dla zbioru 1 000 000 rekordów.
+Wraz ze wzrostem głębokości przeszukiwanych powiązań (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z~kolejnych instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania dla zbioru 1 000 000 rekordów.
 
 \begin{table}[H]
     \centering
@@ -105,11 +106,11 @@ Jak można zaobserwować na powyższym przykładzie, różnica pomiędzy MySQL i
 Rozróżniamy dwa główne rodzaje baz grafowych. Pierwszym z~nich są bazy które pozwalają operować na przechowywanych danych jak na grafach, mających jednak odmienny sposób składowania danych. Popularnym rozwiązaniem jest np. przechowywanie struktury grafowej w~bazach relacyjnych. Niestety takie rozwiązanie nie pozwala na pełne wykorzystanie potencjału drzemiącego w~przechowywaniu danych w~postaci grafów. Przykładem takiej bazy jest FlockDB\cite{flockdb} która znajduje zastosowanie w~popularnym serwisie społecznościowym Twitter. Ze względu na małą uniwersalność tego typu rozwiązań (zazwyczaj są one dostosowane do konkretnego przypadku użycia) nie będą one omawiane w~tej pracy.
 
 \subsection{Bazy z~grafowym magazynem danych}
-Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko przedstawiają dane w~formie grafów ale również wykorzystują strukturę grafów do ich składowania. Zaletą takiego podejścia jest to iż przeszukiwanie może okazać się o~wiele wydajniejsze niż równoważne zapytanie do bazy z~relacyjnym magazynem danych. Powodem tego jest lokalność operacji wykonywanych na grafie. W~odróżnieniu od baz relacyjnych gdzie by wyszukać dane powiązane pewną relacją wymagane jest wykonanie iloczynu kartezjańskiego na całych zbiorach danych. W~przypadku ogromnej liczby rekordów taka operacja może okazać się wielce niewydajna. W~przypadku baz grafowych nie ma potrzeby odwiedzania wszystkich danych bowiem poruszamy się tylko w~obrębie obiektów w~bezpośredni sposób związanych ze sobą krawędziami. Przykładem takiej bazy jest np. Neo4j której została poświęcona znaczna część tej pracy.
+Drugim rodzajem baz grafowych są natywne bazy grafowe które nie tylko przedstawiają dane w~formie grafów ale również wykorzystują strukturę grafów do ich składowania. Zaletą takiego podejścia jest to iż przeszukiwanie może okazać się o~wiele wydajniejsze niż równoważne zapytanie do bazy z~relacyjnym magazynem danych. Powodem tego jest lokalność operacji wykonywanych na grafie. W~odróżnieniu od baz relacyjnych gdzie by wyszukać dane powiązane pewną relacją wymagane jest wykonanie iloczynu kartezjańskiego na całych zbiorach danych. W~przypadku ogromnej liczby rekordów taka operacja może okazać się wielce niewydajna. W~przypadku baz grafowych nie ma potrzeby odwiedzania wszystkich danych bowiem poruszamy się tylko w~obrębie obiektów w~bezpośredni sposób związanych ze sobą krawędziami. Przykładem takiej bazy jest Neo4j której została poświęcona znaczna część tej pracy.
 
 \chapter{Neo4j}
 
-Neo4j jest natywną bazą grafową napisaną w~języku Java. Pozwala ona na przechowywanie węzłów jak i~relacji wraz z~polami typów prostych takimi jak napisy czy liczby. W~implementacji zostało zastosowanych wiele mechanizmów mających na celu osiągnięcie jak najlepszej wydajności przy przeszukiwaniu grafów. Warto tutaj wymienić chociażby sposób w~jaki zapisywana jest informacja o~krawędziach wychodzących z~wierzchołka. Otóż, aby odczytać listę krawędzi dla danego wierzchołka nie ma potrzeby korzystania z~żadnego pośredniczącego indeksu, informację tę można odczytać bezpośrednio w~jednym kroku (ang. Index-Free Adjacency\cite[s.~5]{Robinson:2013:GD}). Wierzchołki i~krawędzie są natomiast zapisywane w~plikach w~których każdy rekord jest stałego rozmiaru. Pozwala to na bardzo szybkie odczytywanie danych bez konieczności przeglądania pliku w~celu odnalezienia właściwego rekordu (wystarczy pomnożyć rozmiar rekordu relacji bądź węzła przez jego identyfikator by uzyskać lokalizację w~pliku).
+Neo4j jest natywną bazą grafową napisaną w~języku Java. Pozwala ona na przechowywanie węzłów jak i~krawędzi wraz z~polami typów prostych takimi jak napisy czy liczby. W~implementacji zostało zastosowanych wiele mechanizmów mających na celu osiągnięcie jak najlepszej wydajności przy przeszukiwaniu grafów. Warto tutaj wymienić chociażby sposób w~jaki zapisywana jest informacja o~krawędziach wychodzących z~wierzchołka. Otóż, aby odczytać listę krawędzi dla danego wierzchołka nie ma potrzeby korzystania z~żadnego pośredniczącego indeksu, informację tę można odczytać bezpośrednio w~jednym kroku (ang. Index-Free Adjacency\cite[s.~5]{Robinson:2013:GD}). Wierzchołki i~krawędzie są natomiast zapisywane w~plikach w~których każdy rekord jest stałego rozmiaru. Pozwala to na bardzo szybkie odczytywanie danych bez konieczności przeglądania pliku w~celu odnalezienia właściwego rekordu (wystarczy pomnożyć rozmiar rekordu krawędzi bądź węzła przez jego identyfikator by uzyskać lokalizację w~pliku).
 
 Neo4j jest wydajną i~jedną z~bardziej popularnych baz grafowych. Z~tego powodu została ona wybrana do implementacji narzędzia będącego przedmiotem niniejszej pracy.
 
@@ -146,7 +147,7 @@ Pierwszą z~nich ponownie jest sekcja \texttt{START}, która pozwala na wybranie
 
 \inputminted{cypher}{listings/cypher/start-section.cypher}
 
-Kolejną sekcją jest \texttt{CREATE} której składnia jest podobna do sekcji \texttt{MATCH}. W~przeciwieństwie jednak do \texttt{MATCH} pozwala ona na tworzenie krawędzi w~grafie oraz węzłów. W~poniższym przykładzie zostanie utworzony węzeł \texttt{newFriend} o~polu \texttt{name} równym wartości ,,New friend" oraz relacja \texttt{KNOWS} łącząca wierzchołek wskazywany przez zmienną \texttt{john} z~nowo utworzonym węzłem.
+Kolejną sekcją jest \texttt{CREATE} której składnia jest podobna do sekcji \texttt{MATCH}. W~przeciwieństwie jednak do \texttt{MATCH} pozwala ona na tworzenie powiązań oraz węzłów w~grafie. W~poniższym przykładzie zostanie utworzony węzeł \texttt{newFriend} o~polu \texttt{name} równym wartości ,,New friend" oraz krawędź \texttt{KNOWS} łącząca wierzchołek wskazywany przez zmienną \texttt{john} z~nowo utworzonym węzłem.
 
 \inputminted{cypher}{listings/cypher/create-section.cypher}
 
@@ -164,7 +165,7 @@ Neo4j udostępnia kilka odmiennych sposobów dostępu do bazy. Rozdział ten ma 
 
 \subsection{Java Core API -- Embedded mode}
 
-Jedną z~możliwości jest skorzystanie z~tzw. Java Core API czyli zestawu klas i~interfejsów dostępnych dla języka Java. Udostępnionych został szereg mechanizmów pozwalających na operowanie na węzłach i~relacjach w~sposób bezpośredni.
+Jedną z~możliwości jest skorzystanie z~tzw. Java Core API czyli zestawu klas i~interfejsów dostępnych dla języka Java. Udostępnionych został szereg mechanizmów pozwalających na operowanie na węzłach i~związkach w~sposób bezpośredni.
 
 \medskip\noindent Do rozpoczęcia pracy potrzebna jest instancja bazy. Można ją utworzyć w~następujący sposób.
 
@@ -172,7 +173,7 @@ Jedną z~możliwości jest skorzystanie z~tzw. Java Core API czyli zestawu klas 
 
 Powyższy fragment kodu powinien utworzyć instancję bazy pod ścieżką ,,/tmp/neo4j".
 
-Z wykorzystaniem tak utworzonej bazy danych możliwe jest wstawianie oraz odczytywanie węzłów i~relacji. Oto fragment kodu demonstrujący podstawowe operacje.
+Z wykorzystaniem tak utworzonej bazy danych możliwe jest wstawianie oraz odczytywanie węzłów i~krawędzi. Oto fragment kodu demonstrujący podstawowe operacje.
 
 \inputminted{java}{listings/java/neo4j-core-api-use.java}
 
@@ -180,7 +181,7 @@ Oczywistą wadą jest fakt, że do wykorzystania tego mechanizmu potrzebna jest 
 
 \subsection{Traversal Framework API}
 
-Uzupełnieniem poprzedniego mechanizmu jest tzw. Traversal Framework który pozwala w~prosty sposób na definiowanie algorytmu przechodzenia po grafie. Podstawowym interfejsem jest \texttt{TraversalDescription} który służy do określania zasad przechodzenia grafu. Oczywiście nikt nie wymaga od programisty by tworzył złożoną implementację algorytmu odwiedzania grafu. Neo4j udostępnia szereg standardowych metod służących do poruszania się po krawędziach określonego typu oraz do komponowania tychże metod ze sobą.
+Uzupełnieniem poprzedniego mechanizmu jest tzw. Traversal Framework który pozwala w~prosty sposób na definiowanie algorytmu przechodzenia po grafie. Podstawowym interfejsem jest \texttt{TraversalDescription}, który służy do określania zasad przechodzenia grafu. Oczywiście nikt nie wymaga od programisty by tworzył złożoną implementację algorytmu odwiedzania grafu. Neo4j udostępnia szereg standardowych metod służących do poruszania się po krawędziach określonego typu oraz do komponowania tychże metod ze sobą.
 
 Poniżej przedstawiony został przykład w~jaki sposób można zdefiniować ,,opis" metody wyszukiwania węzłów połączonych w~sposób bezpośredni krawędzią ,,KNOWS" z~wierzchołkiem \texttt{john}
 
@@ -190,7 +191,7 @@ Poniżej przedstawiony został przykład w~jaki sposób można zdefiniować ,,op
 
 Ostatnim ze sposobów dostępu do bazy Neo4j jest użycie serwisu REST--owego. W~tym trybie korzystając z~protokołu HTTP odwołujemy się do usług pozwalających między innymi na wykonywanie poleceń języka Cypher. Niewątpliwą zaletą tego podejścia jest niezależność od platformy. Z~wystawionego serwisu można skorzystać z~poziomu praktycznie każdego języka programowania. Dodatkowo, w~odróżnieniu od embedded mode nie ma potrzeby aby baza danych znajdowała się na tym samym serwerze co aplikacja.
 
-Usługa serwera udostępnia standardowe akcje służące do tworzenia, wyszukiwania węzłów oraz relacji czy też uruchamiania zapytań języka Cypher. Ze względu na swoją uniwersalność właśnie ten sposób dostępu do bazy danych został wykorzystany w~narzędziu powstałym w~ramach tej pracy.
+Usługa serwera udostępnia standardowe akcje służące do tworzenia, wyszukiwania węzłów oraz krawędzi czy też uruchamiania zapytań języka Cypher. Ze względu na swoją uniwersalność właśnie ten sposób dostępu do bazy danych został wykorzystany w~narzędziu powstałym w~ramach tej pracy.
 
 Oto przykładowe żądanie zlecające wykonanie zapytania języka Cypher (wysłane z~wykorzystaniem narzędzia ,,curl")
 
@@ -200,7 +201,7 @@ Oto przykładowe żądanie zlecające wykonanie zapytania języka Cypher (wysła
 
 Scala jest statycznie typowanym językiem programowania który łączy w~sobie idee programowania obiektowego oraz funkcyjnego. Połączenie tych dwóch paradygmatów było jednym ze środków do osiągnięcia głównego z~założeń twórców jakim było stworzenie języka, który jest skalowalny oraz zwięzły. Skalowalność w~tym przypadku polega na przystosowaniu języka do prostych zadań jak np. niewielkie skrypty oraz do ogromnych projektów jakie realizuje się w~językach typu Java czy C\#.
 
-Do dyspozycji programisty zostało oddanych szereg mechanizmów pozwalających na ,,rozszerzanie" składni języka. Jednym z~nich jest np. możliwość definiowania metod zawierających w~nazwie symbole uchodzące w~innych językach za specjalne (takie jak \texttt{*}, \texttt{+}, \texttt{-} etc.). Pozwala to na definiowanie ,,operatorów" które w~innych językach takich jak Java są traktowane w~sposób szczególny. Scala jest tak elastycznym narzędziem iż pozwala nawet na definiowanie znanych struktur kontrolnych takich jak np. pętla \texttt{while}. Warto również wspomnieć o~niejawnym przekazywaniu parametrów i~wywoływaniu metod. Możliwe jest zdefiniowanie metody której jeden z~argumentów dostarczany jest w~sposób niejawny (bez wiedzy programisty) poprzez wyszukanie pasującego obiektu w~miejscu wywołania metody. Podobnie mechanizm działa w~przypadku niejawnych metod gdzie możliwe jest wywołanie ich wykonanie w~sytuacji gdy typ przekazywanego wyrażenia jest niezgodny z~oczekiwanym.
+Do dyspozycji programisty zostało oddanych szereg mechanizmów pozwalających na ,,rozszerzanie" składni języka. Jednym z~nich jest np. możliwość definiowania metod zawierających w~nazwie symbole uchodzące w~innych językach za specjalne (takie jak \texttt{*}, \texttt{+}, \texttt{-} etc.). Pozwala to na definiowanie ,,operatorów" które w~innych językach takich jak Java są traktowane w~sposób szczególny. Scala jest tak elastycznym narzędziem iż pozwala nawet na definiowanie znanych struktur kontrolnych takich jak np. pętla \texttt{while}. Warto również wspomnieć o~niejawnym przekazywaniu parametrów i~wywoływaniu metod. Możliwe jest zdefiniowanie metody której jeden z~argumentów dostarczany jest w~sposób niejawny (bez wiedzy programisty) poprzez wyszukanie pasującego obiektu w~miejscu wywołania metody. Podobnie mechanizm działa w~przypadku niejawnych metod gdzie możliwe jest ich wykonanie w~sytuacji gdy typ przekazywanego wyrażenia jest niezgodny z~oczekiwanym.
 
 Pomimo tego, że Scala jest językiem statycznie typowanym, nie wymaga od programisty jawnego określania typu w~każdej sytuacji. System inferencji typów jest na tyle rozbudowany iż w~wielu przypadkach możliwe jest całkowite pominięcie określania typów zmiennych. Jest to kolejna cecha poza wieloma innymi wpływająca na zwięzłość kodu pisanego w~tym języku.
 
@@ -250,7 +251,9 @@ Wszystkie bazy danych udostępniają pewien natywny interfejs do manipulacji na 
 
 Alternatywą dla klasycznych rozwiązań typu Hibernate są języki dziedzinowe (ang. Domain Specific Language -- w~skrócie DSL)  pozwalające w~pewnym uproszczeniu na zapisywanie zapytań języka bazy danych wprost w~kodzie programu. Tak budowane zapytania są zwykłymi wywołaniami metod danego języka stąd są automatycznie walidowane na etapie kompilacji.
 
-Rozdział ten ma na celu przedstawienie istniejących rozwiązań dla baz relacyjnych jak i~NoSQL będących inspiracją dla narzędzia ,,NeoDSL" stworzonego w~ramach tej pracy.
+Rozdział ten ma na celu przedstawienie istniejących rozwiązań dla baz relacyjnych jak i~NoSQL będących inspiracją dla narzędzia NeoDSL stworzonego w~ramach tej pracy.
+
+\newpage
 
 \section{Bazy SQL}
 
@@ -299,6 +302,8 @@ Podobnie jak w~bibliotece Squeryl, w~NeoDSL przed tworzeniem jakichkolwiek zapyt
 
 Pierwszym krokiem jaki należy wykonać przed definiowaniem zapytań jest utworzenie modelu (tj. zbioru klas) odpowiadającego jakiemuś fragmentowi rzeczywistości, który opisujemy i~przechowujemy w~bazie danych. Neodsl udostępnia mechanizmy pomocnicze, które pozwalają na szybkie odwzorowanie węzłów oraz powiązań między nimi.
 
+\newpage
+
 \subsection{Klasa \texttt{DomainObject}}
 
 Wszystkie klasy domenowe powinny rozszerzać \texttt{DomainObject}, która dostarcza narzędziu niezbędnych informacji do działania. Jest to klasa generyczna\footnote{Klasy generyczne  przyjmują dodatkowe parametry będące typami}, która wymaga określenia typu klasy, którą definiuje programista (konieczność przekazywania typu definiowanej klasy jest technicznym szczegółem, który wymagany jest do prawidłowego funkcjonowania narzędzia). 
@@ -311,7 +316,7 @@ Do określania krawędzi wchodzących, wychodzących i~bez określonego kierunku
 
 \subsection{Przykład modelu}
 
-Rozpatrzmy przykładową klasę domenową reprezentującą osobę. Zawiera ona pola \texttt{name} oraz \texttt{surname} odpowiadające imieniu i~nazwisku oraz pola definiujące krawędzie wchodzące i~wychodzące z~węzłów tego typu. Jest to pole \texttt{knows}, które definiuje krawędź wychodzącą do obiektów typu \texttt{Person} oraz \texttt{wrote} -- reprezentujące związek pomiędzy \texttt{Person} a~obiektami typu \texttt{Comment} (w klasie \texttt{Comment} zdefiniowane jest odbicie symetryczne tego związku).
+Rozpatrzmy przykładową klasę domenową reprezentującą osobę. Zawiera ona pola \texttt{name} oraz \texttt{surname} odpowiadające imieniu i~nazwisku oraz pola definiujące krawędzie wychodzące z~węzłów tego typu. Jest to pole \texttt{knows}, które definiuje krawędź wychodzącą do obiektów typu \texttt{Person} oraz \texttt{wrote} -- reprezentujące związek pomiędzy \texttt{Person} a~obiektami typu \texttt{Comment} (w klasie \texttt{Comment} zdefiniowane jest odbicie symetryczne tego związku).
 
 \inputminted{scala}{listings/scala/dsl/sample-model.scala}
 
@@ -393,7 +398,7 @@ Przypomnijmy, że w~każdym zapytaniu języka Cypher da się wyszczególnić kil
 
 Głównym obiektem zajmującym się serializacją jest \texttt{CypherSerializer}. Jego zadaniem jest obsługa wszystkich rodzajów zapytań i~delegowanie serializacji do klas odpowiedzialnych za dany typ.
 
-Jedną z~nich jest \texttt{SelectSerializer}, która odpowiada za serializację zapytań typu Select służących do wydobywania danych z~bazy. Realizuje ona swoje zadanie z~wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: \texttt{StartSerializer}, \texttt{MatchSerializer}, \texttt{ReturnSerializer}, \texttt{WhereSerializer}. Ponżej przedstawiona została graficzna reprezentacja powiązań pomiędzy poszczególnymi klasami.
+Jedną z~nich jest \texttt{SelectSerializer}, która odpowiada za serializację zapytań typu Select służących do wydobywania danych z~bazy. Realizuje ona swoje zadanie z~wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: \texttt{StartSerializer}, \texttt{MatchSerializer}, \texttt{ReturnSerializer}, \texttt{WhereSerializer}. Na następnej stronie przedstawiona została graficzna reprezentacja powiązań pomiędzy poszczególnymi klasami.
 
 \newpage
 
@@ -403,7 +408,7 @@ Jedną z~nich jest \texttt{SelectSerializer}, która odpowiada za serializację 
 
 \subsection{Uwspólnianie nazw zmiennych}
 
-W zapytaniach języka Cypher węzłom oraz relacjom nadawane są nazwy służące do odwoływania się do nich w~dalszych częściach zapytania. Ze względu na to, że poszczególne sekcje serializowane są w~sposób niezależny, potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja, którą jest \texttt{BasicNameResolver} przydziela nazwy według stosownej konwencji. Węzłom pojawiających się w~zapytaniu o~określonym wewnętrznym identyfikatorze przydzielana jest nazwa o~wartości identyfikatora z~prefixem \texttt{id\_}. Pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z~prefixem \texttt{n\_}. Przykładowe nazwy to np. \texttt{id\_10} przydzielona dla węzła o~identyfikatorze równym 10 oraz \texttt{n\_2}, która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
+W zapytaniach języka Cypher węzłom oraz krawędziom nadawane są nazwy służące do odwoływania się do nich w~dalszych częściach zapytania. Ze względu na to, że poszczególne sekcje serializowane są w~sposób niezależny, potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja, którą jest \texttt{BasicNameResolver} przydziela nazwy według stosownej konwencji. Węzłom pojawiających się w~zapytaniu o~określonym wewnętrznym identyfikatorze przydzielana jest nazwa o~wartości identyfikatora z~prefixem \texttt{id\_}. Pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z~prefixem \texttt{n\_}. Przykładowe nazwy to np. \texttt{id\_10} przydzielona dla węzła o~identyfikatorze równym 10 oraz \texttt{n\_2}, która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
 
 \section{Zwracanie wyników}
 
@@ -411,7 +416,7 @@ Istotnym zadaniem narzędzia miało być ukrycie wewnętrznych mechanizmów bazy
 
 \subsection{Refleksja w~Scali}
 
-Język Scala od wersji 2.10 udostępnia mechanizm refleksji dedykowany do tego języka. We wcześniejszych wersjach refleksja mogła być realizowana wyłącznie przy pomocy API udostępnianego razem z~językiem Java. Refleksja pozwala na odczytywanie informacji o~dowolnej klasie w~trakcie działania programu. Informacje, jakie można uzyskać to np. zdefiniowane pola, metody czy w~szczególności konstruktory. Poza informacją o~dostępnych polach istnieje również możliwość ich modyfikacji, wywoływania metod czy tworzenia instancji danego typu. Jest to zatem nieodzowny mechanizm stosowany przy implementacji narzędzi tworzących obiekty w~sposób dynamiczny.
+Język Scala od wersji 2.10 udostępnia mechanizm refleksji dedykowany do tego języka\cite{scalareflection}. We wcześniejszych wersjach refleksja mogła być realizowana wyłącznie przy pomocy API udostępnianego razem z~językiem Java. Refleksja pozwala na odczytywanie informacji o~dowolnej klasie w~trakcie działania programu. Informacje, jakie można uzyskać to np. zdefiniowane pola, metody czy w~szczególności konstruktory. Poza informacją o~dostępnych polach istnieje również możliwość ich modyfikacji, wywoływania metod czy tworzenia instancji danego typu. Jest to zatem nieodzowny mechanizm stosowany przy implementacji narzędzi tworzących obiekty w~sposób dynamiczny.
 
 Oczywistą wadą refleksji jest mniejsza wydajność niż w~przypadku bezpośredniego operowania na klasie. Na maszynie testowej o~poniższych parametrach został wykonany pomiar porównujący wydajność tworzenia instancji prostych obiektów w~sposób bezpośredni, z~wykorzystaniem refleksji oraz z~refleksją wraz z~mechanizmem pamięci podręcznej.
 
@@ -423,10 +428,11 @@ Oczywistą wadą refleksji jest mniejsza wydajność niż w~przypadku bezpośred
   \hline
 \end{tabular} 
 
+\newpage
 Oto wyniki tego pomiaru przedstawiające jak wiele razy refleksja okazała się wolniejsza od bezpośredniego operowania na klasie.
 
 \begin{figure}[H]
-	\includegraphics[scale=0.6]{images/reflection-comparison.png}
+	\includegraphics[scale=0.65]{images/reflection-comparison.png}
 	\caption{Porównanie wydajnościowe refleksji w~Scali}
 	\label{fig:reflection_comparison}
 \end{figure}
@@ -528,7 +534,6 @@ Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W
 Zmiany dotknęły również języka Cypher który jak określają twórcy stał się jeszcze bardziej deklaratywny. Istotną nowością jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów, po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
 
 % literatura (obowiązkowo):
-\nocite{*}
 \bibliographystyle{unsrt}
 \bibliography{master-thesis}
 

@@ -77,6 +77,7 @@ Przykładowe zapytanie SQL do wyszukiwania znajomych znajomych osoby o~imieniu A
 	\caption{Zapytanie SQL do wydobycia znajomych znajomych Alicji. Przykład z~książki ,,Graph Databases"\cite{Robinson:2013:GD}}
 \end{listing}
 
+\newpage
 Wraz ze wzrostem głębokości przeszukiwanych relacji (znajomi znajomych znajomych itd.) potrzebne jest skorzystanie z~kolejnych instrukcji \texttt{JOIN}. Poniżej przedstawiona została tabela zestawiająca czasy wykonania zapytań wraz ze wzrostem ,,głębokości" zapytania dla zbioru 1 000 000 rekordów.
 
 \begin{table}[H]
@@ -114,6 +115,8 @@ Neo4j jest wydajną i~jedną z~bardziej popularnych baz grafowych. Z~tego powodu
 
 \section{Język Cypher}
 Cypher jest językiem zapytań stworzonym specjalnie na potrzeby Neo4j pozwalającym w~sposób deklaratywny przeszukiwać oraz aktualizować bazę grafową. Podobnie jak SQL jest to stosunkowo łatwy w~analizie język który oferuje duże możliwości. Podrozdział ten ma na celu zaznajomienie czytelnika z~podstawami składni i~sposobem w~jaki operuje się za jego pomocą na danych w~bazach grafowych.
+
+\newpage
 
 \subsection{Przeszukiwanie grafu}
 
@@ -212,6 +215,8 @@ Składnia Scali była inspirowana takimi językami jak C\# czy Java stąd doświ
 
 Istotną różnicą w~stosunku do Javy czy C\# wpływającą na czytelność kodu jest sposób w~jaki definiuje się zmienne czy parametry metod. Mianowicie, najpierw określa się ich nazwy a~w drugiej kolejności typ (który może być całkowicie pominięty jeśli da się go określić z~systemu inferencji). Taka kolejność umotywowana jest tym iż programista czytający kod bardziej zainteresowany jest nazwą aniżeli typem zmiennej. Poniżej kilka przykładowych deklaracji wartości i~zmiennych.
 
+\newpage
+
 \inputminted{scala}{listings/scala/val-var-declarations.scala}
 
 Metody w~języku Scala definiuje się z~użyciem słowa kluczowego \texttt{def}. Podobnie jak w~przypadku zmiennych typ zwracanej wartości określany jest po zdefiniowaniu nazwy i~może być on całkowicie pominięty jeśli da się go określić z~ciała metody. Poniżej przykłady kilku funkcji.
@@ -232,7 +237,7 @@ Zdefiniowanej powyżej klasie odpowiada poniższy kod w~języku Java.
 \subsection{Pattern Matching}
 
 Jednym z~bardziej istotnych mechanizmów języka niespotykanym w~takich językach jak Java jest tzw. Pattern Matching (dopasowywanie do wzorca). Pozwala on na definiowanie specjalnych klas (ang. Case Classes) które można dopasowywać i~docierać do ich składowych z~wykorzystaniem dedykowanej do tego celu składni. Przypomina to trochę instrukcję \texttt{switch} o~dużo bardziej zaawansowanym działaniu. Oto przykład użycia tego mechanizmu do wyświetlenia wartości przechowywanych w~liściach struktury drzewa reprezentowanej właśnie przy pomocy tzw. case classes.
-
+\newpage
 \inputminted{scala}{listings/scala/pattern-matching-trees.scala}
 
 W powyższym przykładzie zdefiniowana została cecha\footnote{W Scali cecha (ang. trait) to mieszanka koncepcji interfejsu oraz klasy abstrakcyjnej. Mogą one posiadać zarówno metody abstrakcyjne jak i~konkretne implementacje.} drzewa (ang. Tree) oraz podklasy liścia (ang. Leaf) przechowującego wartości typu \texttt{Int} i~węzła (ang. Node) posiadającego dwóch potomków. Metoda \texttt{showTree} zdefiniowana w~obiekcie \texttt{TreeProrgram} dopasowuje przekazany argument do wzorców liścia i~węzła. W~ramach tego dopasowania składowe klas zostają przypisane do identyfikatorów \texttt{left}, \texttt{right} oraz \texttt{value}. W~zależności od przekazanego argumentu wywołany zostanie odpowiedni blok kodu.
@@ -358,7 +363,9 @@ W powyższym przykładzie zdefiniowane zostało makro o~nazwie assert przyjmują
 Zastosowanie makr w~przypadku NeoDSL polega na zamianie wyrażeń typu \texttt{Boolean} na własną strukturę którą można w~prosty sposób serializować do języka Cypher. 
 Strukturę tę rozpoczyna cecha \texttt{Condition} której potomkami są takie klasy jak \texttt{And}, \texttt{Or}, \texttt{Not}, które odpowiednio reprezentują koniunkcję, alternatywę i~zaprzeczenie warunków oraz \texttt{PropertyComparison} która odpowiada porównaniu pól obiektów z~dziedziny. Poniżej przedstawiony został diagram klas.
 
-\includegraphics[scale=0.5]{images/conditions-uml.png}
+\begin{center}
+	\includegraphics[scale=1]{images/conditions-uml.png}
+\end{center}
 
 W makrach można wyszczególnić dwa rodzaje operacji. Są to przechodzenie drzewa składniowego i~wyszukiwanie interesujących wzorców oraz budowanie drzew składniowych wyrażeń, którymi mają być zastąpione znalezione wzorce. Z~tego powodu implementacja makra służącego do transformowania wyrażeń logicznych została podzielona na dwie części realizujące te zadania.
 
@@ -388,7 +395,11 @@ Głównym obiektem zajmującym się serializacją jest \texttt{CypherSerializer}
 
 Jedną z~nich jest \texttt{SelectSerializer}, która odpowiada za serializację zapytań typu Select służących do wydobywania danych z~bazy. Realizuje ona swoje zadanie z~wykorzystaniem obiektów odpowiedzialnych za poszczególne sekcje zapytań takie jak: \texttt{StartSerializer}, \texttt{MatchSerializer}, \texttt{ReturnSerializer}, \texttt{WhereSerializer}. Ponżej przedstawiona została graficzna reprezentacja powiązań pomiędzy poszczególnymi klasami.
 
-\includegraphics[scale=0.5]{images/cypher-serialization-uml.png}
+\newpage
+
+\begin{center}
+	\includegraphics[scale=1]{images/cypher-serialization-uml.png}
+\end{center}
 
 \subsection{Uwspólnianie nazw zmiennych}
 
@@ -440,6 +451,7 @@ Rozdział ten ma na celu zaprezentowanie kompletnego przykładu zastosowania Neo
 
 Sieci społecznościowe są idealnym przykładem do prezentowania zalet baz grafowych. Skupiają się one bowiem na relacjach występujących między osobami takimi jak np. znajomość, partnerstwo, które można rozpatrywać na kilku poziomach głębokości. Silniki rekomendacji stosowane w~serwisach społecznościowych dostarczają informacji o~osobach, które użytkownicy mogą znać bazując na powiązaniach znajomych. Proponują one również interesujące strony, informacje w~oparciu gusta osób o~podobnych zainteresowaniach. Implementacja takich zachowań w~bazach grafowych jest niezwykle prosta, a~wyniki uzyskiwane są bardzo krótkim czasie. Oto przykładowy schemat sieci społecznościowej nazywanej dalej ,,NeoSocial".
 
+\newpage
 \begin{figure}[H]
         \centering
 	\includegraphics[scale=0.5]{images/socialnetwork-data.png}

@@ -1,5 +1,4 @@
 \documentclass{xmgr}
-
 \usepackage{float}
 % minted listings
 \usepackage{minted}
@@ -505,21 +504,21 @@ Jego uruchomienie dla węzła John oraz komentarza ,,Wise Comment" zwraca pojedy
 \inputminted{scala}{listings/scala/examples/socialnetwork/friendswholikecomment-exec.scala}
 \inputminted{text}{listings/text/friendswholikecomment-result.txt}
 
-\chapter{Potencjalne funkcjonalności NeoDSL}
+\chapter{Potencjalne rozszerzenia NeoDSL}
 
-Obecna funkcjonalność NeoDSL obejmuje przeszukiwanie bazy danych. Możliwy jest jednak dalszy rozwój tego narzędzia. W~rozdziale zostaną opisane niektóre z~możliwych do zaimplementowania usprawnień wraz z~proponowanym sposobem implementacji.
+Obecna funkcjonalność NeoDSL obejmuje przeszukiwanie bazy danych. Możliwy jest jednak dalszy rozwój tego narzędzia. W~bieżącym rozdziale zostaną opisane niektóre z~możliwych do zaimplementowania usprawnień wraz z~proponowanym sposobem ich implementacji.
 
 \section{Aktualizacja danych}
 
-Jednym z~istotnych rozszerzeń byłoby dodanie możliwości aktualizowania i~wstawiania danych. Aktualnie, możliwe jest jedynie przeszukiwanie bazy bez jakiejkolwiek możliwości zmian jej stanu. 
+Jednym z~istotnych rozszerzeń byłoby dodanie możliwości aktualizowania i~wstawiania danych. Obecnie, możliwe jest jedynie przeszukiwanie bazy bez jakiejkolwiek możliwości zmian jej stanu. 
 
-Osiągnięcie tego celu możliwe byłoby z~wykorzystaniem istniejących już struktur. Budowanie wzorców nie wymagałoby praktycznie żadnej zmiany, a~jedynym istotnym elementem byłaby implementacja zapytań oraz ich serializacja do języka Cypher. Poniżej przedstawiono przykład potencjalnej implementacji.
+Dodanie obsługi aktualizacji możliwe byłoby z~wykorzystaniem istniejących już struktur. Budowanie wzorców nie wymagałoby praktycznie żadnej zmiany, a~jedynym istotnym elementem byłaby implementacja zapytań oraz ich serializacja do języka Cypher. Poniżej przedstawiono przykład możliwej implementacji.
 
 \inputminted{scala}{listings/scala/missing-features-update.scala}
 
 \section{Sortowanie oraz dodatkowe ograniczenia na wyniki}
 
-Obecnie możliwe jest definiowanie prostych ograniczeń na zwracane wyniki (jak porównanie wartości pól węzłów). Nie ma natomiast możliwości wyrażenia wymogu unikatowości zwracanych wyników czy też określania kolejności w~jakiej będą one przekazywane. Oczywiście mowa tutaj o~wyrażaniu tych ograniczeń w~taki sposób, aby mogły być one zrealizowane przez serwer bazy danych. Nic nie stoi na przeszkodzie aby spełnić je po stronie klienta korzystając ze standardowych funkcjonalności kolekcji języka Scala.
+Obecnie możliwe jest definiowanie prostych ograniczeń na zwracane wyniki (np. poprzez porównywanie wartości pól węzłów). Nie ma natomiast możliwości wyrażenia wymogu unikatowości zwracanych wyników, czy też określania kolejności w~jakiej będą one przekazywane. Oczywiście mowa tutaj o~wyrażaniu tych ograniczeń w~taki sposób, aby mogły być one zrealizowane przez serwer bazy danych. Nic nie stoi na przeszkodzie aby spełnić je po stronie klienta korzystając ze standardowych funkcjonalności kolekcji języka Scala.
 
 Implementacja tego typu zachowań mogłaby też zostać zrealizowana w~podobny sposób, w~jaki możliwe jest nakładanie warunków na pola zwracanych węzłów tj. z~wykorzystaniem makr. Konieczna byłaby wówczas analiza wyrażeń, które służą np. do wskazania pola po jakim powinno odbywać się sortowanie. 
 
@@ -530,11 +529,11 @@ Implementacja tego typu zachowań mogłaby też zostać zrealizowana w~podobny s
 % zakończenie 
 \summary
 
-Popularyzacja języków takich jak Scala skłania do poszukiwania efektywniejszych i~wygodniejszych w obsłudze narzędzi do baz danych. Projekty takie jak Squeryl czy Rogue pokazują olbrzymi potencjał drzemiący językach dziedzinowych. Ich stosowanie pozwala na wyrażanie zapytań w równie intuicyjny sposób jak możliwe jest to z wykorzystaniem np. SQL-a, dając dodatkowo funkcjonalności takie jak sprawdzanie poprawności wyrażeń na etapie kompilacji i~automatyczne mapowanie wyników na obiekty.
+Rosnąca popularność języków takich jak Scala skłania do poszukiwania efektywniejszych i~wygodniejszych w obsłudze narzędzi do baz danych. Projekty takie jak Squeryl czy Rogue pokazują olbrzymi potencjał drzemiący językach dziedzinowych. Ich stosowanie pozwala na wyrażanie zapytań w co najmniej równie intuicyjny sposób jak możliwe jest to z wykorzystaniem np. SQL-a, dając dodatkowo funkcjonalności takie jak sprawdzanie poprawności wyrażeń na etapie kompilacji i~automatyczne odwzorowywanie wyników na obiekty.
 
-Bazy grafowe stanowią natomiast świeże spojrzenie na problem składowania danych. Reprezentacja grafowa dużo bardziej odpowiada rzeczywistości, którą programiści modelują w~swoich aplikacjach. W~coraz większym stopniu mamy do czynienia z~danymi, które powiązane są wieloma zależnościami. Neo4j jak i~inne bazy grafowe stanowią wydajne rozwiązanie dla tego typu zastosowań.
+Bazy grafowe stanowią świeże spojrzenie na problem składowania danych. Reprezentacja grafowa dużo bardziej odpowiada rzeczywistości, którą programiści modelują w~swoich aplikacjach. W~coraz większym stopniu mamy do czynienia z~danymi, które powiązane są wieloma, często bardzo złożonymi zależnościami. Neo4j jak i~inne bazy grafowe stanowią wydajne rozwiązanie dla tego typu zastosowań.
 
-Powstały w ramach pracy język dziedzinowy był eksperymentem mającym na celu odkrycie ciekawych technik pomocnych przy ich definiowaniu. Jedną z nich jest np. zastosowanie makr języka Scala. Okazuje się, że mechanizm ten może być niezwykle użyteczny i pozwala na osiągnięcie spektakularnych efektów. Zastosowanie tego mechanizmu w NeoDSL pozwoliło na wyrażanie warunków logicznych z wykorzystaniem standardowej składni Scali. Podobne efekty osiągane w~innych narzędziach z wykorzystaniem odmiennych technik niejednokrotnie prowadzą do trudnego w~analizie kodu opartego na sztuczkach programistycznych. Jak się jednak okazuje, przy właściwym wykorzystaniu makr można stworzyć prostą i~czytelną implementację.
+Powstały w ramach pracy język dziedzinowy był eksperymentem mającym na celu odkrycie ciekawych technik pomocnych przy definiowaniu tego typu rozwiązań. Jedną z takich technik jest np. zastosowanie makr języka Scala. Okazuje się, że mechanizm ten może być niezwykle użyteczny i pozwala na osiągnięcie spektakularnych efektów. Zastosowanie tego mechanizmu w NeoDSL pozwoliło na wyrażanie warunków logicznych z wykorzystaniem standardowej składni Scali. Podobne efekty osiągane w~innych narzędziach z wykorzystaniem odmiennych technik niejednokrotnie prowadzą do trudnego w~analizie kodu opartego na sztuczkach programistycznych. Jak się okazuje, przy właściwym wykorzystaniu makr można stworzyć implementację, która jest jednocześnie prosta i czytelna.
 
 Niewątpliwie, potencjał drzemiący w~językach dziedzinowych jest ogromny, a~zastosowanie ich w~przypadku baz danych jest tylko jednym z~wielu. Ciekawymi zastosowaniami DSL-i może być np. język: do definiowania interfejsu użytkownika, budowania XML czy też pisania testów w~formie specyfikacji, która podlega weryfikacji.
 
@@ -548,7 +547,7 @@ Jedną z~bardziej istotnych zmian jest tak zwany mechanizm etykietowania, który
 
 Kolejnym mechanizmem który został gruntownie przebudowany jest indeksowanie. W~przypadku wydań z~serii 1.x narzut związany z~obsługą indeksowania był zrzucony na programistę. W~dodatku by wykorzystać dany indeks w~zapytaniu trzeba było zażądać tego w~sposób jawny w~sekcji \texttt{START}. Obecnie, indeksy przypominają w~dużo większym stopniu funkcjonalność znaną z~baz relacyjnych. Nie ma potrzeby jawnego określania jaki indeks powinien zostać wykorzystany w~zapytaniu, natomiast samo zarządzanie nimi stało się możliwe z~poziomu języka Cypher.
 
-Zmiany dotknęły również języka Cypher który jak określają twórcy stał się jeszcze bardziej deklaratywny. Istotną nowością jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów, po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
+Zmiany dotknęły również języka Cypher, który jak określają twórcy, stał się jeszcze bardziej deklaratywny. Istotną nowością jest np. opcjonalność sekcji \texttt{START}. Zapytania nie muszą zawierać jakichkolwiek węzłów początkowych niemniej zalecane jest ograniczanie zbioru węzłów, po których odbywać będzie się wyszukiwanie. Pozostałe zmiany miały na celu uproszczenie składni.
 
 % literatura (obowiązkowo):
 \bibliographystyle{unsrt}

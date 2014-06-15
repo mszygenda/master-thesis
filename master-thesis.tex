@@ -363,7 +363,7 @@ Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt\footn
 
 \inputminted{scala}{listings/scala/macro-sample.scala}
 
-W powyższym przykładzie zdefiniowane zostało makro o~nazwie assert przyjmujące dwa argumenty. Pierwszym z~nich jest wyrażenie typu \texttt{Boolean}, kolejny to wiadomość która powinna zostać wyświetlona w~przypadku gdy wyrażenie logiczne okaże się fałszywe. Przykładowe zastosowanie makra w~tym przypadku to np. zamiana wyrażenia logicznego na napis i~wypisanie go w~całości w~sytuacji gdy asercja nie jest spełniona.
+W powyższym przykładzie zdefiniowane zostało makro o~nazwie \texttt{assert} przyjmujące dwa argumenty. Pierwszym z~nich jest wyrażenie typu \texttt{Boolean}, kolejny to wiadomość która powinna zostać wyświetlona w~przypadku gdy wyrażenie logiczne okaże się fałszywe. Przykładowe zastosowanie makra w~tym przypadku to np. zamiana wyrażenia logicznego na napis i~wypisanie go w~całości w~sytuacji gdy asercja nie jest spełniona.
 
 \inputminted{scala}{listings/scala/macro-usage-assert.scala}
 
@@ -414,7 +414,7 @@ Jedną z~nich jest \texttt{SelectSerializer}, która odpowiada za serializację 
 
 \subsection{Uwspólnianie nazw zmiennych}
 
-W zapytaniach języka Cypher węzłom oraz krawędziom nadawane są nazwy służące do odwoływania się do nich w~dalszych częściach zapytania. Ze względu na to, że poszczególne sekcje serializowane są w~sposób niezależny, potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja, którą jest \texttt{BasicNameResolver} przydziela nazwy według stosownej konwencji. Węzłom pojawiających się w~zapytaniu o~określonym wewnętrznym identyfikatorze przydzielana jest nazwa o~wartości identyfikatora z~prefixem \texttt{id\_}. Pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z~prefixem \texttt{n\_}. Przykładowe nazwy to np. \texttt{id\_10} przydzielona dla węzła o~identyfikatorze równym 10 oraz \texttt{n\_2}, która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
+W zapytaniach języka Cypher węzłom oraz krawędziom nadawane są nazwy służące do odwoływania się do nich w~dalszych częściach zapytania. Ze względu na to, że poszczególne sekcje serializowane są w~sposób niezależny, potrzebny jest mechanizm służący do uwspólniania używanych nazw. Do rozwiązania tego problemu wprowadzony został interfejs \texttt{NameResolver}. Służy on do przydzielania nazw węzłom przekazanym do metody \texttt{name}. Instancja klasy implementującej wspomniany interfejs powinna zawsze zwracać tę samą unikalną nazwę dla każdego przekazanego węzła. Domyślna implementacja, którą jest \texttt{BasicNameResolver} przydziela nazwy według stosownej konwencji. Węzłom pojawiających się w~zapytaniu o~określonym wewnętrznym identyfikatorze przydzielana jest nazwa o~wartości identyfikatora z~prefiksem \texttt{id\_}. Pozostałym węzłom przydzielany jest kolejny wolny numer (zaczynając od 1) z~prefiksem \texttt{n\_}. Przykładowe nazwy to np. \texttt{id\_10} przydzielona dla węzła o~identyfikatorze równym 10 oraz \texttt{n\_2}, która może być przydzielona dowolnemu anonimowemu wierzchołkowi.
 
 \section{Zwracanie wyników}
 

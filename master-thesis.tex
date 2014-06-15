@@ -1,4 +1,4 @@
-\documentclass[brudnopis]{xmgr}
+\documentclass{xmgr}
 
 \usepackage{float}
 % minted listings
@@ -175,6 +175,8 @@ Powyższy fragment kodu powinien utworzyć instancję bazy pod ścieżką ,,/tmp
 
 Z wykorzystaniem tak utworzonej bazy danych możliwe jest wstawianie oraz odczytywanie węzłów i~krawędzi. Oto fragment kodu demonstrujący podstawowe operacje.
 
+\newpage
+
 \inputminted{java}{listings/java/neo4j-core-api-use.java}
 
 Oczywistą wadą jest fakt, że do wykorzystania tego mechanizmu potrzebna jest lokalna instancja bazy danych.
@@ -318,6 +320,8 @@ Do określania krawędzi wchodzących, wychodzących i~bez określonego kierunku
 
 Rozpatrzmy przykładową klasę domenową reprezentującą osobę. Zawiera ona pola \texttt{name} oraz \texttt{surname} odpowiadające imieniu i~nazwisku oraz pola definiujące krawędzie wychodzące z~węzłów tego typu. Jest to pole \texttt{knows}, które definiuje krawędź wychodzącą do obiektów typu \texttt{Person} oraz \texttt{wrote} -- reprezentujące związek pomiędzy \texttt{Person} a~obiektami typu \texttt{Comment} (w klasie \texttt{Comment} zdefiniowane jest odbicie symetryczne tego związku).
 
+\newpage
+
 \inputminted{scala}{listings/scala/dsl/sample-model.scala}
 
 \section{Budowanie wzorców}
@@ -354,6 +358,8 @@ Makra są eksperymentalną funkcjonalnością języka Scala wprowadzoną w~wersj
 Samo definiowanie makra jest stosunkowo proste. Wystarczy utworzyć obiekt\footnote{W Scali istnieje dedykowana instrukcja do tworzenia pojedynczej instancji obiektu, natomiast w~językach takich jak Java realizowane jest to za pomocą wzorca Singleton} z~dowolnie nazwaną metodą która docelowo ma służyć do wykonywania makra. W~przeciwieństwie do zwykłych metod, nie powinna ona zawierać ciała, a~jedynie słowo kluczowe \texttt{macro} wraz z~nazwą metody która implementuje dane makro. Najbardziej interesującym elementem jest właśnie metoda implementująca makro. Ma ona dwie listy parametrów. Pierwsza z~nich zawiera jeden parametr tzw. kontekst (typu \texttt{Context}), który udostępnia niezbędne metody do modyfikacji kodu. Druga --  drzewa składniowe wyrażeń jakie zostały przekazane do makra w~postaci argumentów. Zwracaną wartością jest drzewo składniowe które zostanie wstawione w~miejscu wywołania makra. Mechanizm wydaje się dość skomplikowany jednak w~efekcie służy do zamiany pewnych wyrażeń w~kodzie programu na inne podczas etapu kompilacji.
 
 \medskip\noindent Przykładowa definicja makra powinna nieco rozjaśnić sposób ich użycia.
+
+\newpage
 
 \inputminted{scala}{listings/scala/macro-sample.scala}
 
@@ -480,6 +486,8 @@ Poniżej przedstawione jedno z~prostszych zapytań służących do wydobywania z
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-friends-query.scala}
 
 Ciekawszym i~często używanym przykładem w~kontekście baz grafowych jest zapytanie służące do wyszukiwania znajomych znajomych danej osoby. Może być ono użyte przy implementacji silnika rekomendacji znajomych. Oto ono zdefiniowane przy pomocy NeoDSL.
+
+\newpage
 
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-fof-query.scala}
 

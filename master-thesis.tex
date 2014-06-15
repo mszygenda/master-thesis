@@ -496,6 +496,15 @@ Uruchomienie powyższego zapytania z~argumentem reprezentującym wierzchołek ,,
 \inputminted{scala}{listings/scala/examples/socialnetwork/person-fof-result.scala}
 \inputminted{text}{listings/text/person-fof-result.txt}
 
+Zaprezentowane dotychczas przykłady operowały wyłącznie na jednym typie krawędzi, oczywiście możliwe jest również mieszanie różnych rodzajów w ramach pojedynczych wzorców. Poniższe zapytanie służy do wyszukiwania znajomych, którzy ,,polubili" komentarz o wybranej treści.
+
+\inputminted{scala}{listings/scala/examples/socialnetwork/friendswholikecomment.scala}
+
+Jego uruchomienie dla węzła John oraz komentarza ,,Wise Comment" zwraca pojedynczą parę obiektów reprezentujących wierzchołek ,,Anne" oraz wspomniany komentarz.
+
+\inputminted{scala}{listings/scala/examples/socialnetwork/friendswholikecomment-exec.scala}
+\inputminted{text}{listings/text/friendswholikecomment-result.txt}
+
 \chapter{Potencjalne funkcjonalności NeoDSL}
 
 Obecna funkcjonalność NeoDSL obejmuje przeszukiwanie bazy danych. Możliwy jest jednak dalszy rozwój tego narzędzia. W~rozdziale zostaną opisane niektóre z~możliwych do zaimplementowania usprawnień wraz z~proponowanym sposobem implementacji.

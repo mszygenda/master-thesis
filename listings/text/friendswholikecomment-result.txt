@@ -1,0 +1,8 @@
+Serialized query into: START id_0=node(0)
+MATCH id_0-[:KNOWS]-n_1-[:LIKES]->n_2
+WHERE n_2.content = 'Wise Comment'
+RETURN id(n_1) AS `n_1.id`,n_1.name,n_2.content,id(n_2) AS `n_2.id`
+
+res3: Seq[(org.neodsl.tests.example.socialnetwork.Person, 
+           org.neodsl.tests.example.socialnetwork.Comment)] =
+List((Person(Anne),Comment(Wise Comment)))

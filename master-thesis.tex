@@ -261,7 +261,7 @@ Rozdział ten ma na celu przedstawienie istniejących rozwiązań dla baz relacy
 
 Sztandarowym przykładem DSLa bazodanowego dla języka Scala jest projekt Squeryl. Umożliwia on definiowanie struktury bazy danych w~kodzie programu a~następnie budowanie zapytań z~jej wykorzystaniem.
 
-Pierwszym etapem w~przypadku narzędzia Squeryl jest stworzenie odwzorowania struktury bazy danych. Definiuje się je z~wykorzystaniem zwykłych klas języka Scala oraz specjalnej cechy \texttt{Schema}. Przykładowa struktura (zaczerpnięta z~dokumentacji Squeryla\cite{squeryl_schemadefinition}) poniżej.
+Pierwszym etapem w~przypadku narzędzia Squeryl jest stworzenie odwzorowania struktury bazy danych. Definiuje się je z~wykorzystaniem zwykłych klas języka Scala oraz specjalnej cechy \texttt{Schema}. Przykładowa struktura (zaczerpnięta z~dokumentacji Squeryla\cite{squeryl_schemadefinition}) przedstawiona jest poniżej.
 
 \inputminted{scala}{listings/scala/squeryl-schema.scala}
 
@@ -325,10 +325,10 @@ Rozpatrzmy przykładową klasę domenową reprezentującą osobę. Zawiera ona p
 Zapytania w~bazach grafowych skupiają się na wyszukiwaniu określonych wzorców. Z~tego powodu główny nacisk w~kwestii zwięzłości tworzonego DSLa został położony właśnie na tej części.
 
 \subsection{Podstawowa struktura -- \texttt{PatternTriple}}
-Podstawową strukturą służącą do reprezentacji wzorców jest klasa PatternTriple. Jak sugeruje jej nazwa, składa się ona z~trzech elementów. Są to kolejno: węzeł początkowy, krawędź z~określonym kierunkiem oraz tzw. ,,ogon" wzorca. Wspomniany ,,ogon" może być zarówno pojedynczym węzłem jak i~kolejną instancją PatternTriple. Taka struktura pozwala na budowanie w~sposób rekurencyjny dowolnie długich wzorców. Warto również dodać iż klasa PatternTriple jest generyczna i~posiada z~góry określone typy węzłów jakie mogą pojawiać się w~dalszej części wzorca. Niemożliwe jest zatem utworzenie instancji wzorca, w~której zachodziłaby niezgodność typów (o to zadba kompilator języka Scala).
+Podstawową strukturą służącą do reprezentacji wzorców jest klasa \texttt{PatternTriple}. Jak sugeruje jej nazwa, składa się ona z~trzech elementów. Są to kolejno: węzeł początkowy, krawędź z~określonym kierunkiem oraz tzw. ,,ogon" wzorca. Wspomniany ,,ogon" może być zarówno pojedynczym węzłem jak i~kolejną instancją \texttt{PatternTriple}. Taka struktura pozwala na budowanie w~sposób rekurencyjny dowolnie długich wzorców. Warto również dodać iż klasa \texttt{PatternTriple} jest generyczna i~posiada z~góry określone typy węzłów jakie mogą pojawiać się w~dalszej części wzorca. Niemożliwe jest zatem utworzenie instancji wzorca, w~której zachodziłaby niezgodność typów (o to zadba kompilator języka Scala).
 
 \subsection{Budowniczy wzorców -- \texttt{PatternBuilder}}
-Aby uprościć budowanie trójek wzorca została przygotowana klasa \texttt{PatternBuilder} (nazywana dalej ,,budowniczym"), która jak sugeruje jej nazwa służy do budowania wzorców. Udostępnia ona szereg metod pomocniczych pozwalających na budowanie i~rozszerzanie istniejących instancji PatternTriple. Tworzenie instancji budowniczego jest niezwykle proste i~odbywa się na etapie definiowania klas domenowych, instancje klasy PatternBuilder zwracane są przez metody \texttt{-->}, \texttt{<--}, \texttt{--}.
+Aby uprościć budowanie trójek wzorca została przygotowana klasa \texttt{PatternBuilder} (nazywana dalej ,,budowniczym"), która jak sugeruje jej nazwa służy do budowania wzorców. Udostępnia ona szereg metod pomocniczych pozwalających na budowanie i~rozszerzanie istniejących instancji \texttt{PatternTriple}. Tworzenie instancji budowniczego jest niezwykle proste i~odbywa się na etapie definiowania klas domenowych, instancje klasy PatternBuilder zwracane są przez metody \texttt{-->}, \texttt{<--}, \texttt{--}.
 
 Rozważmy przykładowe złożenie kilku wzorców. Wykorzystuje ono została tutaj zaprezentowaną wcześniej strukturę sieci społecznościowej. Pojawiające się poniżej zmienne \texttt{john}, \texttt{friend}, \texttt{matthew} są instancjami typu \texttt{Person} podczas gdy \texttt{wiseComment} jest obiektem typu \texttt{Comment}.
 

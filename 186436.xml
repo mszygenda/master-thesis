@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><danepracy><studiauczelnia>Uniwersytet Gdański</studiauczelnia><studiawydzial>Wydział Matematyki, Fizyki i Informatyki</studiawydzial><studiakierunek>Informatyka</studiakierunek><studiatryb>stacjonarne</studiatryb><studentimie>Mateusz</studentimie><studentnazwisko>Szygenda</studentnazwisko><studentalbum>186436</studentalbum><pracaopiekun>dr Wiesław Pawłowski</pracaopiekun><pracaprowadzacy>dr Wiesław Pawłowski</pracaprowadzacy><pracatytul>Wykorzystanie baz grafowych w języku Scala</pracatytul><pracadziedzina>11.3|Informatyka</pracadziedzina><pracarok>2014</pracarok><pracadatazlozenia>17-06-2014</pracadatazlozenia><pracastreszczenie>Praca ma na celu zademonstrowanie sposobu w jaki można wykorzystać bazy grafowe w nowoczesnych językach takich jak Scala. Jako część programistyczna powstało narzędzie NeoDSL. Jest to mini-język pozwalający na zapisywanie zapytań baz grafowych wprost w kodzie programów pisanych w języku Scala.</pracastreszczenie><pracaslowakluczowe>Scala, Neo4j, DSL, języki dziedzinowe, bazy grafowe</pracaslowakluczowe>
+<pracaspistresci>
+1. Bazy grafowe
+2. Neo4j
+3. Język Scala
+4. Dostęp do baz danych z wykorzystaniem DSL
+5. DSL do baz grafowych
+6. Przykład wykorzystania NeoDSL
+7. Potencjalne rozszerzenia NeoDSL
+</pracaspistresci><pracazgodanaudostepnienie>tak</pracazgodanaudostepnienie></danepracy>

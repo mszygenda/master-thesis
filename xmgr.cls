@@ -162,6 +162,7 @@ i~materialnych innych osób.\endgraf }
 \newpage }
 
 \renewcommand\maketitle{%
+  \thispagestyle{empty}% dirty hack no. 1 
   \begin{titlepage}%
     \let\footnotesize\small
     \let\footnoterule\relax
@@ -205,11 +206,13 @@ i~materialnych innych osób.\endgraf }
   \global\let\and\relax
   %
   \clearpage 
+  \thispagestyle{empty}\hbox{}\newpage% dirty hack no. 2
   \thispagestyle{empty}
   \InsertAbstractHere
   \section*{Słowa kluczowe}
   \@keywords
   \clearpage
+  \thispagestyle{empty}\hbox{}\newpage% dirt hack no. 3
   \tableofcontents
   %\listoftables
   %\listoffigures
